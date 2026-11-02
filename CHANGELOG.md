@@ -12,6 +12,10 @@ optional `### For addon authors` subsection after a version's player bullets.
 
 ## [Unreleased]
 
+## [1.22.16] - 2026-11-02
+
+- **Every line reads in all nine languages.** The twenty-three phrases the travel journal and the `/path issue` composer added were still English in German, Spanish, French, Korean, Portuguese, Russian and both Chinese files; they are translated now, so nothing in the journal or the report window falls back to English. `tools/typecheck.sh` runs the locale check with `--release` from now on, so an English line added without its translations fails the change that adds it.
+
 ## [1.22.15] - 2026-10-30
 
 - **THIRD_PARTY.md credits more of the players behind the addon.** Its Ideas and contributors table gains rows for players whose reports, ideas or fixes shipped but were not yet credited there. Thanks to Mouchoir and z1ck for what they reported, asked for and fixed.
