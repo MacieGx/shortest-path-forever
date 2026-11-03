@@ -12,6 +12,12 @@ optional `### For addon authors` subsection after a version's player bullets.
 
 ## [Unreleased]
 
+- **Travel leaderboards keep your own row visible.** Guild and group totals are labelled player-reported, and approximate distance stays marked. New participation starts on, while saved recording and sharing opt-outs remain off. Disabling either cancels queued sends and hides cached peers while preserving personal history. Shared reports use the suite's bounded transport. Only travel records are cached.
+
+### For addon authors
+
+- `TravelStats().peers` retains its addon, player, metric and subject layout, but now contains only `spf` travel reports. Unused foreign-addon caches are removed.
+
 ## [1.22.19] - 2026-11-03
 
 - **The destination pin says what the step is, not only how far.** The in-world pin now carries one short line of the current step's wording under the distance, taken from the journey's current row and falling back to the journey title when no row is current, cut at a word so it fits the pin. It is reread only when the goal or the stop index changes, so the per-poll cost is unchanged, and the map pin's tooltip still carries the full text of every step. Asked for on the pin that shipped in 1.22.18.
