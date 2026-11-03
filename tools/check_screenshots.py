@@ -25,7 +25,6 @@ OUT = ROOT / "docs/screenshots"
 SOURCES = (
     "Locales/enUS.lua",
     "tools/screenshots*.py",
-    "tools/ui_art.py",
     "tools/load_nav.lua",
     "Transport/Model.lua",
     "Routing/*.lua",
