@@ -12,6 +12,10 @@ optional `### For addon authors` subsection after a version's player bullets.
 
 ## [Unreleased]
 
+## [1.22.19] - 2026-11-03
+
+- **The destination pin says what the step is, not only how far.** The in-world pin now carries one short line of the current step's wording under the distance, taken from the journey's current row and falling back to the journey title when no row is current, cut at a word so it fits the pin. It is reread only when the goal or the stop index changes, so the per-poll cost is unchanged, and the map pin's tooltip still carries the full text of every step. Asked for on the pin that shipped in 1.22.18.
+
 - **Alt-clicking the world map no longer plans a journey and drops a TomTom waypoint at once.** TomTom's click-to-
   waypoint is on by default and reads the same press. While that option is on the click is left to TomTom, and a
   journey is planned from the quest menu, a pin or Shift-click as before.
