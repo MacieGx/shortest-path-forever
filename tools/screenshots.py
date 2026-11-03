@@ -31,6 +31,7 @@ from gen_routes import BUILD as DATA_BUILD
 from screenshots_area import render as render_area_art
 from screenshots_services import render as render_services
 from screenshots_tracker import detached_tracker
+from ui_art import DATA_TABLES
 from ui_art import make as make_art_ui
 from wowmock import (
     FONTS,
@@ -68,15 +69,7 @@ Art = make_art_ui(
     Ui,
     DATA_BUILD,
     UI_ART_BUILD,
-    {
-        "UiMapAssignment",
-        "UiMapArt",
-        "UiMapArtStyleLayer",
-        "UiMapArtTile",
-        "UiMapXMapArt",
-        "WorldMapOverlay",
-        "WorldMapOverlayTile",
-    },
+    DATA_TABLES,
 )
 
 

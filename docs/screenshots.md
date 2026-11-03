@@ -2,8 +2,8 @@
 
 `tools/screenshots.py` uses Pillow 12+, LuaJIT and the shared
 shared renderer in `forever-core`. Set `FOREVER_CORE` if the checkout is not beside this repository.
-the sibling `forever-core` checkout. All downloaded art is pinned to the client build in
-`tools/gen_routes.py` (`BUILD`); `~/.cache/wowmock/<build>/` holds the assets. No game installation or
+the sibling `forever-core` checkout. UI art and fonts use `UI_ART_BUILD` in `tools/screenshots.py`; generated
+map and content data use `DATA_BUILD` from `tools/gen_routes.py`. `~/.cache/wowmock/<build>/` holds the assets. No game installation or
 SavedVariables are read. Verified with Pillow 12.3.0 / FreeType 2.14.3.
 
 ```sh
