@@ -3,13 +3,12 @@
     python3 tools/screenshots.py
     python3 tools/screenshots.py --scenes tracker minimap
     python3 tools/screenshots.py --verify --refs /path/to/refs
-FOREVER_CORE selects the shared renderer checkout. First use downloads assets
-from wago.tools; subsequent runs use its build-specific cache. Never reads the game
+FOREVER_CORE selects the shared renderer checkout. First use downloads assets from wago.tools for the explicit
+UI_ART_BUILD and DATA_BUILD pins; subsequent runs use build-specific caches. Never reads the game
 installation or SavedVariables. See docs/screenshots.md for source and scene notes.
 """
 
 import argparse
-import csv
 import hashlib
 import io
 import json
@@ -28,10 +27,11 @@ WOWMOCK = FOREVER_CORE / "tools" / "wowmock"
 if not (WOWMOCK / "wowmock.py").is_file():
     sys.exit(f"wowmock.py not found in {WOWMOCK}; set FOREVER_CORE to the forever-core checkout")
 sys.path.insert(0, str(WOWMOCK))
-from gen_routes import BUILD
+from gen_routes import BUILD as DATA_BUILD
 from screenshots_area import render as render_area_art
 from screenshots_services import render as render_services
 from screenshots_tracker import detached_tracker
+from ui_art import make as make_art_ui
 from wowmock import (
     FONTS,
     NORMAL,
@@ -61,21 +61,23 @@ START = {"map": 1, "x": 6341.38, "y": 557.68, "z": 16.29}
 GOAL = {"map": 0, "x": -3263.0, "y": -1353.0}
 DARKSHORE_GOAL = {"map": 1, "x": 4990.0, "y": 170.0}
 BOAT_COLOR = (0, 0.75, 1)
+UI_ART_BUILD = "1.60.1.70124"
 
 
-class Art(Ui):
-    """Reuse atlas crops across animation frames and the generator's already pinned DB2 CSVs."""
-
-    @cache
-    def atlas(self, name):
-        return super().atlas(name)
-
-    def table(self, name, key="ID"):
-        local = ROOT / "tools/.cache" / f"{name}-{BUILD}.csv"
-        if name not in self._tables and local.is_file():
-            with local.open() as source:
-                self._tables[name] = {row[key]: row for row in csv.DictReader(source)}
-        return super().table(name, key)
+Art = make_art_ui(
+    Ui,
+    DATA_BUILD,
+    UI_ART_BUILD,
+    {
+        "UiMapAssignment",
+        "UiMapArt",
+        "UiMapArtStyleLayer",
+        "UiMapArtTile",
+        "UiMapXMapArt",
+        "WorldMapOverlay",
+        "WorldMapOverlayTile",
+    },
+)
 
 
 @lru_cache(maxsize=1)
@@ -718,7 +720,7 @@ def render_minimap(ui):
 
 def render_demo():
     # Strokes.lua fixes stroke widths in physical pixels; render at the GIF's final size.
-    ui = Art(build=BUILD, scale=1)
+    ui = Art(scale=1)
     frames = []
     for index in range(80):
         t = index / 10
@@ -881,7 +883,7 @@ def compare_map_references(ui, refs):
 
 def compare_references(refs, tooltip_ref=None):
     """Keep reference pixels out of product media; this sheet is a review artifact only."""
-    ui, art = Art(build=BUILD, scale=1.2), Art(build=BUILD, scale=2)
+    ui, art = Art(scale=1.2), Art(scale=2)
     # Reuse the cached 2x atlas at the capture's UI scale; never switch the art set for this comparison.
     ui.atlas = art.atlas
     panel = tracker_canvas(ui)
@@ -971,14 +973,14 @@ def main():
     parser.add_argument("--refs", type=Path, help="write enlarged comparisons against the owner's captures")
     parser.add_argument("--tooltip-ref", type=Path, help="optional real stock tooltip capture; absent from refs 11-21")
     args = parser.parse_args()
-    ui = Art(build=BUILD, scale=2)
+    ui = Art(scale=2)
     OUT.mkdir(parents=True, exist_ok=True)
     failed = []
     for name in args.scenes:
         try:
             content, suffix = encode(ui, name)
             if args.verify:
-                assert content == encode(Art(build=BUILD, scale=2), name)[0], f"{name}: nondeterministic bytes"
+                assert content == encode(Art(scale=2), name)[0], f"{name}: nondeterministic bytes"
             path = OUT / (name + suffix)
             path.write_bytes(content)
             print(
