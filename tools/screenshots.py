@@ -83,7 +83,7 @@ class Art(Ui):
 
     def table(self, name, key="ID"):
         local = ROOT / "tools/.cache" / f"{name}-{DATA_BUILD}.csv"
-        if name not in self._tables and local.is_file():
+        if name in self._DATA_TABLES and name not in self._tables and local.is_file():
             with local.open() as source:
                 self._tables[name] = {row[key]: row for row in csv.DictReader(source)}
         return self._data.table(name, key) if name in self._DATA_TABLES else super().table(name, key)
