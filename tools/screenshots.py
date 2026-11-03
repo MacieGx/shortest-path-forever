@@ -65,29 +65,26 @@ UI_ART_BUILD = "1.60.1.70124"
 
 
 DATA_TABLES = frozenset(
-    "Map QuestPOIBlob QuestPOIPoint UiMapAssignment UiMapArt UiMapArtStyleLayer UiMapArtTile UiMapXMapArt WorldMapOverlay WorldMapOverlayTile".split()
+    "Map QuestPOIBlob QuestPOIPoint UiMapAssignment UiMapArt UiMapArtStyleLayer "
+    "UiMapArtTile UiMapXMapArt WorldMapOverlay WorldMapOverlayTile".split()
 )
 
 
 class Art(Ui):
     _DATA_TABLES = DATA_TABLES
-
     def __init__(self, *args, **kwargs):
         kwargs.setdefault("build", UI_ART_BUILD)
         super().__init__(*args, **kwargs)
         self._data = Ui(build=DATA_BUILD, scale=self.scale)
-
     @cache
     def atlas(self, name):
         return super().atlas(name)
-
     def table(self, name, key="ID"):
         local = ROOT / "tools/.cache" / f"{name}-{DATA_BUILD}.csv"
         if name not in self._tables and local.is_file():
             with local.open() as source:
                 self._tables[name] = {row[key]: row for row in csv.DictReader(source)}
         return self._data.table(name, key) if name in self._DATA_TABLES else super().table(name, key)
-
     def data_db2(self, name):
         return self._data.wago.db2(name)
 
