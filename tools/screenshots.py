@@ -3,13 +3,13 @@
     python3 tools/screenshots.py
     python3 tools/screenshots.py --scenes tracker minimap
     python3 tools/screenshots.py --verify --refs /path/to/refs
-FOREVER_CORE selects the shared renderer checkout. First use downloads assets from wago.tools for the explicit
-UI_ART_BUILD and DATA_BUILD pins; subsequent runs use build-specific caches. Never reads the game
+FOREVER_CORE selects the shared renderer checkout. UI art and content data use the separate
+build pins in screenshots_art.py. First use downloads assets from wago.tools; subsequent
+runs use build-specific caches. Never reads the game
 installation or SavedVariables. See docs/screenshots.md for source and scene notes.
 """
 
 import argparse
-import csv
 import hashlib
 import io
 import json
@@ -28,8 +28,8 @@ WOWMOCK = FOREVER_CORE / "tools" / "wowmock"
 if not (WOWMOCK / "wowmock.py").is_file():
     sys.exit(f"wowmock.py not found in {WOWMOCK}; set FOREVER_CORE to the forever-core checkout")
 sys.path.insert(0, str(WOWMOCK))
-from gen_routes import BUILD as DATA_BUILD
 from screenshots_area import render as render_area_art
+from screenshots_art import Art
 from screenshots_services import render as render_services
 from screenshots_tracker import detached_tracker
 from wowmock import (
@@ -39,7 +39,6 @@ from wowmock import (
     TooltipLine,
     TrackerBlock,
     TrackerModule,
-    Ui,
     backdrop,
     colored,
     crop_coords,
@@ -56,40 +55,11 @@ from wowmock import (
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs/screenshots"
+# A chosen offline character state, not a recorded or predicted live timetable.
 START = {"map": 1, "x": 6341.38, "y": 557.68, "z": 16.29}
 GOAL = {"map": 0, "x": -3263.0, "y": -1353.0}
 DARKSHORE_GOAL = {"map": 1, "x": 4990.0, "y": 170.0}
 BOAT_COLOR = (0, 0.75, 1)
-UI_ART_BUILD = "1.60.1.70124"
-
-
-DATA_TABLES = frozenset(
-    "Map QuestPOIBlob QuestPOIPoint UiMapAssignment UiMapArt UiMapArtStyleLayer "
-    "UiMapArtTile UiMapXMapArt WorldMapOverlay WorldMapOverlayTile".split()
-)
-
-
-class Art(Ui):
-    _DATA_TABLES = DATA_TABLES
-
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault("build", UI_ART_BUILD)
-        super().__init__(*args, **kwargs)
-        self._data = Ui(build=DATA_BUILD, scale=self.scale)
-
-    @cache
-    def atlas(self, name):
-        return super().atlas(name)
-
-    def table(self, name, key="ID"):
-        local = ROOT / "tools/.cache" / f"{name}-{DATA_BUILD}.csv"
-        if name in self._DATA_TABLES and name not in self._tables and local.is_file():
-            with local.open() as source:
-                self._tables[name] = {row[key]: row for row in csv.DictReader(source)}
-        return self._data.table(name, key) if name in self._DATA_TABLES else super().table(name, key)
-
-    def data_db2(self, name):
-        return self._data.wago.db2(name)
 
 
 @lru_cache(maxsize=1)
@@ -164,6 +134,7 @@ print(json({ flight = flight, portals = ns.Portals, docks = ns.Docks,
 
 
 def ordered(mapping):
+    # Path.FindSync attaches wet-yard metadata to the Lua array.
     return [mapping[key] for key in sorted((k for k in mapping if k.isdigit()), key=int)]
 
 
@@ -176,6 +147,7 @@ def projection(ui, point, map_id):
     if not rows:
         return None
     r = min(rows, key=lambda row: (int(row["OrderIndex"]), int(row["ID"])))
+    # UiMapAssignment uses world x north/y west, with min at the southeast corner.
     x = (float(r["Region_4"]) - point["y"]) / (float(r["Region_4"]) - float(r["Region_1"]))
     y = (float(r["Region_3"]) - point["x"]) / (float(r["Region_3"]) - float(r["Region_0"]))
     return tuple(
@@ -207,6 +179,7 @@ def dock_title(dock_id):
         for key, d in data()["docks"].items()
         if key in boats and d["map"] == dock["map"] and (d["x"] - dock["x"]) ** 2 + (d["y"] - dock["y"]) ** 2 < 800**2
     ]
+    # Map.lua's DockPierName uses all nearby boat piers, independent of zoom or discovered routes.
     landing = (
         pier_direction(
             sum(d["y"] for d in near) / len(near) - dock["y"], dock["x"] - sum(d["x"] for d in near) / len(near)
@@ -328,6 +301,7 @@ def map_landmarks(canvas, map_id, rect):
 
     for _, taxi in sorted(data()["taxis"].items(), key=lambda item: int(item[0])):
         p = point(taxi)
+        # A zone's art also contains adjacent terrain; Map.lua only includes that zone's flight masters.
         if map_id == 1439 and taxi["name"].split(", ")[-1] != "Darkshore":
             continue
         if p and taxi.get("faction") != "Horde":
@@ -340,9 +314,9 @@ def map_landmarks(canvas, map_id, rect):
 
 @cache
 def map_base(ui, map_id):
-    art = map_art(ui, map_id)
-    for overlay in map_overlays(ui, map_id):
-        draw_overlay(ui, art, overlay.offset_x, overlay.offset_y, overlay.width, overlay.height, overlay.tiles)
+    art = map_art(ui.data, map_id)
+    for overlay in map_overlays(ui.data, map_id):
+        draw_overlay(ui.data, art, overlay.offset_x, overlay.offset_y, overlay.width, overlay.height, overlay.tiles)
     names = {
         947: ("World",),
         1414: ("World", "Kalimdor"),
@@ -397,6 +371,7 @@ def map_dock_pins(canvas, map_id, rect, hover):
         kind = "boat" if kind == "zeppelin" else kind
         atlas = {"boat": "flightmasterferry", "lift": "poi-door-arrow-up", "tram": "poi-door-arrow-down"}[kind]
         art = ui.atlas(atlas)
+        # Fitted at its native shape, as ns.FitAtlas does: the floor arrows are 13 by 14.
         scale = size / max(art.width, art.height)
         w, h = art.width * scale, art.height * scale
         canvas.draw(art, x - w / 2, y - h / 2, w, h)
@@ -428,6 +403,7 @@ def map_canvas(ui, map_id=947, alpha=1, hover=False):
                 pa, pb = projection(ui, a, map_id), projection(ui, b, map_id)
                 before = points[index - 1] if index else points[-2]
                 if pa and pb:
+                    # Same-continent teleports retain both ends; only a hidden end fades to the map edge.
                     route_crossing(
                         route,
                         pa,
@@ -437,6 +413,7 @@ def map_canvas(ui, map_id=947, alpha=1, hover=False):
                         projection(ui, before, map_id) if before["map"] == a["map"] else None,
                     )
                     continue
+                # Strokes.lua EdgeCurve carries a loading-screen crossing out to sea, fading at the edge.
                 for end, neighbor in ((a, before), (b, points[index + 2] if index + 2 < len(points) else points[1])):
                     p, n = projection(ui, end, map_id), projection(ui, neighbor, map_id)
                     if not p or not n or end["map"] != neighbor["map"]:
@@ -487,6 +464,7 @@ def map_canvas(ui, map_id=947, alpha=1, hover=False):
         bend = next(p for p in points[1:] if math.hypot(p["x"] - START["x"], p["y"] - START["y"]) > 25)
         bp = point(bend)
         if bp:
+            # JourneyGuide.lua places Guide's native 30-unit waypoint beneath the player's map arrow.
             icon(canvas, "Waypoint-MapPin-Tracked", mx + bp[0], my + bp[1], 30)
     sp = point(START)
     if sp:
@@ -513,6 +491,7 @@ def render_docks(ui):
         [
             TooltipLine("Boats"),
             TooltipLine(labels[8]),
+            # Timetable.Status: a boat already in port has no arrival count, only "docked".
             TooltipLine("to Teldrassil", NORMAL, "docked · leaves 0:47"),
             TooltipLine(labels[10]),
             TooltipLine("to Wetlands", NORMAL, "arrives 3:23 · leaves 4:23"),
@@ -522,10 +501,13 @@ def render_docks(ui):
             TooltipLine("Last seen 2 min ago by you", (0.5, 0.5, 0.5)),
         ],
     )
+    # GameTooltip ANCHOR_RIGHT: tooltip bottom-left just past the owner's top-right.
     return scene(ui, [(canvas, 0, 0), (tip, pin[0] + 10, pin[1] - 10 - tip.height)])
 
 
 THELSAMAR = {"map": 0, "x": -5640.0, "y": -2760.0}
+# A caller's route through Thelsamar (API.lua NavigateRoute with kinds): the flight master, a quest giver, a hand-in,
+# and back to the quest giver, whose ring then holds stops 2 and 4.
 STOP_BADGES = ("taxinode_alliance", "QuestNormal", "QuestTurnin", "QuestTurnin")
 STOP_SIZE = 20
 NUMBER_ICONS = "interface/worldmap/ui-questpoi-numbericons.blp"
@@ -566,6 +548,7 @@ def render_stops(ui):
         return (normal[0] * mw, normal[1] * mh)
 
     ends = [ordered(walk)[-1] for walk in ordered(data()["stops"])]
+    # Route.lua RefreshStops: stops at one place share a ring, which holds each of them.
     rings = {}
     for number, end in enumerate(ends, 1):
         rings.setdefault(tuple(point(end)), []).append(number)
@@ -684,7 +667,7 @@ def render_minimap(ui):
     # jetty, so its planks are measured off the minimap art.
     here = {"map": START["map"], "x": 6464.8, "y": 662.9}
     points = [here, {"map": START["map"], "x": 6506.6, "y": 808.6}, pier]
-    terrain = minimap_art(ui, START["map"], here["x"], here["y"], radius)
+    terrain = minimap_art(ui.data, START["map"], here["x"], here["y"], radius)
     face = ui.canvas(size, size)
     face.draw(terrain, 0, 0, size, size)
 

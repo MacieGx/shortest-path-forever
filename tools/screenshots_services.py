@@ -5,7 +5,7 @@ from wowmock import MenuButton, MenuTitle, context_menu, map_art, scene, world_m
 
 def render(ui):
     # The stock world-map tracking dropdown gains one Nearby services submenu.
-    canvas, _ = world_map_frame(ui, map_art(ui, 1439), ("World", "Kalimdor", "Darkshore"))
+    canvas, _ = world_map_frame(ui, map_art(ui.data, 1439), ("World", "Kalimdor", "Darkshore"))
     menu, menu_rects = context_menu(
         ui,
         [
