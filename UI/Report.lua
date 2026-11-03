@@ -101,6 +101,7 @@ end
 ---@field message string
 ---@field count integer
 ---@field stack string?
+---@field rawMessage string
 -- Its `GetDB` API is also what BugSack displays. The built-in ScriptErrors frame has no readable history API.
 ---@return ReportExternalError[]?
 local function BugGrabberErrors()
@@ -132,6 +133,7 @@ local function BugGrabberErrors()
 				end
 				result[#result + 1] = {
 					message = ns.CutText(entry.message, 140),
+					rawMessage = entry.message,
 					count = type(entry.counter) == "number" and entry.counter or 1,
 					stack = stack[1],
 				}
@@ -152,13 +154,17 @@ local function Errors()
 	local bugGrabber = BugGrabberErrors()
 	local lines = {}
 	if bugGrabber and bugGrabber[1] then
-		lines[#lines + 1] = "Recent Lua errors (BugGrabber):"
 		local caughtMessages = {}
 		for _, entry in ipairs(caught) do
-			caughtMessages[entry.message] = true
+			caughtMessages[entry.rawMessage or entry.message] = true
 		end
+		local added = false
 		for _, entry in ipairs(bugGrabber) do
-			if not caughtMessages[entry.message] then
+			if not caughtMessages[entry.rawMessage or entry.message] then
+				if not added then
+					lines[#lines + 1] = "Recent Lua errors (BugGrabber):"
+					added = true
+				end
 				lines[#lines + 1] = ("- x%d %s"):format(entry.count, entry.message)
 				if entry.stack then
 					lines[#lines + 1] = "    " .. entry.stack
@@ -491,11 +497,11 @@ local function IssueWindow()
 		L["The link is selected. Press Ctrl+C (Cmd+C on a Mac), then paste into a browser; GitHub opens a filled-in issue."]
 	)
 
-	local bug = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate") --[[@as Button]]
+	local bug = CreateFrame("Button", nil, frame, "SharedButtonSmallTemplate") --[[@as Button]]
 	bug:SetSize(110, 24)
 	bug:SetPoint("TOPLEFT", 18, -66)
 	bug:SetText(L["Bug"])
-	local feature = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate") --[[@as Button]]
+	local feature = CreateFrame("Button", nil, frame, "SharedButtonSmallTemplate") --[[@as Button]]
 	feature:SetSize(150, 24)
 	feature:SetPoint("LEFT", bug, "RIGHT", 8, 0)
 	feature:SetText(L["Feature request"])
@@ -515,11 +521,11 @@ local function IssueWindow()
 	details:SetPoint("TOPLEFT", 22, -178)
 	details:SetMaxLetters(1000)
 
-	local copyLink = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate") --[[@as Button]]
+	local copyLink = CreateFrame("Button", nil, frame, "SharedButtonSmallTemplate") --[[@as Button]]
 	copyLink:SetSize(150, 24)
 	copyLink:SetPoint("TOPLEFT", 18, -260)
 	copyLink:SetText(L["Copy issue link"])
-	local copyReport = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate") --[[@as Button]]
+	local copyReport = CreateFrame("Button", nil, frame, "SharedButtonSmallTemplate") --[[@as Button]]
 	copyReport:SetSize(140, 24)
 	copyReport:SetPoint("LEFT", copyLink, "RIGHT", 8, 0)
 	copyReport:SetText(L["Copy report"])
