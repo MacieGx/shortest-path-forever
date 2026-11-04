@@ -12,6 +12,10 @@ optional `### For addon authors` subsection after a version's player bullets.
 
 ## [Unreleased]
 
+## [1.22.23] - 2026-11-04
+
+- **Travel data regenerated against the 1.60.1.70755 build.** The travel data set (taxi network, teleports, transports and zone adjacency) is rebuilt from the new Forever client build. The regenerated values match the previous build, so the routes and boat times you see do not move.
+
 ## [1.22.22] - 2026-11-04
 
 - **Travel leaderboards keep your own row visible.** Guild and group totals are labelled player-reported, and approximate distance stays marked. New participation starts on, while saved recording and sharing opt-outs remain off. Disabling either cancels queued sends and hides cached peers while preserving personal history. Shared reports use the suite's bounded transport. Only travel records are cached.
