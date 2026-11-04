@@ -1,9 +1,9 @@
 # Reproducing the media
 
-`tools/screenshots.py` uses Pillow 12+, LuaJIT and the shared
-shared renderer in `forever-core`. Set `FOREVER_CORE` if the checkout is not beside this repository.
-the sibling `forever-core` checkout. All downloaded art is pinned to the client build in
-`tools/gen_routes.py` (`BUILD`); `~/.cache/wowmock/<build>/` holds the assets. No game installation or
+`tools/screenshots.py` uses Pillow 12+, LuaJIT and the shared renderer in the sibling
+`forever-core` checkout. Set `FOREVER_CORE` if it is not beside this repository. UI art and fonts use
+`UI_ART_BUILD` in `tools/screenshots_art.py`; generated map and content data use `BUILD` from
+`tools/gen_routes.py`, imported as `DATA_BUILD`. `~/.cache/wowmock/<build>/` holds the assets. No game installation or
 SavedVariables are read. Verified with Pillow 12.3.0 / FreeType 2.14.3.
 
 ```sh
@@ -58,7 +58,7 @@ remains 8,000 ms. The animation uses fixed time steps, never the wall clock.
   0.9 alpha later lines share. Each button keeps the caller's action badge over its lower right.
 - `area.png` draws the client's own areas for quest 92744's objective 0 on Westfall: every `QuestPOIBlob`
   row of it and their `QuestPOIPoint` corners, projected through `UiMapAssignment`, with the player in the
-  largest (blob 590790 in build 70425).
+  largest area in the pinned data build.
   The border is `Interface\Minimap\UI-BonusObjectiveBlob-Outside`, the texture `UI/QuestBlob.lua` gives the
   blob widget, at the stock border alpha of 192; that set's fill texture is clear, so the area is not filled.
   The widget's drawing is engine-side, so three things are assumptions: a closed Catmull-Rom curve through
