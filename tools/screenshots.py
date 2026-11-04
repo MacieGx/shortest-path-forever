@@ -141,7 +141,7 @@ def ordered(mapping):
 def projection(ui, point, map_id):
     rows = [
         r
-        for r in ui.table("UiMapAssignment").values()
+        for r in ui.data.table("UiMapAssignment").values()
         if int(r["UiMapID"]) == map_id and int(r["MapID"]) == point["map"] and r["WMODoodadPlacementID"] == "0"
     ]
     if not rows:

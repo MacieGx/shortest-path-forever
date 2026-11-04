@@ -8,20 +8,6 @@ from wowmock import Ui
 
 ROOT = Path(__file__).resolve().parent.parent
 UI_ART_BUILD = "1.60.1.70124"
-DATA_TABLES = frozenset(
-    {
-        "Map",
-        "QuestPOIBlob",
-        "QuestPOIPoint",
-        "UiMapAssignment",
-        "UiMapArt",
-        "UiMapArtStyleLayer",
-        "UiMapArtTile",
-        "UiMapXMapArt",
-        "WorldMapOverlay",
-        "WorldMapOverlayTile",
-    }
-)
 
 
 class Content(Ui):
@@ -48,6 +34,3 @@ class Art(Ui):
         if name not in self._atlas_cache:
             self._atlas_cache[name] = super().atlas(name)
         return self._atlas_cache[name]
-
-    def table(self, name, key="ID"):
-        return self.data.table(name, key) if name in DATA_TABLES else super().table(name, key)
