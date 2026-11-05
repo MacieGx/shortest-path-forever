@@ -12,6 +12,8 @@ optional `### For addon authors` subsection after a version's player bullets.
 
 ## [Unreleased]
 
+- **The objective tracker column stays still as you enter and leave combat.** All Objectives and your quests keep their place at the top, and the Forever sections always follow below them, so nothing swaps order, jumps or loses a line when a fight starts or ends.
+
 ## [1.22.27] - 2026-11-04
 
 - **Transit and route data now name the 1.60.1.70790 build.** Routes, transports, taxi paths, portals, teleports and zone boxes are regenerated from the new Forever client build, and the InFlight stand-in follows its head. The regenerated data matches the previous build, so no journey changes.
