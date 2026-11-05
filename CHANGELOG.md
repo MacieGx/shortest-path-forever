@@ -14,6 +14,8 @@ optional `### For addon authors` subsection after a version's player bullets.
 
 - **A mage in your group can shorten a journey.** An opt-in Party mage portals setting adds "ask <mage> for a portal" to a capital city when that beats walking there, using the capital portals in the shipped mage teleport data. It only appears while another mage is in your party or raid, only for the capitals you tick, and only for your faction. It is off by default, and the hop disappears on the next plan when the mage leaves or you turn the setting off.
 
+## [1.22.32] - 2026-11-05
+
 - **The guided waypoint says where it leads.** Hovering the pin the game places at the end of the current step, on the minimap or the world map, now names the flight master, boat, portal or place the step reaches instead of the client's generic "Map Pin". When the step is only a hop, the journey's own destination sits under it. A pin you place yourself keeps the game's own tooltip.
 
 - **A short trip can now change to a quicker way as you walk.** A followed route only gave way to one saving at least 30 seconds and a tenth of the time left, and nothing can save 30 seconds on a trip under half a minute, so a clearly better way found as you moved never took over. It now gives way for a saving of a tenth of the trip left or 30 seconds, whichever is the smaller, so short trips follow their best route without flip-flopping.

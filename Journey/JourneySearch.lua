@@ -140,9 +140,7 @@ local function Provisional()
 	return followed ~= nil and followed.provisional == true
 end
 
--- The same journey replanned from a few yards on: every leg goes the same way to the same place. A teleport or party
--- portal place keeps its identity while the declaration is unchanged (Transport/Teleports.lua,
--- Transport/PartyPortals.lua), so a leg asking a different mage, or none, is another journey, not a retime.
+-- The same journey replanned from a few yards on: every leg goes the same way to the same place.
 local function SameJourney(a, b)
 	if not (a and b) or a.waterMode ~= b.waterMode or #a.legs ~= #b.legs - progress.index + 1 then
 		return false
@@ -152,8 +150,6 @@ local function SameJourney(a, b)
 		if
 			leg.mode ~= other.mode
 			or leg.route ~= other.route
-			or leg.partyPortal ~= other.partyPortal
-			or leg.teleport ~= other.teleport
 			or not SamePlace(leg.to, other.to)
 			or (index > 1 and not SamePlace(leg.from, other.from))
 		then
