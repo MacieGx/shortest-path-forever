@@ -575,7 +575,7 @@ local function Plan(options)
 				mode = "teleport",
 				teleport = party,
 				partyPortal = party,
-				duration = party.cast,
+				duration = party.cast + (party.map ~= options.from.map and LOADING or 0),
 			})
 		end
 	end

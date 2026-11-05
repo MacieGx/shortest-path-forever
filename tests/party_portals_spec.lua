@@ -174,8 +174,21 @@ plan = ns.Planner.Plan({
 })
 assert(plan and plan.legs[1].mode == "walk", "without the mage the journey walks")
 
--- A plan from somewhere else cannot ask the mage to come to it.
+-- A party mage's portal to another map pays the loading screen once, like a personal teleport.
 mage("Magey")
+here = point(1, 0, 0)
+plan = ns.Planner.Plan({
+	from = here,
+	to = goal,
+	now = 0,
+	walkSpeed = 7,
+	faction = "Alliance",
+	partyPortals = ns.PartyPortalPlaces(here),
+})
+assert(plan and #plan.legs == 2 and plan.legs[1].mode == "teleport", "the portal still wins across maps")
+assert(plan.arrive == 28000, "the fixed ask, the 5000 ms loading screen and the last 70 yards")
+
+-- A plan from somewhere else cannot ask the mage to come to it.
 here = point(0, 1000, 1000)
 assert(#ns.PartyPortalPlaces(point(0, 0, 0)) == 0, "only a plan from where the player stands asks the mage")
 
