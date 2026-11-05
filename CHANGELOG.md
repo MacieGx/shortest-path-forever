@@ -16,6 +16,10 @@ optional `### For addon authors` subsection after a version's player bullets.
 - **A journey drops the Hearthstone once walking is quicker.** If you walked on instead of casting it, the journey kept "Use Hearthstone" as its first step, even a short walk from the goal in the town you are bound to. It now searches the walks again from where you are and switches to the walk as soon as it is faster, so the hearth and its cooldown stay unspent.
 - **The Forever addons settings page ends with a Ko-fi link.** If the addons help you, its Copy link button shows the address, ready to paste into your browser. Nothing is locked behind it, and it shows nowhere else.
 
+### For addon authors
+
+- **Legacy TomTom floor waypoints reject invalid options safely.** `AddMFWaypoint` uses the same option check as `AddWaypoint`, so a non-table options value returns nil and keeps the current waypoint and journey instead of raising a Lua error.
+
 ## [1.22.29] - 2026-11-05
 
 - **RestedXP's arrow shows again while Adventure Guide steers its guide.** With Adventure Guide Forever running a RestedXP guide, Shortest Path hid RestedXP's direction arrow and left only the game's small waypoint marker, so there was no arrow to follow. RestedXP's arrow now stays and points at the guide's current step, and our own screen arrow steps aside while it shows, so you see one arrow rather than two. With TomTom installed, its arrow still shows only for waypoints you or another addon set in it.
