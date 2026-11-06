@@ -15,7 +15,7 @@
 ---@field WalkPlaces table<number, table<string, number[]>>
 ---@field db SPFDatabase
 ---@field charDB SPFCharacterDatabase
----@field Defaults table<string, boolean|number>
+---@field Defaults table<string, boolean|number|string>
 ---@field NearbyServices SPFNearbyServices
 ---@field ProgressJourneyChanged? fun(point: SPFPoint?, reason?: "arrived"|"cleared")
 ---@field PeerStats ForeverPeerStatsNamespace
@@ -112,11 +112,13 @@
 ---@class SPFPartyPortal : SPFTeleportPlace
 ---@field partyMage string
 ---@field destination string
--- A zone a continent's map names on hover (Data/Zones.lua): its level range or a capital's side, and its map's box.
+-- A zone a continent's map names on hover (Data/Zones.lua): its level range or a capital's side and surrounding
+-- zone, and its map's box.
 ---@class SPFZone
 ---@field low? number
 ---@field high? number
 ---@field city? string
+---@field zone? number the zone map a capital stands in
 ---@field map number
 ---@field minX number
 ---@field minY number
@@ -140,6 +142,10 @@
 ---@field x number
 ---@field y number
 ---@field zone string
+---@field capitalUiMap? number the capital the point resolved to, whose zoneUiMap is a sibling map
+---@field zoneUiMap? number the zone map a capital's point stands in
+---@field zoneX? number
+---@field zoneY? number
 ---@class SPFDeparture
 ---@field route number
 ---@field kind SPFMode
@@ -197,6 +203,7 @@
 ---@field mapPinScale? number
 ---@field flightPinScale? number
 ---@field minimapPinScale? number
+---@field routeColor? string the walking route line's preset (Route.lua)
 ---@field journeyTracker? boolean
 ---@field arrow? boolean
 ---@field metres? boolean
