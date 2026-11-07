@@ -18,7 +18,7 @@ with you.
 
 ## Features
 
-- **Compare travel records.** `/path leaderboard routes|distance|transports|flights|portals` shows player-reported guild and group totals, including your own row. Walking distance is approximate. Recording and sharing start on for new participation; saved opt-outs remain off. Turn either off in **Travel journal**.
+- **Compare completed journeys.** `/path leaderboard` opens Forever Leaderboards on the Shortest Path tab, with this week's and all-time totals from guild and group members who report theirs. The window also shows your overall place across every installed Forever addon and puts a player's place in the unit tooltip. Sharing is on unless you turn it off with the window's Share my progress box or the checkbox in **Travel journal**. Reported totals are player-reported and not verified.
 
 - **Plan a journey.** Shift-click the world map or minimap, or choose *Plan journey* on a quest. Routes combine walking, flights, boats, zeppelins, lifts, the tram, portals and teleports, and replan as you move. A spot inside a dungeon or raid leads to its entrance. Walks go round zones whose lowest level is 4 or more above yours and round the other faction's towns, and say so in the tracker when they can't. *Keep journeys after a reload* in Guidance restarts your own journey after a `/reload`.
   ![Journey steps from Auberdine to Silithus](docs/screenshots/tracker.png)
@@ -55,10 +55,6 @@ Install it from [CurseForge](https://www.curseforge.com/wow/addons/shortest-path
 [Releases](https://github.com/cjber/shortest-path-forever/releases). To install the zip by hand, extract it into
 the WoW: Forever client's `Interface/AddOns/` folder (`_forever_` on the live client, `_classic_beta_` on the beta) so you end up with `AddOns/ShortestPathForever/ShortestPathForever.toc`.
 
-![Travel leaderboard with a personal row below the leading players](docs/screenshots/leaderboard.png)
-
-The top five appear alongside your own rank, even when it is lower.
-
 ## Usage
 
 Alt-click the world map to choose a destination over a Questie icon. Shift-click works on empty map space and Shortest Path icons. With the gamepad interface on, Shortest Path never opens or turns the world map, or opens a menu, itself; it asks you to.
@@ -72,6 +68,7 @@ Right-click a flight master icon to mark its flight path as known if a flight ma
 | `/path` | Open the settings (also in Settings → AddOns and the addon compartment) |
 | `/path report` | Show a report to paste into a bug report: versions, your journey, your ride, recent errors |
 | `/path issue` | Show a filled-in GitHub issue link, selected for copying, to report a bug or request a feature |
+| `/path leaderboard` | Open Forever Leaderboards on the Shortest Path tab: your completed journeys against guild and group members who report theirs |
 | `/path perf` | Print this addon's CPU and memory use |
 | `/path debug` | Keep a trace of your ride matching, for a ride that did not sync |
 | `/spfnear` | Open nearby services; add a service such as `repair`, `trainer` or `flight` to route to the nearest one |

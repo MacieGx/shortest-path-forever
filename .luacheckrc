@@ -4,6 +4,7 @@ exclude_files = { ".claude/**", "tools/.cache/**", ".types/**", "types/**", ".re
 globals = {
 	"ForeverPeerStats",
 	"ForeverFamily",
+	"ForeverLeaderboards",
 	"ForeverTrackerHost",
 	"EventUtil",
 	"ShortestPathForever",
@@ -13,6 +14,8 @@ globals = {
 	"TomTom",
 	"SLASH_SHORTESTPATHFOREVER1",
 	"SLASH_SHORTESTPATHFOREVER2",
+	"SLASH_FOREVERLEADERBOARDS1",
+	"SLASH_FOREVERLEADERBOARDS2",
 	"SlashCmdList",
 	"bit",
 	"SLASH_SPFNEAR1",
@@ -195,6 +198,18 @@ read_globals[#read_globals + 1] = "UISpecialFrames"
 read_globals[#read_globals + 1] = "tContains"
 -- Mover.lua: whether the button of a fine drag is still held.
 read_globals[#read_globals + 1] = "IsMouseButtonDown"
+
+-- Forever Leaderboards (Core/LeaderboardsData.lua, UI/Leaderboards.lua): the shared window's client surfaces.
+read_globals[#read_globals + 1] = "C_DateAndTime"
+read_globals[#read_globals + 1] = "RAID_CLASS_COLORS"
+read_globals[#read_globals + 1] = "GREEN_FONT_COLOR"
+read_globals[#read_globals + 1] = "ScrollBoxConstants"
+read_globals[#read_globals + 1] = "CreateDataProvider"
+read_globals[#read_globals + 1] = "CreateScrollBoxListLinearView"
+read_globals[#read_globals + 1] = "ScrollUtil"
+-- LeaderboardsData.lua: the guild roster's classFileName behind a peer row's missing class.
+read_globals[#read_globals + 1] = "GetGuildRosterInfo"
+read_globals[#read_globals + 1] = "GetNumGuildMembers"
 
 -- A translated line is one string; StyLua already wraps what it can, and CJK text counts bytes, not columns.
 files["Locales/*.lua"] = { max_line_length = false }

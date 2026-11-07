@@ -53,6 +53,7 @@ local DEFAULTS = {
 	share = true,
 	-- Existing saved false choices remain off; missing settings join the travel journal.
 	stats = true,
+	-- Sharing is opt-out: only an explicit off stops the travel records leaving this character.
 	statsShare = true,
 	guideStops = true,
 	journeyTracker = true,

@@ -1,8 +1,9 @@
-local function harness(saved, progress)
+local function harness(saved, progress, leaderboards)
 	local h = { now = 1000, timers = {}, frames = {}, sent = {}, guild = true, group = true, printed = {} }
 	local ns = {
 		db = saved or { stats = true, statsShare = true },
 		charDB = { progress = progress },
+		Leaderboards = leaderboards,
 		L = setmetatable({}, {
 			__index = function(_, key)
 				return key

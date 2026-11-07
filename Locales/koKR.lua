@@ -317,7 +317,6 @@ L["You are near the new flight master %s. Discover it before flying."] =
 L["Remind me about new flight masters"] = "새 비행 조련사 알림" -- mt
 L["Warns when a journey needs you to discover a flight master, and again when you are close."] =
 	"여정에 비행 조련사를 찾아야 할 때, 그리고 가까이 있을 때 다시 알려 줍니다." -- mt
-L["%d. %s - %s"] = "%d. %s - %s"
 L["/path issue - report a bug or request a feature with a ready-made GitHub issue link"] =
 	"/path issue - 준비된 GitHub 이슈 링크로 버그를 보고하거나 기능을 요청합니다"
 L["/path report - show a report to copy into a bug report"] =
@@ -332,8 +331,6 @@ L["Local travel journal — approx. %d yd walked; %d journeys; %d transports; %d
 	"로컬 이동 일지 — 약 %d야드 이동, 여정 %d회, 교통수단 %d회, 비행 %d회, 차원문 구간 %d회."
 L["Record travel stats"] = "이동 통계 기록"
 L["Report a bug or request a feature"] = "버그 보고 또는 기능 요청"
-L["Sends and receives travel-stat snapshots over guild, party, raid and instance channels."] =
-	"길드, 파티, 공격대, 인스턴스 채널로 이동 통계 요약을 주고받습니다."
 L["Share travel stats with guild and groups"] = "길드와 그룹에 이동 통계 공유"
 L["The link is selected. Press Ctrl+C (Cmd+C on a Mac), then paste into a browser; GitHub opens a filled-in issue."] =
 	"링크가 선택되었습니다. Ctrl+C(Mac은 Cmd+C)를 눌러 복사한 후 브라우저에 붙여 넣으십시오. GitHub에 내용이 채워진 이슈가 열립니다."
@@ -343,8 +340,6 @@ L["Travel milestone reached: %s"] = "이동 이정표 달성: %s"
 L["Travel stats are not ready yet."] = "이동 통계가 아직 준비되지 않았습니다."
 L["Turn this off to keep stats on this character only. Shared records are player-reported and not verified."] =
 	"끄면 이 캐릭터에만 통계를 보관합니다. 공유 기록은 플레이어가 보낸 것이며 검증되지 않습니다."
-L["Use /path leaderboard routes, distance, transports, flights or portals."] =
-	"/path leaderboard routes, distance, transports, flights, portals 중 하나를 사용하십시오."
 L["What happened, or what you would like"] = "무슨 일이 있었는지 또는 원하는 점"
 L["Party member"] = "파티원" -- mt
 L["That player is not on a map you can see."] = "그 플레이어는 볼 수 있는 지도에 없습니다." -- mt
@@ -357,17 +352,8 @@ L["It stands down while Waypoint UI is navigating, so the two never draw over ea
 L["No longer following."] = "더 이상 따라가지 않습니다." -- mt
 L["Following %s."] = "%s을(를) 따라가는 중입니다." -- mt
 
-L["You (local)"] = "나 (로컬)"
-L["%s (reported)"] = "%s (신고됨)"
 L["On by default. Records approximate walking distance, completed journeys and transport use."] =
 	"기본적으로 켜집니다. 이 캐릭터의 대략적인 도보 거리, 완료한 여정 및 관찰된 교통수단 이용을 기록합니다."
-L["Travel records from guild and group addon users. Peer totals are player-reported."] =
-	"길드 및 파티 애드온 사용자의 여행 기록입니다. 다른 플레이어의 합계는 직접 보고한 수치입니다."
-L["Completed journeys"] = "완료한 여정"
-L["Approximate walking distance"] = "대략적인 도보 거리"
-L["Transport rides"] = "교통수단 이용"
-L["Flights taken"] = "이용한 비행"
-L["Portal legs"] = "차원문 구간"
 L["World map filter menu test: %s. Type /reload to apply."] =
 	"세계 지도 필터 메뉴 테스트: %s. 적용하려면 /reload를 입력하세요." -- mt
 L["Usage: /path menutest map, nearby, both or off"] = "사용법: /path menutest map, nearby, both 또는 off" -- mt
@@ -401,3 +387,36 @@ L["Green"] = "녹색"
 L["Magenta"] = "자홍색"
 L["Show boat, lift and tram departures in the tracker"] = "추적기에서 배, 승강기, 지하철 출발 표시"
 L["Hide departures"] = "출발 숨기기"
+
+-- Forever Leaderboards (Forever Core's shared window).
+L["Completed journeys"] = "완료한 여정"
+L["On unless you turn it off. Shares travel records with guild and group and puts you on Forever Leaderboards."] =
+	"끄지 않는 한 켜져 있습니다. 길드, 파티, 공격대, 인스턴스 채널로 여행 기록을 공유하고 Forever 순위표에 표시합니다." -- mt
+L["total"] = "총" -- mt
+L["Forever Leaderboards"] = "Forever 순위표" -- mt
+L["Overall"] = "전체" -- mt
+L["Forever standing"] = "Forever 순위" -- mt
+L["Your guild and group"] = "길드 및 그룹" -- mt
+L["This week"] = "이번 주" -- mt
+L["All time"] = "전체 기간" -- mt
+L["Rank"] = "순위" -- mt
+L["Player"] = "플레이어" -- mt
+L["No one has reported yet."] = "아직 보고한 사람이 없습니다." -- mt
+L["Share my progress"] = "내 진행 상황 공유" -- mt
+L["Others' values are player-reported."] = "다른 플레이어의 값은 플레이어가 보고한 것입니다." -- mt
+L["Points for placing on each addon's board."] = "각 애드온 순위표에 오른 점수입니다." -- mt
+L["(you)"] = "(나)" -- mt
+L["board"] = "순위표" -- mt
+L["boards"] = "순위표" -- mt
+L["Uses Forever addons"] = "Forever 애드온 사용 중" -- mt
+L["Forever: %s overall this week"] = "Forever: 이번 주 종합 %s" -- mt
+L["Forever: %s overall"] = "Forever: 종합 %s" -- mt
+L["1st"] = "1위" -- mt
+L["2nd"] = "2위" -- mt
+L["3rd"] = "3위" -- mt
+L["4th"] = "4위" -- mt
+L["5th"] = "5위" -- mt
+L["6th"] = "6위" -- mt
+L["7th"] = "7위" -- mt
+L["8th"] = "8위" -- mt
+L[", "] = ", " -- mt

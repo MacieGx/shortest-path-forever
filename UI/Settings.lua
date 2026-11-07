@@ -221,7 +221,7 @@ ns.Init(function()
 	Checkbox(
 		"statsShare",
 		L["Share travel stats with guild and groups"],
-		L["Sends and receives travel-stat snapshots over guild, party, raid and instance channels."]
+		L["On unless you turn it off. Shares travel records with guild and group and puts you on Forever Leaderboards."]
 			.. " "
 			.. L["Turn this off to keep stats on this character only. Shared records are player-reported and not verified."],
 		ns.TravelSharingChanged
@@ -683,20 +683,7 @@ ns.Init(function()
 			)
 			return
 		elseif message:match("^leaderboard") then
-			local metric = message:match("^leaderboard%s+(%S+)") or "routes"
-			local keys = {
-				routes = "routesCompleted",
-				distance = "walkedYards",
-				transports = "transportsUsed",
-				flights = "flightsTaken",
-				portals = "portalsUsed",
-			}
-			local key = keys[metric]
-			if not key then
-				ns.Print(L["Use /path leaderboard routes, distance, transports, flights or portals."])
-				return
-			end
-			ns.PrintTravelLeaderboard(key)
+			ns.OpenTravelLeaderboard()
 			return
 		elseif message == "help" then
 			ns.Print(L["/path report - show a report to copy into a bug report"])

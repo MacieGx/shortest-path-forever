@@ -312,7 +312,6 @@ L["You are near the new flight master %s. Discover it before flying."] =
 L["Remind me about new flight masters"] = "Recordarme los nuevos maestros de vuelo" -- mt
 L["Warns when a journey needs you to discover a flight master, and again when you are close."] =
 	"Avisa cuando un viaje necesita que descubras un maestro de vuelo, y otra vez cuando estás cerca." -- mt
-L["%d. %s - %s"] = "%d. %s - %s"
 L["/path issue - report a bug or request a feature with a ready-made GitHub issue link"] =
 	"/path issue - informa de un error o pide una función con un enlace listo a un reporte de GitHub"
 L["/path report - show a report to copy into a bug report"] =
@@ -327,8 +326,6 @@ L["Local travel journal — approx. %d yd walked; %d journeys; %d transports; %d
 	"Diario de viaje local: aprox. %d yd andados; %d viajes; %d transportes; %d vuelos; %d tramos de portal."
 L["Record travel stats"] = "Registrar estadísticas de viaje"
 L["Report a bug or request a feature"] = "Informar de un error o pedir una función"
-L["Sends and receives travel-stat snapshots over guild, party, raid and instance channels."] =
-	"Envía y recibe resúmenes de estadísticas de viaje por los canales de hermandad, grupo, banda e instancia."
 L["Share travel stats with guild and groups"] = "Compartir estadísticas de viaje con la hermandad y los grupos"
 L["The link is selected. Press Ctrl+C (Cmd+C on a Mac), then paste into a browser; GitHub opens a filled-in issue."] =
 	"El enlace está seleccionado. Presiona Ctrl+C (Cmd+C en Mac) y pégalo en un navegador; GitHub abrirá un reporte ya rellenado."
@@ -338,8 +335,6 @@ L["Travel milestone reached: %s"] = "Hito de viaje alcanzado: %s"
 L["Travel stats are not ready yet."] = "Las estadísticas de viaje aún no están listas."
 L["Turn this off to keep stats on this character only. Shared records are player-reported and not verified."] =
 	"Desactívalo para guardar las estadísticas solo en este personaje. Los registros compartidos los envían los jugadores y no están verificados."
-L["Use /path leaderboard routes, distance, transports, flights or portals."] =
-	"Usa /path leaderboard routes, distance, transports, flights o portals."
 L["What happened, or what you would like"] = "Qué ha pasado o qué te gustaría"
 L["Party member"] = "Miembro del grupo" -- mt
 L["That player is not on a map you can see."] = "Ese jugador no está en un mapa que puedas ver." -- mt
@@ -352,17 +347,8 @@ L["It stands down while Waypoint UI is navigating, so the two never draw over ea
 L["No longer following."] = "Ya no sigues a nadie." -- mt
 L["Following %s."] = "Siguiendo a %s." -- mt
 
-L["You (local)"] = "Tú (local)"
-L["%s (reported)"] = "%s (declarado)"
 L["On by default. Records approximate walking distance, completed journeys and transport use."] =
 	"Activado por defecto. Guarda la distancia aproximada a pie, los viajes completados y el uso de transportes observado de este personaje."
-L["Travel records from guild and group addon users. Peer totals are player-reported."] =
-	"Registros de usuarios del addon de la hermandad y el grupo. Los totales de otros jugadores son declarados."
-L["Completed journeys"] = "Viajes completados"
-L["Approximate walking distance"] = "Distancia aproximada a pie"
-L["Transport rides"] = "Viajes en transporte"
-L["Flights taken"] = "Vuelos realizados"
-L["Portal legs"] = "Tramos de portal"
 L["World map filter menu test: %s. Type /reload to apply."] =
 	"Prueba del menú de filtros del mapa del mundo: %s. Escribe /reload para aplicarla." -- mt
 L["Usage: /path menutest map, nearby, both or off"] = "Uso: /path menutest map, nearby, both u off" -- mt
@@ -396,3 +382,36 @@ L["Magenta"] = "Magenta"
 L["Show boat, lift and tram departures in the tracker"] =
 	"Mostrar salidas de barcos, elevadores y tranvía en el seguimiento"
 L["Hide departures"] = "Ocultar salidas"
+
+-- Forever Leaderboards (Forever Core's shared window).
+L["Completed journeys"] = "Viajes completados"
+L["On unless you turn it off. Shares travel records with guild and group and puts you on Forever Leaderboards."] =
+	"Activado a menos que lo desactives. Comparte registros de viaje por los canales de hermandad, grupo, banda e instancia y te coloca en las clasificaciones Forever." -- mt
+L["total"] = "total" -- mt
+L["Forever Leaderboards"] = "Clasificación Forever" -- mt
+L["Overall"] = "General" -- mt
+L["Forever standing"] = "Posición Forever" -- mt
+L["Your guild and group"] = "Tu hermandad y grupo" -- mt
+L["This week"] = "Esta semana" -- mt
+L["All time"] = "Todo el tiempo" -- mt
+L["Rank"] = "Rango" -- mt
+L["Player"] = "Jugador" -- mt
+L["No one has reported yet."] = "Nadie ha informado todavía." -- mt
+L["Share my progress"] = "Compartir mi progreso" -- mt
+L["Others' values are player-reported."] = "Los valores de otros jugadores son reportados por ellos." -- mt
+L["Points for placing on each addon's board."] = "Puntos por clasificar en la tabla de cada addon." -- mt
+L["(you)"] = "(tú)" -- mt
+L["board"] = "tabla" -- mt
+L["boards"] = "tablas" -- mt
+L["Uses Forever addons"] = "Usa addons Forever" -- mt
+L["Forever: %s overall this week"] = "Forever: %s en total esta semana" -- mt
+L["Forever: %s overall"] = "Forever: %s en total" -- mt
+L["1st"] = "1.º" -- mt
+L["2nd"] = "2.º" -- mt
+L["3rd"] = "3.º" -- mt
+L["4th"] = "4.º" -- mt
+L["5th"] = "5.º" -- mt
+L["6th"] = "6.º" -- mt
+L["7th"] = "7.º" -- mt
+L["8th"] = "8.º" -- mt
+L[", "] = ", " -- mt

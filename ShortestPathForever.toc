@@ -48,6 +48,8 @@ Transport\Sync.lua
 UI\Map.xml
 Transport\Taxi.lua
 Core\PeerStats.lua
+Core\LeaderboardsData.lua
+UI\Leaderboards.lua
 Core\Progress.lua
 Transport\Teleports.lua
 Transport\PartyPortals.lua

@@ -19,10 +19,12 @@
 ---@field NearbyServices SPFNearbyServices
 ---@field ProgressJourneyChanged? fun(point: SPFPoint?, reason?: "arrived"|"cleared")
 ---@field PeerStats ForeverPeerStatsNamespace
+---@field LeaderboardsData? ForeverLeaderboardsData the shared leaderboards' data half (Core/LeaderboardsData.lua)
+---@field Leaderboards? ForeverLeaderboardsAPI the shared Forever Leaderboards window (UI/Leaderboards.lua)
 ---@field TravelSharingChanged fun()
----@field PrintTravelLeaderboard fun(metric: string)
 ---@field TravelStats fun(): SPFProgressData?
----@field TravelLeaderboard fun(metric: string?): SPFProgressRank[]
+---@field TravelBoard fun(scope: ForeverLeaderboardsScope): ForeverLeaderboardsRow[] this addon's board for the shared window
+---@field OpenTravelLeaderboard fun() opens Forever Leaderboards on this addon's tab
 ---@field SafeCall fun(label: string, fn: function, ...: any): boolean, ... run fn as pcall does, keeping a failure for the report and passing it to the error handler (Core/SafeCall.lua)
 ---@field RecordError fun(label: string, message: any, stack?: string)
 ---@field CaughtErrors fun(): ForeverCaughtError[] this session's caught errors, oldest first, as copies
@@ -246,10 +248,6 @@
 ---@class SPFSharedMetric
 ---@field value number
 ---@field eventUnix number
----@class SPFProgressRank
----@field name string
----@field localRecord boolean
----@field value number
 -- A journey's goal as Resume.lua keeps it, with the GetServerTime() it was planned.
 ---@class SPFKeptJourney
 ---@field map number

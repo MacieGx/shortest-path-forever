@@ -306,7 +306,6 @@ L["You are near the new flight master %s. Discover it before flying."] =
 L["Remind me about new flight masters"] = "提醒新的飛行管理員" -- mt
 L["Warns when a journey needs you to discover a flight master, and again when you are close."] =
 	"旅程需要你發現飛行管理員時提醒一次，靠近時再提醒一次。" -- mt
-L["%d. %s - %s"] = "%d. %s - %s"
 L["/path issue - report a bug or request a feature with a ready-made GitHub issue link"] =
 	"/path issue - 透過現成的 GitHub 問題連結回報缺陷或請求功能"
 L["/path report - show a report to copy into a bug report"] =
@@ -321,8 +320,6 @@ L["Local travel journal — approx. %d yd walked; %d journeys; %d transports; %d
 	"本地旅行日誌 — 步行約%d碼；%d次旅程；%d次交通；%d次飛行；%d段傳送門。"
 L["Record travel stats"] = "記錄旅行統計"
 L["Report a bug or request a feature"] = "回報缺陷或請求功能"
-L["Sends and receives travel-stat snapshots over guild, party, raid and instance channels."] =
-	"透過公會、隊伍、團隊和副本頻道收發旅行統計快照。"
 L["Share travel stats with guild and groups"] = "與公會和隊伍共用旅行統計"
 L["The link is selected. Press Ctrl+C (Cmd+C on a Mac), then paste into a browser; GitHub opens a filled-in issue."] =
 	"連結已選取。按 Ctrl+C（Mac 上為 Cmd+C）複製，然後貼到瀏覽器中；GitHub 會開啟一個已填寫的問題。"
@@ -332,8 +329,6 @@ L["Travel milestone reached: %s"] = "達成旅行里程碑：%s"
 L["Travel stats are not ready yet."] = "旅行統計尚未準備好。"
 L["Turn this off to keep stats on this character only. Shared records are player-reported and not verified."] =
 	"關閉後統計只保留在此角色上。共用記錄由玩家回報，未經核實。"
-L["Use /path leaderboard routes, distance, transports, flights or portals."] =
-	"使用 /path leaderboard routes、distance、transports、flights 或 portals。"
 L["What happened, or what you would like"] = "發生了什麼，或你希望有什麼"
 L["Party member"] = "隊友" -- mt
 L["That player is not on a map you can see."] = "該玩家不在你能看到的地圖上。" -- mt
@@ -346,17 +341,8 @@ L["It stands down while Waypoint UI is navigating, so the two never draw over ea
 L["No longer following."] = "已停止跟隨。" -- mt
 L["Following %s."] = "正在跟隨%s。" -- mt
 
-L["You (local)"] = "你（本機）"
-L["%s (reported)"] = "%s（玩家回報）"
 L["On by default. Records approximate walking distance, completed journeys and transport use."] =
 	"預設開啟。記錄此角色的大約步行距離、已完成的旅程和觀察到的交通工具使用情況。"
-L["Travel records from guild and group addon users. Peer totals are player-reported."] =
-	"來自公會和隊伍插件使用者的旅行記錄。其他玩家的總數由其自行回報。"
-L["Completed journeys"] = "已完成的旅程"
-L["Approximate walking distance"] = "大約步行距離"
-L["Transport rides"] = "交通工具搭乘次數"
-L["Flights taken"] = "飛行次數"
-L["Portal legs"] = "傳送門路段"
 L["World map filter menu test: %s. Type /reload to apply."] =
 	"世界地圖過濾選單測試：%s。輸入 /reload 以套用。" -- mt
 L["Usage: /path menutest map, nearby, both or off"] = "用法：/path menutest map、nearby、both 或 off" -- mt
@@ -389,3 +375,36 @@ L["Green"] = "綠色"
 L["Magenta"] = "洋紅色"
 L["Show boat, lift and tram departures in the tracker"] = "在追蹤器中顯示船隻、升降梯和地鐵的班次"
 L["Hide departures"] = "隱藏班次"
+
+-- Forever Leaderboards (Forever Core's shared window).
+L["Completed journeys"] = "已完成的旅程"
+L["On unless you turn it off. Shares travel records with guild and group and puts you on Forever Leaderboards."] =
+	"除非你關閉，否則保持開啟。透過公會、隊伍、團隊和副本頻道分享旅行記錄，並將你列入 Forever 排行榜。" -- mt
+L["total"] = "總計" -- mt
+L["Forever Leaderboards"] = "Forever 排行榜" -- mt
+L["Overall"] = "總覽" -- mt
+L["Forever standing"] = "Forever 總排名" -- mt
+L["Your guild and group"] = "你的公會和隊伍" -- mt
+L["This week"] = "本週" -- mt
+L["All time"] = "全部時間" -- mt
+L["Rank"] = "排名" -- mt
+L["Player"] = "玩家" -- mt
+L["No one has reported yet."] = "還沒有人回報。" -- mt
+L["Share my progress"] = "分享我的進度" -- mt
+L["Others' values are player-reported."] = "其他玩家的數值由玩家自行回報。" -- mt
+L["Points for placing on each addon's board."] = "在每個插件的排行榜上獲得名次的分數。" -- mt
+L["(you)"] = "（你）" -- mt
+L["board"] = "個榜單" -- mt
+L["boards"] = "個榜單" -- mt
+L["Uses Forever addons"] = "使用 Forever 插件" -- mt
+L["Forever: %s overall this week"] = "Forever：本週總排名 %s" -- mt
+L["Forever: %s overall"] = "Forever：總排名 %s" -- mt
+L["1st"] = "第 1 名" -- mt
+L["2nd"] = "第 2 名" -- mt
+L["3rd"] = "第 3 名" -- mt
+L["4th"] = "第 4 名" -- mt
+L["5th"] = "第 5 名" -- mt
+L["6th"] = "第 6 名" -- mt
+L["7th"] = "第 7 名" -- mt
+L["8th"] = "第 8 名" -- mt
+L[", "] = ", " -- mt
