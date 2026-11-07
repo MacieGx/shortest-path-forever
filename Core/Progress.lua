@@ -80,76 +80,87 @@ local function Snapshot()
 		peers = {},
 	}
 end
+local ICON = "Interface\\AddOns\\ShortestPathForever\\media\\Icon"
+local BOARD_METRIC = "routes_completed"
+
+-- Sharing is opt-out: only an explicit off stays off, so a missing saved setting reads as on.
+local function Sharing()
+	return ns.db ~= nil and ns.db.statsShare ~= false
+end
+
+-- Recording has its own switch, and an explicit off there keeps the journal local even while sharing is on.
+local function Enabled()
+	return Sharing() and ns.db.stats ~= false
+end
+
 ns.TravelStats = function()
 	local snapshot = Snapshot()
-	if snapshot and ns.db.stats and ns.db.statsShare then
+	if snapshot and Enabled() then
 		snapshot.peers.spf = peer:Shared()
 	end
 	return snapshot
 end
 
----@param metric? string
----@return SPFProgressRank[]
-function ns.TravelLeaderboard(metric)
-	metric = metric or "routesCompleted"
-	local allowed = {
-		walkedYards = true,
-		routesCompleted = true,
-		transportsUsed = true,
-		flightsTaken = true,
-		portalsUsed = true,
-	}
-	if not allowed[metric] then
-		metric = "routesCompleted"
-	end
+-- One row per ranked player, in the shape the shared window draws. The all-time board keeps the completed journeys
+-- total in the value column; the weekly board draws the progress since the reset there and the total in grey. The
+-- shared window fills each row's class from the client's own knowledge, so these rows leave it nil.
+---@param scope ForeverLeaderboardsScope
+---@return ForeverLeaderboardsRow[]
+local function Board(scope)
 	local stats = Ensure()
-	if not stats then
-		return {}
-	end
-	local metricIDs = {
-		walkedYards = "distance_yards",
-		routesCompleted = "routes_completed",
-		transportsUsed = "transports_used",
-		flightsTaken = "flights_taken",
-		portalsUsed = "portals_used",
-	}
-	local metricID = metricIDs[metric]
-	local ranks = { { name = L["You (local)"], localRecord = true, value = stats[metric] } }
-	local peers = ns.db.stats and ns.db.statsShare and peer:Shared() or {}
-	for name, report in pairs(peers) do
-		local record = report[metricID] and report[metricID].all
-		if record then
-			ranks[#ranks + 1] =
-				{ name = string.format(L["%s (reported)"], name), localRecord = false, value = record.value }
+	local value = stats and stats.routesCompleted or 0
+	local weekly = scope == "week"
+	local ranked
+	local totals
+	if weekly then
+		ranked = peer:WeekBoard(BOARD_METRIC, "all", value)
+		totals = {}
+		for _, row in ipairs(peer:Board(BOARD_METRIC, "all", value)) do
+			totals[row.identity] = row.value
+			totals[row.name:lower()] = row.value
 		end
+	else
+		ranked = peer:Board(BOARD_METRIC, "all", value)
 	end
-	table.sort(ranks, function(a, b)
-		if a.value == b.value then
-			return a.name < b.name
-		end
-		return a.value > b.value
-	end)
-	return ranks
+	local rows = {}
+	for _, row in ipairs(ranked) do
+		local total = totals and (totals[row.identity] or totals[row.name:lower()])
+		rows[#rows + 1] = {
+			name = row.name,
+			value = row.value,
+			extra = total and (total .. " " .. L["total"]) or nil,
+			you = row.self == true,
+		}
+	end
+	return rows
+end
+ns.TravelBoard = Board
+
+--- Open the shared Forever Leaderboards window on this addon's tab.
+function ns.OpenTravelLeaderboard()
+	if ns.Leaderboards then
+		ns.Leaderboards:Open("spf")
+	end
 end
 
----@param metric string
-function ns.PrintTravelLeaderboard(metric)
-	local labels = {
-		routesCompleted = L["Completed journeys"],
-		walkedYards = L["Approximate walking distance"],
-		transportsUsed = L["Transport rides"],
-		flightsTaken = L["Flights taken"],
-		portalsUsed = L["Portal legs"],
-	}
-	ns.Print(labels[metric] or labels.routesCompleted)
-	ns.Print(L["Travel records from guild and group addon users. Peer totals are player-reported."])
-	for index, rank in ipairs(ns.TravelLeaderboard(metric)) do
-		if index <= 5 or rank.localRecord then
-			local value = metric == "walkedYards" and string.format("~%s", ns.FormatDistance(rank.value))
-				or tostring(rank.value)
-			ns.Print(string.format(L["%d. %s - %s"], index, rank.name, value))
-		end
-	end
+if ns.Leaderboards then
+	ns.Leaderboards:Register("spf", {
+		title = L["Shortest Path Forever"],
+		icon = ICON,
+		metric = L["Completed journeys"],
+		board = Board,
+		revision = function()
+			return peer:Revision()
+		end,
+		sharing = Sharing,
+		setSharing = function(shared)
+			ns.db.statsShare = shared == true
+			ns.TravelSharingChanged()
+			if ns.SetOption then
+				pcall(ns.SetOption, "statsShare", shared == true)
+			end
+		end,
+	})
 end
 
 local function Record(key, amount)
@@ -174,7 +185,7 @@ local function Record(key, amount)
 			Milestone(label, stats[key], COUNT_MILESTONES)
 		end
 	end
-	if ns.db.statsShare and not pendingSend then
+	if ns.db.statsShare ~= false and not pendingSend then
 		pendingSend = true
 		C_Timer.After(math.max(5, nextSend - GetTime()), function()
 			pendingSend = false
@@ -232,9 +243,7 @@ for _, metric in ipairs(METRICS) do
 end
 peer = ns.PeerStats.New({
 	addon = "spf",
-	enabled = function()
-		return ns.db ~= nil and ns.db.stats == true and ns.db.statsShare == true
-	end,
+	enabled = Enabled,
 	db = function()
 		local stats = Ensure()
 		if not stats then
@@ -260,7 +269,7 @@ function ns.SendTravelStats()
 end
 
 function ns.TravelSharingChanged()
-	peer:SetEnabled(ns.db.stats == true and ns.db.statsShare == true)
+	peer:SetEnabled(Enabled())
 	lastPosition, lastSample = nil, nil
 end
 
@@ -296,7 +305,7 @@ ns.Init(function()
 	end)
 	ns.OnTravelTick(Sample)
 	C_Timer.After(15, function()
-		if ns.db.statsShare then
+		if ns.db.statsShare ~= false then
 			nextSend = GetTime() + 30
 			ns.SendTravelStats()
 		end

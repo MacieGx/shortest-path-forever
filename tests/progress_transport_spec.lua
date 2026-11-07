@@ -28,7 +28,7 @@ local migrated = harness(nil, {
 		},
 	},
 })
-local migratedBoard = migrated.ns.TravelLeaderboard("routesCompleted")
+local migratedBoard = migrated.ns.TravelBoard("all")
 check(
 	#migratedBoard == 2 and migratedBoard[1].value == 12,
 	"migration merges realm spellings and rejects own or malformed rows"
@@ -69,8 +69,8 @@ check(#h.sent == before, "unchanged snapshots are not sent again")
 
 h:Fire("CHAT_MSG_ADDON", "WFAStats", "1|spf|routes_completed|all|200|1000", "GUILD", "Amy-TestRealm")
 h:Fire("CHAT_MSG_ADDON", "WFAStats", "1|spf|routes_completed|all|200|1000", "GUILD", "Zed-TestRealm")
-local board = h.ns.TravelLeaderboard("routesCompleted")
-check(board[1].name == "Amy (reported)" and board[2].name == "Zed (reported)", "ties use canonical names")
+local board = h.ns.TravelBoard("all")
+check(board[1].name == "Amy" and board[2].name == "Zed", "ties use canonical names")
 h.ns.ProgressJourneyChanged(nil, "arrived")
 h.ns.SendTravelStats()
 h.ns.db.statsShare = false
@@ -80,15 +80,12 @@ for _ = 1, 40 do
 	h:Tick()
 end
 check(#h.sent == before, "opt-out cancels queued and scheduled sends")
-check(#h.ns.TravelLeaderboard("routesCompleted") == 1, "opt-out retains only the personal row")
+check(#h.ns.TravelBoard("all") == 1, "opt-out retains only the personal row")
 check(next(h.ns.TravelStats().peers) == nil, "public stats hide cached peers during opt-out")
 h:Fire("CHAT_MSG_ADDON", "WFAStats", "1|spf|routes_completed|all|999|1000", "GUILD", "Amy-TestRealm")
 h.ns.db.statsShare = true
 h.ns.TravelSharingChanged()
-check(
-	h.ns.TravelLeaderboard("routesCompleted")[1].value == 200,
-	"opt-out ignored incoming reports and re-enable retains cache"
-)
+check(h.ns.TravelBoard("all")[1].value == 200, "opt-out ignored incoming reports and re-enable retains cache")
 for _ = 1, 10 do
 	h:Tick()
 end
@@ -105,10 +102,10 @@ check(
 	#reload.sent == 0 and reload.ns.TravelStats().routesCompleted == 101,
 	"recording opt-out survives reload without sends or updates"
 )
-check(#reload.ns.TravelLeaderboard("routesCompleted") == 1, "recording opt-out hides peers too")
+check(#reload.ns.TravelBoard("all") == 1, "recording opt-out hides peers too")
 reload.ns.db.stats = true
 reload.ns.TravelSharingChanged()
-check(#reload.ns.TravelLeaderboard("routesCompleted") == 3, "reload preserves peer history")
+check(#reload.ns.TravelBoard("all") == 3, "reload preserves peer history")
 for id = 1, 7 do
 	reload:Fire(
 		"CHAT_MSG_ADDON",
@@ -118,11 +115,6 @@ for id = 1, 7 do
 		"Example" .. id .. "-Other"
 	)
 end
-reload.ns.PrintTravelLeaderboard("routesCompleted")
-check(
-	#reload.printed == 8 and reload.printed[8]:find("You (local)", 1, true),
-	"printed top five also includes the player's lower rank"
-)
 local actualStore = {}
 local source = h.ns.PeerStats.New({
 	addon = "agf",
@@ -141,4 +133,44 @@ check(source:Sync() == 1, "another addon's source sender stays independent")
 h:Fire("CHAT_MSG_ADDON", "WFAStats", "1|agf|quest_turn_ins|all|19|1000", "GUILD", "Alice-Other")
 check(actualStore["Alice-Other"].quest_turn_ins.all.value == 19, "the source receives its own metric")
 check(h.ns.TravelStats().peers.agf == nil, "SPF does not copy unrelated addon records")
+
+--[[ Forever Leaderboards: the addon's own board and command ]]
+local opened, spec
+local boards = {
+	Register = function(_, key, registered)
+		registered.key = key
+		spec = registered
+	end,
+	Open = function(_, key)
+		opened = key
+	end,
+}
+local shared = harness(nil, nil, boards)
+check(spec and spec.key == "spf", "the addon registers its board with the shared window")
+check(spec.title == "Shortest Path Forever", "the tab carries the addon's title")
+check(spec.icon == "Interface\\AddOns\\ShortestPathForever\\media\\Icon", "the tab carries the shipped icon")
+check(spec.metric == "Completed journeys", "the board names its metric")
+check(type(spec.revision) == "function", "the board has a revision callback")
+check(spec.sharing(), "sharing is on by default")
+shared.ns.ProgressJourneyChanged(nil, "arrived")
+shared:Fire("CHAT_MSG_ADDON", "WFAStats", "1|spf|routes_completed|all|9|1000", "GUILD", "Amy-TestRealm")
+local sharedRows = spec.board("all")
+check(sharedRows[1].name == "Amy" and sharedRows[1].value == 9, "the all-time board ranks peers")
+check(sharedRows[1].class == nil, "a peer's class stays unknown")
+check(
+	sharedRows[2].you == true and sharedRows[2].class == nil,
+	"the player's own row is marked, its class left to the shared window"
+)
+shared:Fire("CHAT_MSG_ADDON", "WFAStats", "1|spf|routes_completed|all|14|1100", "GUILD", "Amy-TestRealm")
+local weekRows = spec.board("week")
+check(
+	weekRows[1].name == "Amy" and weekRows[1].value == 5 and weekRows[1].extra == "14 total",
+	"the weekly board shows progress since the reset and the cumulative total"
+)
+spec.setSharing(false)
+check(not spec.sharing() and #spec.board("all") == 1, "the window's sharing switch hides peers at once")
+spec.setSharing(true)
+check(spec.sharing(), "turning the switch back on restores sharing")
+shared.ns.OpenTravelLeaderboard()
+check(opened == "spf", "the leaderboard command opens this addon's tab")
 print(("progress transport: %d checks passed"):format(checks))

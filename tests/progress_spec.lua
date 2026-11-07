@@ -134,8 +134,9 @@ Fire("CHAT_MSG_ADDON", "WFAStats", "1|fieldguide|creature_kills|12345|6|200", "G
 Fire("CHAT_MSG_ADDON", "WFAStats", "1|fieldguide|first_sighting|12345|1|200", "GUILD", "Guide-Realm")
 Fire("CHAT_MSG_ADDON", "WFAStats", "1|fieldguide|first_sighting|12345|1|150", "GUILD", "Guide-Realm")
 Fire("CHAT_MSG_ADDON", "WFAStats", "1|fieldguide|not_allowed|12345|1|100", "GUILD", "Guide-Realm")
-local ranks = ns.TravelLeaderboard("routesCompleted")
-assert(ranks[1].name == "Peer (reported)" and ranks[1].value == 10, "peer snapshots are ranked as reported claims")
+local ranks = ns.TravelBoard("all")
+assert(ranks[1].name == "Peer" and ranks[1].value == 10, "peer snapshots are ranked as reported claims")
+assert(ranks[2].you == true and ranks[2].value == 1, "the player's own row follows the peers")
 assert(ns.charDB.progress.peers.fieldguide == nil, "foreign addon records are not cached by travel boards")
 for index = 1, 99 do
 	Fire("CHAT_MSG_ADDON", "WFAStats", "1|spf|routes_completed|all|1|200", "GUILD", "Peer-" .. index)
@@ -149,7 +150,7 @@ assert(
 	"sharing opt out stops receiving snapshots"
 )
 
-assert(#ns.TravelLeaderboard("routesCompleted") == 1, "opt-out hides cached peers and retains the personal row")
+assert(#ns.TravelBoard("all") == 1, "opt-out hides cached peers and retains the personal row")
 assert(next(ns.TravelStats().peers) == nil, "public snapshots hide cached peer records during opt-out")
 
 ns.db.stats = false

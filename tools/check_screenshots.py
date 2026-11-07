@@ -25,7 +25,6 @@ OUT = ROOT / "docs/screenshots"
 SOURCES = (
     "Core/Progress.lua",
     "Core/PeerStats.lua",
-    "tools/progress_scene.lua",
     "tests/progress_harness.lua",
     "Locales/enUS.lua",
     "tools/screenshots*.py",
