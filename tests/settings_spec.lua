@@ -9,7 +9,7 @@ local canvas, familyPanel
 local attachmentNotified, attachmentChanged
 local trackerState = { attached = true }
 local trackerScale, compassScaled, compassBackdrop = 1, nil, nil
-local sharingChanges = 0
+local sharingChanges, leaderboardOpened = 0, nil
 local env = setmetatable({
 	MinimalSliderWithSteppersMixin = { Label = { Right = 1 } },
 	OFF = "Off",
@@ -193,6 +193,9 @@ local ns = {
 	},
 	TravelSharingChanged = function()
 		sharingChanges = sharingChanges + 1
+	end,
+	OpenTravelLeaderboard = function()
+		leaderboardOpened = true
 	end,
 	db = {},
 	Defaults = setmetatable({
@@ -481,11 +484,14 @@ assert(Row("whatsNew").setting.default == true)
 assert(Row("stats").setting.default == true, "the travel journal is on by default")
 assert(Row("statsShare").setting.default == true, "and sharing its stats is too")
 assert(Row("stats").tooltip:find("On by default", 1, true), "the journal's tooltip says it is on")
-assert(not Row("statsShare").tooltip:find("On by default", 1, true), "sharing is not claimed on by default")
+assert(Row("statsShare").tooltip:find("On unless you turn it off", 1, true), "sharing is opt-out")
+assert(Row("statsShare").tooltip:find("Forever Leaderboards", 1, true), "sharing puts the player on the boards")
 assert(Row("statsShare").tooltip:find("player-reported", 1, true), "shared records are still marked unverified")
 Row("stats").setting.onChanged()
 Row("statsShare").setting.onChanged()
 assert(sharingChanges == 2, "both recording and sharing switches update the active transport")
+env.SlashCmdList.SHORTESTPATHFOREVER("leaderboard")
+assert(leaderboardOpened == true, "the leaderboard command opens the shared window on this addon's tab")
 local trackerSlider = Row("trackerScale")
 assert(trackerSlider.kind == "slider" and trackerSlider.setting.default == 100, "tracker scale defaults to 100%")
 assert(trackerSlider.options.minValue == 50 and trackerSlider.options.maxValue == 200, "tracker scale is a percentage")

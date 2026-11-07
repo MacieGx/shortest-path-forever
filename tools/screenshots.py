@@ -31,7 +31,6 @@ sys.path.insert(0, str(WOWMOCK))
 from screenshot_docks import dock_kinds, zeppelin_art
 from screenshots_area import render as render_area_art
 from screenshots_art import Art
-from screenshots_progress import render_leaderboard
 from screenshots_services import render as render_services
 from screenshots_tracker import detached_tracker
 from wowmock import (
@@ -769,7 +768,6 @@ def render_flight(ui):
 
 
 SCENES = {
-    "leaderboard": render_leaderboard,
     "flight": render_flight,
     "area": lambda ui: render_area_art(ui, map_base, projection, map_landmarks, icon),
     "kalimdor": lambda ui: render_map(ui, 1414),

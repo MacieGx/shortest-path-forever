@@ -15,6 +15,29 @@ ChatTypeInfo = nil
 ---@type string[]
 UISpecialFrames = nil
 
+-- UI/Leaderboards.lua publishes the shared window every Forever addon registers into.
+---@type ForeverLeaderboardsAPI?
+ForeverLeaderboards = nil
+-- Client class colours, keyed by the RAID_CLASS_COLORS token (Constants.lua).
+---@type table<string, ColorMixin>?
+RAID_CLASS_COLORS = nil
+-- The scroll box's own option flags (ScrollBoxConstants.lua).
+---@type {RetainScrollPosition: integer}
+ScrollBoxConstants = nil
+-- The client's weekly reset countdown (DateAndTime.lua).
+---@type {GetSecondsUntilWeeklyReset: fun(): number}?
+C_DateAndTime = nil
+-- The scroll box's list helpers (SharedXML/ScrollBox.lua): UI/Leaderboards.lua builds one data provider per refresh.
+---@class SPFDataProvider
+---@type fun(entries?: any[]): SPFDataProvider
+CreateDataProvider = nil
+---@class SPFScrollBoxLinearView
+---@field SetElementInitializer fun(self: SPFScrollBoxLinearView, element: string, initializer: fun(button: any, entry: any))
+---@type fun(...): SPFScrollBoxLinearView
+CreateScrollBoxListLinearView = nil
+---@type {InitScrollBoxListWithScrollBar: fun(scrollBox: Frame, scrollBar: any, view: SPFScrollBoxLinearView)}
+ScrollUtil = nil
+
 -- ChatFrame.lua in the Forever UI source: the edit box a Shift+click map link would land in.
 ---@type (fun(): Frame?)?
 ChatEdit_GetActiveWindow = nil

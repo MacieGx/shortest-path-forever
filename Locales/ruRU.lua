@@ -329,7 +329,6 @@ L["Remind me about new flight masters"] =
 	"Напоминать о новых распорядителях полётов" -- mt
 L["Warns when a journey needs you to discover a flight master, and again when you are close."] =
 	"Предупреждает, когда для путешествия нужно открыть распорядителя полётов, и снова, когда вы рядом." -- mt
-L["%d. %s - %s"] = "%d. %s - %s"
 L["/path issue - report a bug or request a feature with a ready-made GitHub issue link"] =
 	"/path issue - сообщить об ошибке или предложить функцию с готовой ссылкой на задачу GitHub"
 L["/path report - show a report to copy into a bug report"] =
@@ -344,8 +343,6 @@ L["Local travel journal — approx. %d yd walked; %d journeys; %d transports; %d
 	"Дневник путешествий — около %d ярдов пешком; %d маршрутов; %d поездок на транспорте; %d полетов; %d переходов через портал."
 L["Record travel stats"] = "Записывать статистику путешествий"
 L["Report a bug or request a feature"] = "Сообщить об ошибке или предложить функцию"
-L["Sends and receives travel-stat snapshots over guild, party, raid and instance channels."] =
-	"Отправляет и получает снимки статистики путешествий через каналы гильдии, группы, рейда и подземелья."
 L["Share travel stats with guild and groups"] =
 	"Делиться статистикой путешествий с гильдией и группами"
 L["The link is selected. Press Ctrl+C (Cmd+C on a Mac), then paste into a browser; GitHub opens a filled-in issue."] =
@@ -356,8 +353,6 @@ L["Travel milestone reached: %s"] = "Достигнут рубеж путеше�
 L["Travel stats are not ready yet."] = "Статистика путешествий еще не готова."
 L["Turn this off to keep stats on this character only. Shared records are player-reported and not verified."] =
 	"Отключите, чтобы статистика велась только для этого персонажа. Общие записи присылают игроки, они не проверены."
-L["Use /path leaderboard routes, distance, transports, flights or portals."] =
-	"Используйте /path leaderboard routes, distance, transports, flights или portals."
 L["What happened, or what you would like"] = "Что произошло или чего бы вы хотели"
 L["Party member"] = "Участник группы" -- mt
 L["That player is not on a map you can see."] =
@@ -371,17 +366,8 @@ L["It stands down while Waypoint UI is navigating, so the two never draw over ea
 L["No longer following."] = "Вы больше не следуете." -- mt
 L["Following %s."] = "Вы следуете за %s." -- mt
 
-L["You (local)"] = "Вы (локально)"
-L["%s (reported)"] = "%s (сообщено)"
 L["On by default. Records approximate walking distance, completed journeys and transport use."] =
 	"Включено по умолчанию. Сохраняет примерное расстояние пешком, завершённые путешествия и наблюдаемое использование транспорта этим персонажем."
-L["Travel records from guild and group addon users. Peer totals are player-reported."] =
-	"Записи пользователей аддона из гильдии и группы. Итоги других игроков сообщены ими самими."
-L["Completed journeys"] = "Завершённые путешествия"
-L["Approximate walking distance"] = "Примерное расстояние пешком"
-L["Transport rides"] = "Поездки на транспорте"
-L["Flights taken"] = "Совершённые полёты"
-L["Portal legs"] = "Участки с порталами"
 L["World map filter menu test: %s. Type /reload to apply."] =
 	"Проверка меню фильтров карты мира: %s. Введите /reload, чтобы применить." -- mt
 L["Usage: /path menutest map, nearby, both or off"] =
@@ -418,3 +404,37 @@ L["Magenta"] = "Пурпурный"
 L["Show boat, lift and tram departures in the tracker"] =
 	"Показывать отправления кораблей, лифтов и трамвая в трекере"
 L["Hide departures"] = "Скрыть отправления"
+
+-- Forever Leaderboards (Forever Core's shared window).
+L["Completed journeys"] = "Завершённые путешествия"
+L["On unless you turn it off. Shares travel records with guild and group and puts you on Forever Leaderboards."] =
+	"Включено, пока вы это не отключите. Делится записями о путешествиях по каналам гильдии, группы, рейда и подземелья и добавляет вас в рейтинги Forever." -- mt
+L["total"] = "всего" -- mt
+L["Forever Leaderboards"] = "Рейтинги Forever" -- mt
+L["Overall"] = "Общий" -- mt
+L["Forever standing"] = "Общий рейтинг Forever" -- mt
+L["Your guild and group"] = "Ваша гильдия и группа" -- mt
+L["This week"] = "На этой неделе" -- mt
+L["All time"] = "За всё время" -- mt
+L["Rank"] = "Место" -- mt
+L["Player"] = "Игрок" -- mt
+L["No one has reported yet."] = "Пока никто не сообщил." -- mt
+L["Share my progress"] = "Делиться прогрессом" -- mt
+L["Others' values are player-reported."] =
+	"Значения других игроков сообщены ими самими." -- mt
+L["Points for placing on each addon's board."] = "Очки за место в списке каждого аддона." -- mt
+L["(you)"] = "(вы)" -- mt
+L["board"] = "список" -- mt
+L["boards"] = "списки" -- mt
+L["Uses Forever addons"] = "Использует аддоны Forever" -- mt
+L["Forever: %s overall this week"] = "Forever: %s на этой неделе" -- mt
+L["Forever: %s overall"] = "Forever: %s за всё время" -- mt
+L["1st"] = "1-е" -- mt
+L["2nd"] = "2-е" -- mt
+L["3rd"] = "3-е" -- mt
+L["4th"] = "4-е" -- mt
+L["5th"] = "5-е" -- mt
+L["6th"] = "6-е" -- mt
+L["7th"] = "7-е" -- mt
+L["8th"] = "8-е" -- mt
+L[", "] = ", " -- mt
