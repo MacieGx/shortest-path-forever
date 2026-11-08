@@ -165,7 +165,7 @@ function Floor.Sample(map, x, y)
 		return
 	end
 	local steps = last and last.map == map and max(abs(gx - last.gx), abs(gy - last.gy))
-	if not steps or steps > REACH or (x - last.x) ^ 2 + (y - last.y) ^ 2 > JUMP ^ 2 then
+	if not (last and steps) or steps > REACH or (x - last.x) ^ 2 + (y - last.y) ^ 2 > JUMP ^ 2 then
 		last = nil
 	end
 	-- Every cluster the step reads: neighbour looks one cell past the box Step walks.
@@ -248,7 +248,7 @@ if ns.OnTravelTick then
 			return
 		end
 		local x, y, _, map = ns.JourneyPosition()
-		if x and IsIndoors and IsIndoors() then
+		if x and y and map and IsIndoors and IsIndoors() then
 			Floor.Sample(map, x, y)
 		else
 			Floor.Forget()

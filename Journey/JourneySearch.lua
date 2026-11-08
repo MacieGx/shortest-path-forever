@@ -65,7 +65,7 @@ Search.SamePlace = SamePlace
 -- than the cheapest surface near you.
 local function Here()
 	local x, y, _, map = ns.JourneyPosition()
-	if not x then
+	if not (x and y and map) then
 		return nil
 	end
 	return { map = map, x = x, y = y, z = ns.Floor and ns.Floor.Height(map, x, y) or nil }

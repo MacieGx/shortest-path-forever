@@ -492,7 +492,8 @@ function Layer:RefreshStops()
 	-- Groups keep their marks in order, so the current stop leads its group. Whether Guide tracks the goal is part
 	-- of the key: tracking, pausing, yielding or turning Guide off turns the goal pin gold or bronze. So is everything
 	-- a button shows, since a new route keeps the buttons when the key is the same.
-	local groups, keys = ns.OverlapGroups(map, marks, STOP_SIZE),
+	local groups, keys =
+		ns.OverlapGroups(map, marks, STOP_SIZE),
 		{ mapID, ns.GoalPinActive() and "tracked" or "untracked", first, stops and #stops or 0 }
 	for _, group in ipairs(groups) do
 		for _, mark in ipairs(group) do

@@ -560,7 +560,7 @@ local function Update(self, elapsed)
 	if not x then
 		return
 	end
-	if ns.Floor then
+	if ns.Floor and y and map then
 		ns.Floor.Sample(map, x, y)
 	end
 	local changed = policyChanged
