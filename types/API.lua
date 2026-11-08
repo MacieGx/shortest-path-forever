@@ -35,6 +35,7 @@
 --- The NPC whose service this stop reaches. Shortest Path marks that NPC's nameplate while the stop is current.
 --- Another addon's route passes no npc, so its own highlight is the only one.
 ---@field npc? integer
+---@field handins? number[] -- the quests handed in at this stop: 1 or more positive integers; the game's own pin for each is hidden while the stop is drawn, and they never decide arrival or the stop's area
 ---@field shapes? SPFAPIShape[] -- objective areas a held stop stands for; they decide inside when no quest is named or the client has no answer, and are never drawn
 
 ---@class SPFAPILeg

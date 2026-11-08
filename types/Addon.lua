@@ -56,6 +56,7 @@
 ---@field npc? integer -- the service NPC this stop reaches: Shortest Path marks its nameplate while the stop is current (Nearby services)
 ---@field pinBadge? boolean -- destination marker beside an existing map icon
 ---@field questIDs? number[] -- the quests whose client areas a held stop stands for (API.lua)
+---@field handins? number[] -- the quests handed in at an API stop, hidden from the game's own map pins (API.lua)
 ---@field corpse? boolean -- where your corpse lies (Corpse.lua)
 ---@field entrance? number -- the instance map whose door this is (JourneyInput.lua)
 ---@field stop? SPFPoint -- the stop inside that instance the door stands for
@@ -266,6 +267,7 @@
 ---@field z? number
 ---@field label? string
 ---@field questID? number
+---@field handins? number[] -- the quests handed in at the kept stop, validated on the way in and out (Resume.lua)
 ---@field pinBadge? boolean
 ---@field at number
 -- Where the character stood when it last bound at an inn, with GetBindLocation's name then.
@@ -343,6 +345,7 @@ ShortestPathForeverPathData = nil
 ---@field waterMode? boolean
 ---@field hazards? string -- the key of the hazards its walks were searched with (Hazards.lua)
 ---@field preferred? boolean a ride the planner chose over a slightly quicker long walk
+---@field unknownFlight? boolean the route walks only because a flight point it would use is undiscovered
 ---@class SPFWalkCost
 ---@field from SPFPoint
 ---@field to SPFPoint
@@ -361,6 +364,7 @@ ShortestPathForeverPathData = nil
 ---@field walkSpeed? number
 ---@field waterWalking? boolean
 ---@field ride? {route: number, dock: number, arrive: number}
+---@field unknownFlightNotice? boolean also report a walk caused by an undiscovered flight point
 -- [teleport index] = server ms when it can be cast; absent when it cannot.
 ---@field teleportReady? table<number, number>
 ---@class SPFPlaceOptions
