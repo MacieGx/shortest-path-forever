@@ -442,8 +442,8 @@ function API.NavigateRoute(owner, stops)
 			or (stop.radius ~= nil and (not Number(stop.radius) or stop.radius < 0))
 			or (stop.questID ~= nil and not ID(stop.questID))
 			or (stop.questIDs ~= nil and (type(stop.questIDs) ~= "table" or not Quests(stop.questIDs)))
-			or (stop.npc ~= nil and not ID(stop.npc))
 			or (stop.handins ~= nil and (type(stop.handins) ~= "table" or not Quests(stop.handins)))
+			or (stop.npc ~= nil and not ID(stop.npc))
 			or (stop.shapes ~= nil and (type(stop.shapes) ~= "table" or not Shapes(stop.shapes)))
 		then
 			return false

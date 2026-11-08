@@ -138,6 +138,7 @@ L["Nearby services could not read QuestieDB."] =
 	"Услуги поблизости не смогли прочитать QuestieDB."
 L["Nearby services need the QuestieDB addon."] =
 	"Для услуг поблизости нужна модификация QuestieDB."
+L["Nearest"] = "Ближайший"
 L["A flight point you have not discovered yet would shorten this route: visit a flight master to learn it."] =
 	"Неизвестная вам точка полёта сократила бы этот маршрут: посетите распорядителя полётов, чтобы открыть её."
 L["No location for that quest yet."] = "Для этого задания пока нет места."
