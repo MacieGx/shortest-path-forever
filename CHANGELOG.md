@@ -12,6 +12,7 @@ optional `### For addon authors` subsection after a version's player bullets.
 
 ## [Unreleased]
 
+- **Guidelime guides can lead the journey too.** With *Follow Guidelime guides* on, the guide's current step plans the journey and moves it on as the guide advances; Guidelime's own arrow steps aside while Shortest Path draws one, and returns when ours is off. *Resume guide* takes the current step back after another journey. Thanks to deathmvp1 on CurseForge for the request (#506).
 - **The guide arrow and the compass let clicks through again.** Both took the mouse even with "Move the arrow" and "Move the compass" off, so a click near them could drag them away. They now take it only while being moved. (#509)
 
 - **The gold quest area on the minimap replaces the game's blue one instead of circling it.** Standing in a held stop's quest area recoloured the minimap's edge ring, which draws around the whole map, so a larger gold outline appeared around the client's blue area. The area itself now wears the gold, and the edge ring is left alone, so the gold area sits at the client's own shape and scale instead of becoming a second, larger outline (#504).

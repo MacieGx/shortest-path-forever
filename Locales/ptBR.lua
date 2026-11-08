@@ -74,6 +74,7 @@ L["Flight master icon size"] = "Tamanho dos ícones de mestre de voo"
 L["Flight path known"] = "Rota de voo conhecida"
 L["Flights from here"] = "Voos daqui"
 L["Fly to %s"] = "Voar para %s"
+L["Follow Guidelime guides"] = "Seguir guias do Guidelime"
 L["Follow RestedXP guides"] = "Seguir guias do RestedXP"
 L["Follow TomTom's arrow"] = "Seguir a seta do TomTom"
 L["Forever addons"] = "AddOns Forever"
@@ -83,6 +84,7 @@ L["Guidance"] = "Orientação"
 L["Guide marks the next boat, lift, flight master or your destination, not each turn of the walk on the way."] =
 	"A orientação marca o próximo barco, elevador, mestre de voo ou seu destino, não cada curva do caminho a pé."
 L["Guide me"] = "Me guiar"
+L["Guidelime"] = "Guidelime"
 L["Horde"] = "Horda"
 L["Hostile town: %s"] = "Vila hostil: %s"
 L["In the objective tracker while you are near a dock, lift or tram."] =
@@ -151,6 +153,8 @@ L["Other Faction's Routes"] = "Rotas da outra facção"
 L["Picks quests for your level and plans them into one journey."] =
 	"Escolhe missões para o seu nível e as planeja em uma só jornada."
 L["Plan journey"] = "Planejar jornada"
+L["Plan journeys to Guidelime's current guide step. Guidelime's arrow steps aside while ours draws."] =
+	"Planejar viagens até a etapa atual do guia do Guidelime. A seta dele sai do caminho enquanto a nossa é desenhada."
 L["Plan journeys to RestedXP guide targets and hide its arrow. No TomTom needed."] =
 	"Planejar jornadas até os alvos dos guias do RestedXP e ocultar a seta dele. Não precisa do TomTom."
 L["Plans the cheapest route to your next profession rank."] =
@@ -168,6 +172,7 @@ L["Reagent Vendor"] = "Fornecedor de reagentes"
 L["Reagents"] = "Reagentes"
 L["Repair"] = "Conserto"
 L["RestedXP guide"] = "Guia do RestedXP"
+L["Resume Guidelime guide"] = "Retomar guia do Guidelime"
 L["Resume RestedXP guide"] = "Retomar guia do RestedXP"
 L["Resume guide"] = "Retomar guia"
 L["Return to your corpse"] = "Voltar ao seu corpo"

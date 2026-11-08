@@ -144,7 +144,7 @@ local env = setmetatable({
 	SlashCmdList = {},
 }, { __index = _G })
 
-local refreshed, taxiRefreshed, policyChanged, tomtomRefreshed = 0, 0, 0, 0
+local refreshed, taxiRefreshed, policyChanged, tomtomRefreshed, guidelimeRefreshed = 0, 0, 0, 0, 0
 local compassMoving = false
 local arrowMoving, arrowScaled = false, nil
 local tomtomFollowRefreshed, ways = 0, {}
@@ -176,6 +176,9 @@ local ns = {
 		policyChanged = policyChanged + 1
 	end,
 	RefreshRestedXP = function() end,
+	RefreshGuidelime = function()
+		guidelimeRefreshed = guidelimeRefreshed + 1
+	end,
 	RefreshTomTom = function()
 		tomtomRefreshed = tomtomRefreshed + 1
 	end,
@@ -287,6 +290,7 @@ local groups = {
 		"tomtomFollow",
 		"restedxp",
 		"restedxpHideArrow",
+		"guidelime",
 		"avoidHighZones",
 		"teleports",
 		"hearthMinimumSavings",
@@ -331,7 +335,7 @@ local order = {
 }
 
 assert(#buttons == #order + 1, "one index button per group, then the Forever addons page")
-assert(#rows == 54, #rows)
+assert(#rows == 55, #rows)
 local cursor = 0
 for index, name in ipairs(order) do
 	local button = buttons[index].initializer
@@ -420,6 +424,10 @@ assert(mover.default == false and mover:GetValue() == false, "the compass starts
 mover:SetValue(true)
 assert(compassMoving == true and mover:GetValue() == true, "the row unlocks the compass for dragging")
 assert(Row("restedxp").setting.default == true, "RestedXP journeys are enabled by default")
+assert(Row("guidelime").setting.default == true, "Guidelime journeys are enabled by default")
+assert(Row("guidelime").tooltip:find("Guidelime's arrow", 1, true), "the row says the guide arrow steps aside")
+Row("guidelime").setting.onChanged()
+assert(guidelimeRefreshed == 1, "the row follows its setting")
 -- Walks keep out of zones far above your level unless this is off; changing it plans the journey again.
 assert(Row("avoidHighZones").setting.default == true, "avoiding high zones is on by default")
 local policyBefore = policyChanged

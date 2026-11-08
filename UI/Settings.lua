@@ -292,6 +292,8 @@ ns.Init(function()
 			if not ns.db.journey then
 				ns.ClearJourney()
 			end
+			-- The guide follower only ticks while journeys are on; turning them back on starts it again.
+			ns.RefreshGuidelime()
 		end
 	)
 	Checkbox(
@@ -344,6 +346,14 @@ ns.Init(function()
 			.. L["Turning this off leaves RestedXP's arrow visible."],
 		function()
 			ns.RefreshRestedXP()
+		end
+	)
+	Checkbox(
+		"guidelime",
+		L["Follow Guidelime guides"],
+		L["Plan journeys to Guidelime's current guide step. Guidelime's arrow steps aside while ours draws."],
+		function()
+			ns.RefreshGuidelime()
 		end
 	)
 	Checkbox(
@@ -403,6 +413,12 @@ ns.Init(function()
 		page,
 		CreateSettingsButtonInitializer(L["RestedXP guide"], L["Resume guide"], function()
 			ns.ResumeRestedXP()
+		end, nil, false)
+	)
+	Settings.RegisterInitializer(
+		page,
+		CreateSettingsButtonInitializer(L["Guidelime"], L["Resume guide"], function()
+			ns.ResumeGuidelime()
 		end, nil, false)
 	)
 

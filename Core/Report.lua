@@ -9,7 +9,7 @@ local ns = select(2, ...)
 
 local TRACE_SHOWN = 5
 local SETTINGS = "Settings: journeys %s, teleports %s (hearth saving %ss), other faction %s, TomTom %s/follow %s, "
-	.. "RestedXP %s"
+	.. "RestedXP %s, Guidelime %s"
 
 ---@param value any
 ---@return string
@@ -96,7 +96,8 @@ function ns.ReportLines()
 			OnOff(db.otherFaction),
 			OnOff(db.tomtom),
 			OnOff(db.tomtomFollow),
-			OnOff(db.restedxp)
+			OnOff(db.restedxp),
+			OnOff(db.guidelime)
 		),
 	}
 	local bind = ns.charDB.bind

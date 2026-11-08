@@ -23,6 +23,8 @@ globals = {
 	"SLASH_SHORTESTPATHFOREVERWAY1",
 }
 read_globals = {
+	"Guidelime",
+	"GuidelimeArrow",
 	"TomTomCrazyArrow",
 	"IsAltKeyDown",
 	"CreateFramePoolCollection",

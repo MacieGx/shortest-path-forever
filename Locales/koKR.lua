@@ -75,6 +75,7 @@ L["Flight master icon size"] = "비행 조련사 아이콘 크기"
 L["Flight path known"] = "알고 있는 비행 경로"
 L["Flights from here"] = "여기서 출발하는 비행"
 L["Fly to %s"] = "%s(으)로 비행"
+L["Follow Guidelime guides"] = "Guidelime 가이드 따르기"
 L["Follow RestedXP guides"] = "RestedXP 가이드 따르기"
 L["Follow TomTom's arrow"] = "TomTom 화살표 따르기"
 L["Forever addons"] = "Forever 애드온"
@@ -84,6 +85,7 @@ L["Guidance"] = "안내"
 L["Guide marks the next boat, lift, flight master or your destination, not each turn of the walk on the way."] =
 	"안내는 다음 배, 승강기, 비행 조련사 또는 목적지를 표시하며, 걷는 길의 모든 갈림길을 표시하지는 않습니다."
 L["Guide me"] = "안내 받기"
+L["Guidelime"] = "Guidelime"
 L["Horde"] = "호드"
 L["Hostile town: %s"] = "적대 마을: %s"
 L["In the objective tracker while you are near a dock, lift or tram."] =
@@ -153,6 +155,8 @@ L["Other Faction's Routes"] = "다른 진영의 노선"
 L["Picks quests for your level and plans them into one journey."] =
 	"레벨에 맞는 퀘스트를 골라 하나의 여정으로 계획합니다."
 L["Plan journey"] = "여정 계획"
+L["Plan journeys to Guidelime's current guide step. Guidelime's arrow steps aside while ours draws."] =
+	"Guidelime의 현재 가이드 단계로 여정을 계획합니다. 우리 화살표가 그려지는 동안 Guidelime의 화살표는 물러납니다."
 L["Plan journeys to RestedXP guide targets and hide its arrow. No TomTom needed."] =
 	"RestedXP 가이드 목표까지 여정을 계획하고 그 화살표를 숨깁니다. TomTom이 필요 없습니다."
 L["Plans the cheapest route to your next profession rank."] =
@@ -170,6 +174,7 @@ L["Reagent Vendor"] = "마법 재료 상인"
 L["Reagents"] = "마법 재료"
 L["Repair"] = "장비 수리"
 L["RestedXP guide"] = "RestedXP 가이드"
+L["Resume Guidelime guide"] = "Guidelime 가이드 재개"
 L["Resume RestedXP guide"] = "RestedXP 가이드 재개"
 L["Resume guide"] = "가이드 재개"
 L["Return to your corpse"] = "시체로 돌아가기"

@@ -4,7 +4,7 @@
 ## Author: cjber
 ## Version: @project-version@
 ## Category: Map
-## OptionalDeps: QuestieDB, TweaksForever, RXPGuides
+## OptionalDeps: QuestieDB, TweaksForever, RXPGuides, Guidelime
 ## X-License: GPL-3.0-or-later
 ## X-Website: https://github.com/cjber/shortest-path-forever
 ## X-Donate: https://ko-fi.com/cjber
@@ -107,4 +107,5 @@ Journey\Itinerary.lua
 Core\TomTom.lua
 Core\Way.lua
 Core\RestedXP.lua
+Core\Guidelime.lua
 UI\DestinationPin.lua
