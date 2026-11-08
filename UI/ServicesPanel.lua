@@ -75,11 +75,13 @@ local Refresh, Queue
 ---@class SPFSearchBox : EditBox
 ---@field Instructions FontString
 
+---@class SPFCollapseButton : Button
+---@field UpdateCollapsedState fun(self: SPFCollapseButton, collapsed: boolean)
 ---@class SPFServicesHeader : Button
 ---@field key string
 ---@field Name FontString
 ---@field Count FontString
----@field CollapseButton Button
+---@field CollapseButton SPFCollapseButton
 
 ---@class SPFServicesRow : Button
 ---@field key string
@@ -104,10 +106,11 @@ end
 ---@param row SPFServicesRow
 local function PaintRow(row)
 	local group, place = row.group, row.place
-	if type(group.icon) == "number" then
-		Art.Icon(row.Icon, ItemIcon(group.icon), ICON)
+	local icon = group.icon
+	if type(icon) == "number" then
+		Art.Icon(row.Icon, ItemIcon(icon), ICON)
 	else
-		Art.Fit(row.Icon, group.icon, ICON, ICON)
+		Art.Fit(row.Icon, icon, ICON, ICON)
 	end
 	row.Label:SetText(group.label)
 	row.Detail:SetText(ns.NearbyServices.Detail(group.key, place, row.query))
@@ -154,7 +157,7 @@ local function CreateHeader(parent)
 			art:SetAlpha(0.4)
 		end
 	end
-	header.CollapseButton = CreateFrame("Button", nil, header, "CollapseButtonTemplate") --[[@as Button]]
+	header.CollapseButton = CreateFrame("Button", nil, header, "CollapseButtonTemplate") --[[@as SPFCollapseButton]]
 	header.CollapseButton:SetPoint("RIGHT", -6, 0)
 	header.Count = header:CreateFontString(nil, "ARTWORK", "Game15Font_Shadow")
 	header.Count:SetPoint("RIGHT", -28, 0)

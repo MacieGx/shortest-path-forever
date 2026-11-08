@@ -319,14 +319,15 @@ local function Under(block, ancestor)
 	if not ancestor then
 		return false
 	end
+	local frame = block ---@type Frame?
 	for _ = 1, TRACKER_DEPTH do
-		if block == ancestor then
-			return true
-		end
-		block = block:GetParent()
-		if not block then
+		if not frame then
 			return false
 		end
+		if frame == ancestor then
+			return true
+		end
+		frame = frame:GetParent()
 	end
 	return false
 end
