@@ -22,7 +22,7 @@ With the game's gamepad interface on, Shortest Path never opens or turns the wor
 
 Click the current journey step and choose **Complete this step** to advance it. Skipping a Hearthstone leaves it out of plans for that journey. Other steps may return if your actual position still requires them.
 
-With RestedXP installed, **Resume guide** in Guidance or the Journey header menu resumes its current target after another journey. Adventure Guide owns this action when its RestedXP display is enabled; update both addons to use the integrated resume control.
+With RestedXP or Guidelime installed, **Resume guide** in Guidance or the Journey header menu resumes that guide's current target after another journey. Adventure Guide owns this action when its RestedXP display is enabled; update both addons to use the integrated resume control.
 
 ## Routes and map marks
 

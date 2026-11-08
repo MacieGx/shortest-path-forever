@@ -76,6 +76,7 @@ L["Flight master icon size"] = "Taille des icônes des maîtres de vol" -- mt
 L["Flight path known"] = "Trajet aérien connu" -- mt
 L["Flights from here"] = "Vols depuis ici" -- mt
 L["Fly to %s"] = "Voler vers %s" -- mt
+L["Follow Guidelime guides"] = "Suivre les guides Guidelime" -- mt
 L["Follow RestedXP guides"] = "Suivre les guides RestedXP" -- mt
 L["Follow TomTom's arrow"] = "Suivre la flèche de TomTom" -- mt
 L["Forever addons"] = "Addons Forever" -- mt
@@ -85,6 +86,7 @@ L["Guidance"] = "Guidage" -- mt
 L["Guide marks the next boat, lift, flight master or your destination, not each turn of the walk on the way."] =
 	"Le guidage marque le prochain bateau, ascenseur, maître de vol ou votre destination, pas chaque virage du trajet à pied." -- mt
 L["Guide me"] = "Me guider" -- mt
+L["Guidelime"] = "Guidelime" -- mt
 L["Horde"] = "Horde" -- mt
 L["Hostile town: %s"] = "Ville hostile : %s" -- mt
 L["In the objective tracker while you are near a dock, lift or tram."] =
@@ -153,6 +155,8 @@ L["Other Faction's Routes"] = "Routes de l'autre faction" -- mt
 L["Picks quests for your level and plans them into one journey."] =
 	"Choisit des quêtes de votre niveau et les enchaîne en un seul trajet." -- mt
 L["Plan journey"] = "Planifier un trajet" -- mt
+L["Plan journeys to Guidelime's current guide step. Guidelime's arrow steps aside while ours draws."] =
+	"Planifier des trajets vers l'étape actuelle du guide Guidelime. Sa flèche s'efface pendant que la nôtre s'affiche." -- mt
 L["Plan journeys to RestedXP guide targets and hide its arrow. No TomTom needed."] =
 	"Planifier des trajets vers les cibles des guides RestedXP et masquer leur flèche. TomTom n'est pas nécessaire." -- mt
 L["Plans the cheapest route to your next profession rank."] =
@@ -170,6 +174,7 @@ L["Reagent Vendor"] = "Fournisseur de composants" -- mt
 L["Reagents"] = "Composants" -- mt
 L["Repair"] = "Réparations" -- mt
 L["RestedXP guide"] = "Guide RestedXP" -- mt
+L["Resume Guidelime guide"] = "Reprendre le guide Guidelime" -- mt
 L["Resume RestedXP guide"] = "Reprendre le guide RestedXP" -- mt
 L["Resume guide"] = "Reprendre le guide" -- mt
 L["Return to your corpse"] = "Retourner à votre cadavre" -- mt

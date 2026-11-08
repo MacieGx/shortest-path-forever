@@ -77,6 +77,7 @@ L["Flight master icon size"] = "Размер значков распорядит
 L["Flight path known"] = "Маршрут полета известен"
 L["Flights from here"] = "Полеты отсюда"
 L["Fly to %s"] = "Лететь: %s"
+L["Follow Guidelime guides"] = "Следовать руководствам Guidelime"
 L["Follow RestedXP guides"] = "Следовать руководствам RestedXP"
 L["Follow TomTom's arrow"] = "Следовать стрелке TomTom"
 L["Forever addons"] = "Модификации Forever"
@@ -86,6 +87,7 @@ L["Guidance"] = "Навигация"
 L["Guide marks the next boat, lift, flight master or your destination, not each turn of the walk on the way."] =
 	"Навигация отмечает следующий корабль, подъемник, распорядителя полетов или цель, а не каждый поворот пешего пути."
 L["Guide me"] = "Вести меня"
+L["Guidelime"] = "Guidelime"
 L["Horde"] = "Орда"
 L["Hostile town: %s"] = "Вражеский город: %s"
 L["In the objective tracker while you are near a dock, lift or tram."] =
@@ -158,6 +160,8 @@ L["Other Faction's Routes"] = "Маршруты другой фракции"
 L["Picks quests for your level and plans them into one journey."] =
 	"Подбирает задания по вашему уровню и объединяет их в один маршрут."
 L["Plan journey"] = "Проложить маршрут"
+L["Plan journeys to Guidelime's current guide step. Guidelime's arrow steps aside while ours draws."] =
+	"Планировать путешествия к текущему шагу руководства Guidelime. Его стрелка уступает место нашей."
 L["Plan journeys to RestedXP guide targets and hide its arrow. No TomTom needed."] =
 	"Прокладывать маршруты к целям руководств RestedXP и скрывать его стрелку. TomTom не нужен."
 L["Plans the cheapest route to your next profession rank."] =
@@ -175,6 +179,7 @@ L["Reagent Vendor"] = "Торговец реагентами"
 L["Reagents"] = "Реагенты"
 L["Repair"] = "Ремонт"
 L["RestedXP guide"] = "Руководство RestedXP"
+L["Resume Guidelime guide"] = "Продолжить руководство Guidelime"
 L["Resume RestedXP guide"] = "Продолжить руководство RestedXP"
 L["Resume guide"] = "Продолжить руководство"
 L["Return to your corpse"] = "Вернуться к телу"

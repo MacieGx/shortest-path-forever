@@ -62,6 +62,11 @@ function ModuleMixin:OnBlockHeaderClick(block, button)
 				root:CreateButton(L["Resume RestedXP guide"], function()
 					ns.ResumeRestedXP()
 				end)
+				if GuidelimeArrow then
+					root:CreateButton(L["Resume Guidelime guide"], function()
+						ns.ResumeGuidelime()
+					end)
+				end
 				-- A corpse run ends only when you live again.
 				if not ns.Corpse.Active() then
 					root:CreateButton(L["Clear journey"], ns.ClearJourney)

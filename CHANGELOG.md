@@ -12,6 +12,8 @@ optional `### For addon authors` subsection after a version's player bullets.
 
 ## [Unreleased]
 
+- **Guidelime guides can lead the journey too.** With *Follow Guidelime guides* on, the guide's current step plans the journey and moves it on as the guide advances; Guidelime's own arrow steps aside while Shortest Path draws one, and returns when ours is off. *Resume guide* takes the current step back after another journey. Thanks to deathmvp1 on CurseForge for the request (#506).
+
 ## [1.22.55] - 2026-11-08
 
 - **The report keeps errors from earlier sessions.** An error Shortest Path caught before the last `/reload`, a blocked action or a Lua warning was forgotten when the client reloaded, so it could not be copied into a report once it was gone. The report now lists them under their own heading, with when each was first and last seen and the version, build and locale it happened on, and keeps the 50 most recent. It also carries Shortest Path's recent log lines, the steps that led up to a bug, and `/forever debug` turns on detailed lines for the session (cjber/forever-core#204, cjber/forever-core#206).

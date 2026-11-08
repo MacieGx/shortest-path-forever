@@ -29,7 +29,7 @@ as the glossary for game terms; eight frFR lines are Brainc3ll's.
 | Input | Used for | Licence |
 |---|---|---|
 | QuestieDB, if installed | Quest givers and objectives as route goals | QuestieDB carries no licence; nothing is copied |
-| TomTom and RestedXP Guides, if installed | Waypoints and guide steps, through their public APIs | Their own; nothing is copied |
+| TomTom, RestedXP Guides and Guidelime, if installed | Waypoints and guide steps, through their public APIs | Their own; nothing is copied |
 | TomTom's API, while TomTom is not installed | `Core/TomTom.lua` answers guide addons' TomTom calls, and `/way` reads its arguments as TomTom does | Our own code; only TomTom's public call names and `/way` syntax are followed |
 | Adventure Guide Forever and Tweaks Forever, if installed | The RestedXP hand-off, and class trainers for nearby services, through their public APIs | GPL-3.0-or-later |
 
@@ -71,7 +71,7 @@ Credit for the ideas and reports behind the addon.
 | team\_Brigade, phear and Testvonfarkle, on CurseForge | Asked to hide the empty tracker's title (1.15.0) | |
 | berserkerlxl, on CurseForge | Found guides' TomTom waypoints not reaching the addon, and asked for `/way` (1.15.0); found that Questie's tracker was covering the Journey (#214) | |
 | rydoc and Joster91, on CurseForge | Found the Journey collapsing into or overlapping the quest tracker (1.15.0, 1.17.0) | |
-| deathmvp1, on CurseForge | Asked to move the Journey off the quest list; detaching it is now in its right-click menu (1.17.0). Found Questie's quest list covering the Journey, which now moves clear of it (#214) | |
+| deathmvp1, on CurseForge | Asked to move the Journey off the quest list; detaching it is now in its right-click menu (1.17.0). Found Questie's quest list covering the Journey, which now moves clear of it (#214), and asked for Guidelime guides to lead the journey too (#506) | |
 | saikoso, on CurseForge | Reported the missing Dalaran–Stormwind portal route for Alliance Skyborne (#226) | |
 | user\_uf9axk2x4gqtmfch, on CurseForge | Asked for the route to work with OpenMap's stitched map, and pointed at OpenMap's API for drawing on it (1.21.0, #194) | |
 | Ragnarok11B, on CurseForge | Reported that the quest tracker could not be moved after hiding the journey steps (#227) | |
