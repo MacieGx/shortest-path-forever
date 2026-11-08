@@ -159,4 +159,43 @@ do
 	assert(not jns.OnWalk(line, { map = 0, x = 50, y = 2, z = -42 }), "a floor below it is not on it")
 end
 
+-- A goal in the Undercity is not reached from the ruins' hall above it, and is once you stand on its floor; where the
+-- floor is unknown the spot alone decides.
+do
+	local driver = assert(loadfile("tests/journey_driver.lua"))()
+	local jns = driver.ns
+	local tracked = 60
+	jns.Floor = {
+		Sample = function() end,
+		Height = function()
+			return tracked
+		end,
+	}
+	driver.move({ map = 0, x = 1588, y = 237 })
+	jns.StartJourney({ map = 0, x = 1590, y = 237, z = -43.1 })
+	driver.update(0.2)
+	assert(jns.JourneyGoal(), "standing in the hall above, the goal below is not reached")
+	tracked = -42
+	driver.update(0.2)
+	assert(not jns.JourneyGoal(), "on the city's floor it is")
+	tracked = nil
+	jns.StartJourney({ map = 0, x = 1590, y = 237, z = -43.1 })
+	driver.update(0.2)
+	assert(not jns.JourneyGoal(), "with the floor unknown the spot decides")
+end
+
+-- A spot picked on the Undercity's map is on the city's floor; one on Tirisfal's names the surface.
+do
+	local input = assert(loadfile("tests/journey_driver.lua"))()
+	input.env.C_Map.GetWorldPosFromMapPos = function(_, pos)
+		return 0, {
+			GetXY = function()
+				return pos.x, pos.y
+			end,
+		}
+	end
+	assert(input.ns.WorldPoint(1458, 0.5, 0.5).z == -43.1, "the Undercity's map is the city")
+	assert(input.ns.WorldPoint(1420, 0.5, 0.5).z == nil, "Tirisfal's is the surface")
+end
+
 print("floor_spec: ok")

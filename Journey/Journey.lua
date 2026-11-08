@@ -159,7 +159,15 @@ end
 
 local function Near(node, reach)
 	local x, y, _, map = ns.JourneyPosition()
-	return x and map == node.map and (x - node.x) ^ 2 + (y - node.y) ^ 2 <= (reach or ARRIVAL) ^ 2
+	if not (x and y and map == node.map and (x - node.x) ^ 2 + (y - node.y) ^ 2 <= (reach or ARRIVAL) ^ 2) then
+		return false
+	end
+	-- The goal under or over you is not reached: crossing the Ruins of Lordaeron's hall above a stop in the Undercity
+	-- never arrives there. Where the floor is unknown, the spot alone decides, as before. Only the goal: a dock's or
+	-- a landing's height is the transport's, and boarding and landing have their own tests.
+	local atGoal = goal and node.z and node.map == goal.map and node.x == goal.x and node.y == goal.y
+	local height = atGoal and map and ns.Floor and ns.Floor.Height(map, x, y)
+	return not (height and math.abs(height - node.z) > OTHER_FLOOR)
 end
 
 -- The client's own answer for the quests a held stop names: true inside any of their areas, false outside them
