@@ -28,10 +28,27 @@ local SECTION_LABELS = {
 	services = L["Services"],
 }
 -- A vendor group's item IDs by NPC, which a search matches and a row says it sells.
-local index, vendorItems, groups, state, menuOpen = {}, {}, {}, "idle", false
-local Open
-local function Close()
-	menuOpen = false
+local index, vendorItems, groups, groupByKey, state = {}, {}, {}, {}, "idle"
+-- Every vendor item's name, so a search matches what a vendor sells and a row can name it.
+local itemNames = {}
+-- Callers waiting for the index, so an open panel fills as soon as the read finishes.
+local waiting = {}
+
+---@param fn fun()
+local function WhenReady(fn)
+	if state == "ready" then
+		fn()
+	else
+		waiting[#waiting + 1] = fn
+	end
+end
+-- Case-folded matching for the panel's search box: plain substring, never a keyword list.
+local Fold = ns.Text and ns.Text.Fold or function(text)
+	return tostring(text or ""):lower()
+end
+
+local function Contains(folded, query)
+	return query == "" or folded:find(query, 1, true) ~= nil
 end
 -- What the menu says in place of the services: QuestieDB is still being read, is not installed, or could not be read.
 local STATUS = {
@@ -58,10 +75,47 @@ local SHORTLIST = 5
 -- so it scrolls past this many rows the way Blizzard's own long menus do (Blizzard_Menu SetScrollMode).
 local MENU_ROW, MENU_ROWS = 20, 20
 
-local function Shortlist(key, world, limit)
-	local list, gaps = {}, {}
+-- What put an NPC in a group (defined below, after the index is built).
+local Items
+
+-- Every NPC of a group on the player's continent that a folded query matches, or all of them with an empty query.
+-- A group label, an NPC's name or title, or the name of an item that puts the NPC in the group each count.
+local function Matching(key, world, query)
+	local matching = {}
+	local labelHit = query ~= "" and Contains(Fold((groupByKey[key] or {}).label), query)
 	for _, place in ipairs(index[key] or {}) do
 		if place.world.map == world.map then
+			local hit = query == "" or labelHit or Contains(Fold(place.name), query)
+			if not hit then
+				hit = Contains(Fold(place.title), query)
+			end
+			if not hit then
+				for _, itemID in ipairs(Items(key, place.id) or {}) do
+					if Contains(Fold(itemNames[itemID]), query) then
+						hit = true
+						break
+					end
+				end
+			end
+			if hit then
+				matching[place.id] = true
+			end
+		end
+	end
+	return matching
+end
+
+---@param key string
+---@param world SPFPoint
+---@param limit integer
+---@param query? string a raw search query, matched without case or accent
+---@return SPFNearbyPlace[]
+local function Shortlist(key, world, limit, query)
+	local list, gaps = {}, {}
+	local folded = Fold(query)
+	local matching = folded ~= "" and Matching(key, world, folded) or nil
+	for _, place in ipairs(index[key] or {}) do
+		if place.world.map == world.map and (not matching or matching[place.id]) then
 			local gap = (place.world.x - world.x) ^ 2 + (place.world.y - world.y) ^ 2
 			local last = #list
 			if last < limit or gap < gaps[last] or (gap == gaps[last] and place.id < list[last].id) then
@@ -99,13 +153,14 @@ local function Navigate(key, place)
 	if not place then
 		return false
 	end
-	return ShortestPathForever.API.Navigate("Shortest Path Forever", place.map, place.x, place.y, place.name, Kind(key))
+	-- The stop carries the NPC id, so the nameplate arrows can point at the NPC the journey walks to.
+	local stop = { map = place.map, x = place.x, y = place.y, title = place.name, kind = Kind(key), npc = place.id }
+	return ShortestPathForever.API.NavigateRoute("Shortest Path Forever", { stop })
 end
 -- A service button's response: one that starts a journey closes every menu, one that cannot keeps the menu open.
 -- The response is how a button closes its menu: the Forever client's MenuUtil has no CloseAllMenus (#161).
 local function Pick(key, place)
 	if Navigate(key, place) then
-		Close()
 		return MenuResponse.CloseAll
 	end
 	return MenuResponse.Open
@@ -208,22 +263,27 @@ local function BuildGroups()
 		end
 	end
 	local list = {}
+	local byKey = {}
+	local function Add(group)
+		list[#list + 1] = group
+		byKey[group.key] = group
+	end
 	for _, group in ipairs(VENDOR_GROUPS) do
-		list[#list + 1] = {
+		Add({
 			section = "vendors",
 			key = group.key,
 			label = group.label,
 			icon = group.icon,
 			npcs = GroupNPCs(group.key),
-		}
+		})
 	end
-	list[#list + 1] = {
+	Add({
 		section = "trainers",
 		key = "class",
 		label = L["Class trainer"],
 		icon = "Class",
 		npcs = GroupNPCs("class"),
-	}
+	})
 	local skills, seen = {}, {}
 	for _, skill in pairs(ns.ProfessionTrainers or {}) do
 		if not seen[skill] then
@@ -235,24 +295,25 @@ local function BuildGroups()
 	for _, skill in ipairs(skills) do
 		local label = ProfessionName(skill)
 		if label then
-			list[#list + 1] = {
+			Add({
 				section = "trainers",
 				key = "profession:" .. skill,
 				label = label,
 				icon = "Profession",
 				npcs = GroupNPCs("profession:" .. skill),
-			}
+			})
 		end
 	end
 	for _, service in ipairs(SERVICES) do
-		list[#list + 1] = {
+		Add({
 			section = "services",
 			key = service.key,
 			label = service.label,
 			icon = service.icon,
 			npcs = GroupNPCs(service.key),
-		}
+		})
 	end
+	groupByKey = byKey
 	return list
 end
 local function Build()
@@ -286,11 +347,14 @@ local function Build()
 		-- Every item says who sells it and what it is; that is the whole vendor grouping.
 		local item = lib.Item
 		if item and item.GetAllIds and item.GetAll then
-			local fields = { "vendors", "class", "subClass" }
+			local fields = { "vendors", "class", "subClass", "name" }
 			for _, itemID in ipairs(item.GetAllIds()) do
 				local values = item.GetAll(itemID, fields)
 				if values then
-					local vendors, class, subClass = unpack(values, 1, values.n)
+					local vendors, class, subClass, name = unpack(values, 1, values.n)
+					if type(name) == "string" then
+						itemNames[itemID] = name
+					end
 					if type(class) == "number" and type(subClass) == "number" and type(vendors) == "table" then
 						local keys = VendorKeys(itemID, class, subClass)
 						for _, npc in ipairs(vendors) do
@@ -303,11 +367,11 @@ local function Build()
 				coroutine.yield()
 			end
 		end
-		local fields = { "name", "spawns", "friendlyToFaction", "npcFlags" }
+		local fields = { "name", "spawns", "friendlyToFaction", "npcFlags", "subName" }
 		for _, id in ipairs(lib.Npc.GetAllIds()) do
 			local values = lib.Npc.GetAll(id, fields)
 			if values then
-				local name, spawns, friendly, flags = unpack(values, 1, values.n)
+				local name, spawns, friendly, flags, title = unpack(values, 1, values.n)
 				if type(name) == "string" and (friendly == "AH" or friendly == faction) and type(flags) == "number" then
 					local keys = {}
 					for _, service in ipairs(SERVICES) do
@@ -347,6 +411,7 @@ local function Build()
 										local place = {
 											id = id,
 											name = name,
+											title = type(title) == "string" and title ~= "" and title or nil,
 											map = map,
 											x = x / 100,
 											y = y / 100,
@@ -383,9 +448,10 @@ local function Build()
 			end
 			if coroutine.status(co) == "dead" then
 				state = "ready"
-				if menuOpen and not InCombatLockdown() then
-					Open()
+				for _, fn in ipairs(waiting) do
+					fn()
 				end
+				waiting = {}
 				return
 			end
 		until debugprofilestop() >= finish
@@ -408,25 +474,63 @@ local function PlayerWorld()
 		return ns.WorldPoint(map, x, y)
 	end
 end
+-- One row's shortlist ranked by the planner's own journey cost, one Estimate per Step. The panel calls one Step a
+-- frame; the tracking menu and /spfnear drain it at once on the click. The best starts as the straight-line nearest,
+-- so a row always has an NPC, and stays so when no estimate can be made.
+---@class SPFNearbyRank
+---@field key? string
+---@field candidates SPFNearbyPlace[]
+---@field estimate SPFEstimate
+---@field fromMap integer
+---@field fromX number
+---@field fromY number
+---@field at integer
+---@field best? SPFNearbyPlace
+---@field seconds? number
+local Rank = {}
+Rank.__index = Rank
+
+function Rank:Step()
+	local place = self.candidates[self.at]
+	if not place then
+		return self.best or self.candidates[1], self.seconds, false
+	end
+	self.at = self.at + 1
+	local seconds = self.estimate(self.fromMap, self.fromX, self.fromY, place.map, place.x, place.y)
+	if seconds and (not self.seconds or seconds < self.seconds) then
+		self.best, self.seconds = place, seconds
+	end
+	return self.best or self.candidates[1], self.seconds, self.at <= #self.candidates
+end
+
+local function NewRank(candidates, estimate, fromMap, fromX, fromY)
+	return setmetatable({
+		candidates = candidates,
+		estimate = estimate,
+		fromMap = fromMap,
+		fromX = fromX,
+		fromY = fromY,
+		at = 1,
+	}, Rank)
+end
+
 -- The chosen place: the closest few by straight line, then the cheapest of those by the planner's own journey cost.
 -- A boat or flight can beat a shorter walk across the hills. Planned here, on the click, so opening or refreshing a
 -- menu never starts a plan, and only the shortlist is planned.
-local function TravelNearest(key, world)
-	local candidates = Shortlist(key, world, SHORTLIST)
+local function TravelNearest(key, world, query)
+	local candidates = Shortlist(key, world, SHORTLIST, query)
 	local best = candidates[1]
 	local api = ShortestPathForever and ShortestPathForever.API
 	local map, x, y = PlayerUi()
-	if #candidates < 2 or not (api and api.Estimate and map) then
+	if #candidates < 2 or not (api and api.Estimate and map and x and y) then
 		return best
 	end
-	local cheapest, seconds
-	for _, place in ipairs(candidates) do
-		local estimate = api.Estimate(map, x, y, place.map, place.x, place.y)
-		if estimate and (not seconds or estimate < seconds) then
-			cheapest, seconds = place, estimate
-		end
+	local rank = NewRank(candidates, api.Estimate, map, x, y)
+	local more = true
+	while more do
+		_, _, more = rank:Step()
 	end
-	return cheapest or best
+	return rank.best or best
 end
 
 -- A group's nearest from here, or a row that says it is not on this map.
@@ -447,12 +551,31 @@ local function AddGroups(root, world)
 	end
 end
 
+-- The panel itself lives in UI/ServicesPanel.lua; this is the way in both the tracking menu and /spfnear take.
+local function OpenServices()
+	Build()
+	-- Under the gamepad interface neither the map nor a menu the addon opens gets past the client (#158), so the
+	-- map's own tracking menu, which the game opens, lists the services and the tab stays where the player finds it.
+	if ns.GamepadUI() then
+		ns.Print(L["Open the world map and choose Nearby services in its tracking menu."])
+		return
+	end
+	if ns.OpenWorldMap() and ns.QuestLogTabs then
+		ns.QuestLogTabs.Select("services")
+	end
+end
+
 -- The world map's tracking menu and the minimap's (Blizzard_Minimap/Mainline/Minimap.lua:645, Gethe/wow-ui-source
 -- branch forever, tags it MENU_MINIMAP_TRACKING) both carry this submenu.
 local function AddTrackingEntry(_, root)
 	Build()
 	local world = PlayerWorld()
 	local submenu = root:CreateButton(L["Nearby services"])
+	-- The way into the quest log's Nearby services tab, above the groups themselves.
+	submenu:CreateButton(L["Open Nearby services"], function()
+		OpenServices()
+		return MenuResponse.CloseAll
+	end)
 	if not world then
 		submenu:CreateTitle(L["Your position is unavailable"])
 		return
@@ -464,57 +587,47 @@ local function AddTrackingEntry(_, root)
 	AddGroups(submenu, world)
 end
 
-Open = function()
-	if InCombatLockdown() then
-		return
-	end
-	-- The services menu opens over the world map. Under the gamepad interface neither the map nor a menu the addon
-	-- opens gets past the client (#158), so the map's own tracking menu, which the game opens, lists the services.
-	-- The index starts loading either way.
-	if ns.GamepadUI() then
-		Build()
-		ns.Print(L["Open the world map and choose Nearby services in its tracking menu."])
-		return
-	end
-	ns.OpenWorldMap()
-	menuOpen = true
-	Build()
-	local world = PlayerWorld()
-	MenuUtil.CreateContextMenu(WorldMapFrame or UIParent, function(_, root)
-		root:AddMenuReleasedCallback(Close)
-		root:CreateTitle(L["Nearby services"])
-		if state ~= "ready" then
-			root:CreateTitle(STATUS[state])
-			return
-		end
-		if not world then
-			root:CreateTitle(L["Your position is unavailable"])
-			return
-		end
-		AddGroups(root, world)
-	end)
-end
-
 ---@class SPFNearbyGroup
 ---@field section "vendors"|"trainers"|"services"
 ---@field key string
 ---@field label string
 ---@field icon number|string
 ---@field npcs number[]
+---@class SPFNearbyRow
+---@field group SPFNearbyGroup
+---@field npc SPFNearbyPlace the nearest matching NPC by straight line
+---@class SPFNearbySection
+---@field section "vendors"|"trainers"|"services"
+---@field label string
+---@field count integer
+---@field collapsed boolean
+---@field rows SPFNearbyRow[]
 ---@class SPFNearbyServices
 ---@field Nearest fun(key: string, world: SPFPoint): SPFNearbyPlace?
 ---@field Index fun(): table<string, SPFNearbyPlace[]>
 ---@field Groups fun(): SPFNearbyGroup[]
 ---@field Items fun(key: string, npc: number): integer[]?
 ---@field State fun(): string
+---@field OnReady fun(fn: fun())
+---@field Sections fun(world: SPFPoint, query?: string, collapsed?: table<string, boolean>): SPFNearbySection[]
+---@field Shortlist fun(key: string, world: SPFPoint, limit: integer, query?: string): SPFNearbyPlace[]
+---@alias SPFEstimate fun(...: number): number?
+---@alias SPFRank fun(places: SPFNearbyPlace[], estimate: SPFEstimate, map: number, x: number, y: number): SPFNearbyRank
+---@field Rank SPFRank
+---@field Detail fun(key: string, place: SPFNearbyPlace, query?: string): string
+---@field Navigate fun(key: string, place: SPFNearbyPlace?): boolean
+---@field PlayerUi fun(): integer?, number?, number?
+---@field PlayerWorld fun(): SPFPoint?
+---@field Open fun()
 ---@class SPFNearbyPlace
 ---@field id integer
 ---@field name string
+---@field title? string
 ---@field map integer
 ---@field x number
 ---@field y number
 ---@field world SPFPoint
-local function Items(key, npcID)
+function Items(key, npcID)
 	local byNpc = vendorItems[key]
 	local items = byNpc and byNpc[npcID]
 	if not items then
@@ -525,6 +638,58 @@ local function Items(key, npcID)
 		copy[at] = id
 	end
 	return copy
+end
+
+-- The panel's list: sections in their fixed order, each a header and the groups here that the query keeps. A group
+-- with no NPC on the player's continent never reaches a section, and a section with no rows is left out.
+local function Sections(world, query, collapsed)
+	local folded = Fold(query)
+	local list = {}
+	for _, section in ipairs({ "vendors", "trainers", "services" }) do
+		local rows = {}
+		for _, group in ipairs(groups) do
+			if group.section == section then
+				local place = Shortlist(group.key, world, 1, folded)[1]
+				if place then
+					rows[#rows + 1] = { group = group, npc = place }
+				end
+			end
+		end
+		if #rows > 0 then
+			local isCollapsed = type(collapsed) == "table" and collapsed[section] == true
+			list[#list + 1] = {
+				section = section,
+				label = SECTION_LABELS[section],
+				count = #rows,
+				collapsed = isCollapsed,
+				rows = isCollapsed and {} or rows,
+			}
+		end
+	end
+	return list
+end
+
+-- A row's detail line: the NPC and its title, or while searching, the NPC and only the items that matched.
+local function Detail(key, place, query)
+	local folded = Fold(query)
+	if folded ~= "" then
+		local names = {}
+		for _, itemID in ipairs(Items(key, place.id) or {}) do
+			local name = itemNames[itemID]
+			if name and Contains(Fold(name), folded) then
+				names[#names + 1] = name
+			end
+		end
+		if #names > 0 then
+			table.sort(names)
+			return L["%s · %s"]:format(place.name, table.concat(names, ", "))
+		end
+		return place.name
+	end
+	if place.title then
+		return L["%s · %s"]:format(place.name, place.title)
+	end
+	return place.name
 end
 
 ns.NearbyServices = {
@@ -539,12 +704,18 @@ ns.NearbyServices = {
 	State = function()
 		return state
 	end,
+	OnReady = WhenReady,
+	Sections = Sections,
+	Shortlist = Shortlist,
+	Rank = NewRank,
+	Detail = Detail,
+	Navigate = Navigate,
+	PlayerUi = PlayerUi,
+	PlayerWorld = PlayerWorld,
+	Open = OpenServices,
 }
 ns.Init(function()
 	Build()
-	if WorldMapFrame and WorldMapFrame.HookScript then
-		WorldMapFrame:HookScript("OnHide", Close)
-	end
 	ns.ModifyMenu("MENU_WORLD_MAP_TRACKING", "nearby", AddTrackingEntry)
 	ns.ModifyMenu("MENU_MINIMAP_TRACKING", "nearby", AddTrackingEntry)
 	SLASH_SPFNEAR1 = "/spfnear"
@@ -559,6 +730,6 @@ ns.Init(function()
 				end
 			end
 		end
-		Open()
+		OpenServices()
 	end
 end)

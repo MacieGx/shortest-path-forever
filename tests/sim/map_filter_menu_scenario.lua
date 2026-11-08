@@ -144,8 +144,8 @@ scenario(
 
 		local navigations = 0
 		local api = G.ShortestPathForever.API
-		local navigate = api.Navigate
-		api.Navigate = function(...)
+		local navigate = api.NavigateRoute
+		api.NavigateRoute = function(...)
 			navigations = navigations + 1
 			return navigate(...)
 		end

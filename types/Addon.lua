@@ -21,6 +21,7 @@
 ---@field charDB SPFCharacterDatabase
 ---@field Defaults table<string, boolean|number|string>
 ---@field NearbyServices SPFNearbyServices
+---@field QuestLogTabs ForeverQuestLogTabsAPI the shared quest log side tabs (UI/QuestLogTabs.lua)
 ---@field ProgressJourneyChanged? fun(point: SPFPoint?, reason?: "arrived"|"cleared")
 ---@field PeerStats ForeverPeerStatsNamespace
 ---@field LeaderboardsData? ForeverLeaderboardsData the shared leaderboards' data half (Core/LeaderboardsData.lua)
@@ -52,6 +53,7 @@
 ---@field shapes? SPFAreaShape[] -- objective areas the stop stands for, in world coordinates
 ---@field look? SPFAPIStopKind -- what the caller said stands there (API.lua)
 ---@field questID? number
+---@field npc? integer -- the service NPC this stop reaches (Nearby services)
 ---@field pinBadge? boolean -- destination marker beside an existing map icon
 ---@field questIDs? number[] -- the quests whose client areas a held stop stands for (API.lua)
 ---@field corpse? boolean -- where your corpse lies (Corpse.lua)

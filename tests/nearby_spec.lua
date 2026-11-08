@@ -46,33 +46,34 @@ local function frame(_, name, parent, template)
 	return f
 end
 local data = {
-	[1] = { "Near vendor", { [10] = { { 10, 10 } } }, "A", 4, n = 4 },
-	[2] = { "Far vendor", { [10] = { { 80, 80 } } }, "A", 4, n = 4 },
-	[3] = { "Horde vendor", { [10] = { { 11, 11 } } }, "H", 4, n = 4 },
-	[4] = { "Hostile vendor", { [10] = { { 12, 12 } } }, nil, 4, n = 4 },
-	[5] = { "No coordinates", nil, "A", 4, n = 4 },
-	[6] = { "Mage trainer", { [10] = { { 30, 30 } } }, "A", 16, n = 4 },
-	[7] = { "Warrior trainer", { [10] = { { 1, 1 } } }, "A", 16, n = 4 },
-	[9] = { "Bad position", { [10] = { { -1, -1 }, { 101, 1 } } }, "A", 4, n = 4 },
-	[10] = { "Neutral repairs", { [11] = { { 20, 20 } } }, "AH", 16384, n = 4 },
-	[11] = { "Fishing supplier", { [10] = { { 50, 50 } } }, "A", 4, n = 4 },
-	[12] = { "Mining supplier", { [10] = { { 60, 60 } } }, "A", 4, n = 4 },
-	[13] = { "Both vendor", { [10] = { { 70, 70 } } }, "A", 4, n = 4 },
-	[1215] = { "Alchemy trainer", { [10] = { { 40, 40 } } }, "A", 16, n = 4 },
+	[1] = { "Near vendor", { [10] = { { 10, 10 } } }, "A", 4, "General Goods", n = 5 },
+	[2] = { "Far vendor", { [10] = { { 80, 80 } } }, "A", 4, "General Goods", n = 5 },
+	[3] = { "Horde vendor", { [10] = { { 11, 11 } } }, "H", 4, "General Goods", n = 5 },
+	[4] = { "Hostile vendor", { [10] = { { 12, 12 } } }, nil, 4, nil, n = 5 },
+	[5] = { "No coordinates", nil, "A", 4, nil, n = 5 },
+	[6] = { "Mage trainer", { [10] = { { 30, 30 } } }, "A", 16, "Mage Trainer", n = 5 },
+	[7] = { "Warrior trainer", { [10] = { { 1, 1 } } }, "A", 16, "Warrior Trainer", n = 5 },
+	[9] = { "Bad position", { [10] = { { -1, -1 }, { 101, 1 } } }, "A", 4, nil, n = 5 },
+	[10] = { "Neutral repairs", { [11] = { { 20, 20 } } }, "AH", 16384, "Blacksmith", n = 5 },
+	[11] = { "Fishing supplier", { [10] = { { 50, 50 } } }, "A", 4, "Fishing Supplies", n = 5 },
+	[12] = { "Mining supplier", { [10] = { { 60, 60 } } }, "A", 4, "Mining Supplies", n = 5 },
+	[13] = { "Both vendor", { [10] = { { 70, 70 } } }, "A", 4, "Trade Goods", n = 5 },
+	[1215] = { "Alchemy trainer", { [10] = { { 40, 40 } } }, "A", 16, "Alchemy Trainer", n = 5 },
 }
--- QuestieDB's item fields for the fixture vendors: the NPCs that sell it, its class and its subclass.
+-- QuestieDB's item fields for the fixture vendors: the NPCs that sell it, its class, subclass and name.
 local items = {
-	[2512] = { { 1, 2 }, 6, 2 }, -- Rough Arrow
-	[2516] = { { 1 }, 6, 3 }, -- Light Shot
-	[4540] = { { 1 }, 0, 0 }, -- Tough Hunk of Bread, in ns.Food
-	[159] = { { 1 }, 0, 0 }, -- Refreshing Spring Water, in ns.Drink
-	[4498] = { { 1 }, 1, 0 }, -- Brown Leather Satchel
-	[2320] = { { 1 }, 7, 0 }, -- Coarse Thread
-	[4470] = { { 1 }, 5, 0 }, -- Simple Wood
-	[851] = { { 1 }, 2, 7 }, -- Cutlass
-	[6256] = { { 11 }, 2, 20 }, -- Fishing Pole
-	[2901] = { { 12 }, 2, 14 }, -- Mining Pick
-	[3448] = { { 13 }, 0, 0 }, -- in both ns.Food and ns.Drink
+	[2511] = { { 1 }, 6, 2, "Sharp Arrow" }, -- Sharp Arrow
+	[2512] = { { 1, 2 }, 6, 2, "Rough Arrow" }, -- Rough Arrow
+	[2516] = { { 1 }, 6, 3, "Light Shot" }, -- Light Shot
+	[4540] = { { 1 }, 0, 0, "Tough Hunk of Bread" }, -- Tough Hunk of Bread, in ns.Food
+	[159] = { { 1 }, 0, 0, "Refreshing Spring Water" }, -- Refreshing Spring Water, in ns.Drink
+	[4498] = { { 1 }, 1, 0, "Brown Leather Satchel" }, -- Brown Leather Satchel
+	[2320] = { { 1 }, 7, 0, "Coarse Thread" }, -- Coarse Thread
+	[4470] = { { 1 }, 5, 0, "Simple Wood" }, -- Simple Wood
+	[851] = { { 1 }, 2, 7, "Cutlass" }, -- Cutlass
+	[6256] = { { 11 }, 2, 20, "Fishing Pole" }, -- Fishing Pole
+	[2901] = { { 12 }, 2, 14, "Mining Pick" }, -- Mining Pick
+	[3448] = { { 13 }, 0, 0, "Sweet Nectar" }, -- in both ns.Food and ns.Drink
 }
 local itemIDs = {}
 for id in pairs(items) do
@@ -91,7 +92,7 @@ local flags = {
 }
 local calls = 0
 
-local menuEntries, releaseMenu, trackingMenus = {}, nil, {}
+local menuEntries, trackingMenus = {}, {}
 local mapOpens = 0
 local function menuNode()
 	local node = {}
@@ -108,7 +109,9 @@ local function menuNode()
 				text = childText,
 				callback = childCallback,
 				children = {},
-				SetEnabled = function() end,
+				SetEnabled = function(c, enabled)
+					c.enabled = enabled
+				end,
 				SetScrollMode = function(c, extent)
 					c.scrollExtent = extent
 				end,
@@ -153,7 +156,7 @@ local lib = {
 			return { 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 1215 }
 		end,
 		GetAll = function(id, fields)
-			assert(type(id) == "number" and #fields == 4, "packed GetAll actual contract")
+			assert(type(id) == "number" and #fields == 5, "packed GetAll actual contract")
 			calls = calls + 1
 			return data[id]
 		end,
@@ -164,9 +167,9 @@ local lib = {
 			return itemIDs
 		end,
 		GetAll = function(id, fields)
-			assert(type(id) == "number" and #fields == 3, "item fields: vendors, class, subClass")
+			assert(type(id) == "number" and #fields == 4, "item fields: vendors, class, subClass, name")
 			local row = items[id]
-			return row and { row[1], row[2], row[3], n = 3 }
+			return row and { row[1], row[2], row[3], row[4], n = 4 }
 		end,
 	},
 }
@@ -190,9 +193,7 @@ local env = setmetatable({
 		CreateContextMenu = function(_, callback)
 			menuEntries = {}
 			local root = menuNode()
-			root.AddMenuReleasedCallback = function(_, callbackFn)
-				releaseMenu = callbackFn
-			end
+			root.AddMenuReleasedCallback = function() end
 			callback(nil, root)
 		end,
 	},
@@ -249,12 +250,27 @@ local env = setmetatable({
 	SlashCmdList = {},
 	ShortestPathForever = {
 		API = {
-			Navigate = function(owner, map, x, y, title, kind)
+			NavigateRoute = function(owner, stops)
+				local stop = stops[1]
 				assert(
-					type(owner) == "string" and map == 100 and x >= 0 and x <= 1 and y >= 0 and y <= 1,
+					type(owner) == "string"
+						and #stops == 1
+						and stop.map == 100
+						and stop.x >= 0
+						and stop.x <= 1
+						and stop.y >= 0
+						and stop.y <= 1,
 					"public API receives UI coordinates"
 				)
-				navigated[#navigated + 1] = { owner, map, x, y, title, kind }
+				navigated[#navigated + 1] = {
+					owner,
+					stop.map,
+					stop.x,
+					stop.y,
+					stop.title,
+					stop.kind,
+					stop.npc,
+				}
 				return true
 			end,
 		},
@@ -290,6 +306,13 @@ ns.OpenWorldMap = function(uiMap)
 	env.C_Map.OpenWorldMap(uiMap)
 	return true
 end
+-- The panel's tab registry (UI/QuestLogTabs.lua, vendored): /spfnear and the tracking entry select this key.
+local selectedTab
+ns.QuestLogTabs = {
+	Select = function(key)
+		selectedTab = key
+	end,
+}
 -- UI/MenuModifier.lua's guard, with errors left to surface here rather than reported.
 ns.db = {}
 ns.SafeCall = function(_, fn, ...)
@@ -305,7 +328,8 @@ for _, fn in ipairs(initializers) do
 	fn()
 end
 env.SlashCmdList.SPFNEAR("")
-assert(mapOpens == 1, "opening the menu asks the game to open the map")
+assert(mapOpens == 1, "opening the panel asks the game to open the map")
+assert(selectedTab == "services", "and selects the Nearby services tab")
 assert(ns.NearbyServices.State() == "building" and calls == 0, "index does not block click")
 local trackingMenu = assert(trackingMenus.MENU_WORLD_MAP_TRACKING, "registers the native world-map tracking dropdown")
 local minimapMenu = assert(trackingMenus.MENU_MINIMAP_TRACKING, "registers the native minimap tracking dropdown")
@@ -317,14 +341,13 @@ for _, item in ipairs(menuEntries) do
 	end
 end
 assert(
-	loadingEntry and loadingEntry.children and loadingEntry.children[1].text == "Loading QuestieDB…",
-	"tracking menu reports loading"
+	loadingEntry and loadingEntry.children and loadingEntry.children[2].text == "Loading QuestieDB…",
+	"tracking menu reports loading below the way into the tab"
 )
-env.SlashCmdList.SPFNEAR("")
-assert(#menuEntries > 0 and menuEntries[1].title, "nearby opens an addon-owned map menu")
-local dismissedMenuCount = #menuEntries
-assert(releaseMenu, "native menu release callback is registered")
-releaseMenu()
+assert(
+	loadingEntry.children[1].text == "Open Nearby services",
+	"the way into the tab sits at the top of the tracking submenu"
+)
 local function pump()
 	local fn = table.remove(timers, 1)
 	assert(fn)
@@ -342,7 +365,6 @@ while #timers > 0 do
 	pump()
 end
 assert(ns.NearbyServices.State() == "ready")
-assert(#menuEntries == dismissedMenuCount, "dismissed menu does not reopen after async loading")
 menuEntries = {}
 trackingMenu(nil, menuNode())
 local tracking = menuEntries[1]
@@ -354,14 +376,24 @@ local function menuEntry(entries, text)
 		end
 	end
 end
+local opensBeforeEntry = mapOpens
+assert(
+	menuEntry(tracking.children, "Open Nearby services").callback() == env.MenuResponse.CloseAll,
+	"the way into the tab closes every menu"
+)
+assert(mapOpens == opensBeforeEntry + 1 and selectedTab == "services", "and opens the map on the services tab")
 menuEntry(tracking.children, "Repair").callback()
 assert(navigated[#navigated][5] == "Neutral repairs", "tracking repair action routes nearest")
+assert(navigated[#navigated][7] == 10, "the row passes the NPC id along with the place")
 menuEntries = {}
 local opensBefore = mapOpens
 minimapMenu(nil, menuNode())
 local minimap = menuEntries[1]
 local groups = ns.NearbyServices.Groups()
-assert(#minimap.children == #groups + 3, "the minimap's tracking menu carries the same groups, one section title each")
+assert(
+	#minimap.children == #groups + 4,
+	"the minimap's tracking menu carries the same groups, the way in and one section title each"
+)
 menuEntry(minimap.children, "Class trainer").callback()
 assert(navigated[#navigated][5] == "Warrior trainer", "a service chosen from the minimap routes to the nearest")
 assert(mapOpens == opensBefore, "the minimap's menu routes without opening the world map")
@@ -416,8 +448,11 @@ for _, item in ipairs(groups) do
 		end
 	end
 end
-assert(ns.NearbyServices.Items("arrows", 1)[1] == 2512, "Items names what put the NPC in the group")
-assert(ns.NearbyServices.Items("arrows", 2)[1] == 2512, "an item lists every NPC that sells it")
+assert(
+	same(ns.NearbyServices.Items("arrows", 1), { 2511, 2512 }),
+	"Items names every item that put the NPC in the group"
+)
+assert(same(ns.NearbyServices.Items("arrows", 2), { 2512 }), "an item lists every NPC that sells it")
 assert(ns.NearbyServices.Items("food", 1)[1] == 4540, "Items is exact, not a range")
 assert(ns.NearbyServices.Items("drink", 13)[1] == 3448, "an item in both groups names both")
 assert(ns.NearbyServices.Items("gear", 11) == nil, "a fishing pole is not a weapon")
@@ -427,27 +462,104 @@ assert(ns.NearbyServices.Nearest("arrows", here).id == 1)
 assert(ns.NearbyServices.Nearest("profession:171", here).id == 1215)
 assert(ns.NearbyServices.Nearest("repair", { map = 2, x = 100, y = 100 }) == nil)
 assert(places.repair[1].map == 100, "subzone uses parent map")
-env.SlashCmdList.SPFNEAR("")
-assert(menuEntry(menuEntries, "Class trainer").callback() == env.MenuResponse.CloseAll, "class action closes the menu")
+
+-- The panel's pure list: sections in order, filtered by a plain substring in a label, an NPC, a title or an item.
+local function sectionList(query, collapse)
+	return ns.NearbyServices.Sections(here, query, collapse)
+end
+local function sectionOf(list, key)
+	for _, section in ipairs(list) do
+		if section.section == key then
+			return section
+		end
+	end
+end
+local function rowLabels(section)
+	local labels = {}
+	for _, row in ipairs(section.rows) do
+		labels[#labels + 1] = row.group.label
+	end
+	return table.concat(labels, ",")
+end
+local all = sectionList("")
+assert(#all == 3, "three sections here")
+assert(sectionOf(all, "vendors").count == 8, "every vendor group is here")
+assert(sectionOf(all, "trainers").count == 2, "the class and profession trainers are here")
+assert(sectionOf(all, "services").count == 1, "the repair spawn is here, the services without one are not")
+local byLabel = sectionList("arrows")
+assert(#byLabel == 1 and rowLabels(byLabel[1]) == "Arrows", "a query matching a group label keeps that row")
+local byNpc = sectionList("Far vendor")
+assert(#byNpc == 1 and rowLabels(byNpc[1]) == "Arrows", "a query matching an NPC name keeps the groups they serve")
+local byTitle = sectionList("Alchemy Trainer")
+assert(#byTitle == 1 and byTitle[1].section == "trainers" and rowLabels(byTitle[1]) == "Alchemy", "a title matches")
+local byItem = sectionList("Rough Arrow")
+assert(#byItem == 1 and rowLabels(byItem[1]) == "Arrows", "a query matching an item name keeps the group it is sold in")
+local trade = sectionList("Trade Goods")
+assert(trade[1] and trade[1].count == 2 and rowLabels(trade[1]) == "Food,Drink", "counts follow the filter")
+assert(sectionOf(trade, "trainers") == nil and sectionOf(trade, "services") == nil, "an empty section is dropped")
+local folded = sectionList("", { vendors = true })
+assert(
+	folded[1].collapsed and folded[1].count == 8 and #folded[1].rows == 0,
+	"a collapsed section keeps its header and count and hides its rows"
+)
+local function nearbyPlace(key, id)
+	for _, place in ipairs(places[key] or {}) do
+		if place.id == id then
+			return place
+		end
+	end
+end
+local vendor = nearbyPlace("arrows", 1)
+assert(
+	ns.NearbyServices.Detail("arrows", vendor, "") == "Near vendor · General Goods",
+	"the detail line names the NPC and their title"
+)
+local searched = ns.NearbyServices.Detail("arrows", vendor, "arrow")
+assert(searched:find("Near vendor · ", 1, true), "the detail line starts with the nearest matching NPC")
+assert(searched:find("Sharp Arrow", 1, true) and searched:find("Rough Arrow", 1, true), "and only the matching items")
+assert(not searched:find("General Goods", 1, true), "never the title while searching")
+assert(ns.NearbyServices.Detail("arrows", vendor, "general") == "Near vendor", "a title-only match names no items")
+-- The panel's queue: one Estimate per step, the cheapest of a shortlist at the end.
+local candidates = {
+	{ id = 1, map = 100, x = 0.1, y = 0.1, world = here },
+	{ id = 2, map = 100, x = 0.2, y = 0.2, world = here },
+	{ id = 3, map = 100, x = 0.3, y = 0.3, world = here },
+}
+local estimateCalls = 0
+local function echoEstimate(_, _, _, _, toX)
+	estimateCalls = estimateCalls + 1
+	return toX * 100
+end
+local rank = ns.NearbyServices.Rank(candidates, echoEstimate, 100, 0.05, 0.05)
+local best, seconds, more
+local steps = 0
+repeat
+	local beforeStep = estimateCalls
+	best, seconds, more = rank:Step()
+	steps = steps + 1
+	assert(estimateCalls == beforeStep + 1, "one Estimate per step")
+until not more
+assert(steps == #candidates and best.id == 1 and seconds == 10, "the cheapest of the shortlist wins")
+
+assert(
+	menuEntry(tracking.children, "Class trainer").callback() == env.MenuResponse.CloseAll,
+	"class action closes the menu"
+)
 assert(navigated[#navigated][5] == "Warrior trainer", "class action routes nearest class trainer")
-env.SlashCmdList.SPFNEAR("")
-local profession = menuEntry(menuEntries, "Alchemy")
+local profession = menuEntry(tracking.children, "Alchemy")
 assert(profession and profession.text == "Alchemy", "a profession group is listed by its client skill line name")
 profession.callback()
 assert(navigated[#navigated][5] == "Alchemy trainer", "profession picker sends the trainer of that skill")
-env.SlashCmdList.SPFNEAR("")
 assert(
-	menuEntry(menuEntries, "Reagents").callback() == env.MenuResponse.CloseAll,
+	menuEntry(tracking.children, "Reagents").callback() == env.MenuResponse.CloseAll,
 	"a service that starts a journey closes every menu"
 )
 assert(navigated[#navigated][5] == "Near vendor", "reagents route to the vendor selling the reagent")
 local before = calls
-local beforeMenus = #menuEntries
 for _ = 1, 20 do
-	env.SlashCmdList.SPFNEAR("")
+	trackingMenu(nil, menuNode())
 end
-assert(#menuEntries == beforeMenus, "menu rebuilds without creating frames")
-assert(calls == before, "opening does not rebuild DB")
+assert(calls == before, "rebuilding the tracking menu does not rebuild DB")
 env.SlashCmdList.SPFNEAR("repair")
 assert(navigated[#navigated][5] == "Neutral repairs")
 
@@ -473,6 +585,7 @@ local function fresh(questie, away, L)
 		GamepadUI = ns.GamepadUI,
 		Print = ns.Print,
 		ModifyMenu = ns.ModifyMenu,
+		QuestLogTabs = ns.QuestLogTabs,
 	}
 	setfenv(assert(loadfile("UI/Nearby.lua")), env)("ShortestPathForever", copy)
 	for _, fn in ipairs(starts) do
@@ -482,23 +595,35 @@ local function fresh(questie, away, L)
 		pump()
 	end
 	elsewhere = away
-	env.SlashCmdList.SPFNEAR("")
+	menuEntries = {}
+	trackingMenus.MENU_WORLD_MAP_TRACKING(nil, menuNode())
 	return copy
 end
 -- A zone QuestieDB has nothing for: every group, the services too, reads as unavailable here.
 local away = fresh(lib, true)
 assert(away.NearbyServices.State() == "ready")
 local awayGroups = away.NearbyServices.Groups()
-assert(#menuEntries == #awayGroups + 4, "a heading, three sections and every group")
-for position = 2, #menuEntries do
-	local item = menuEntries[position]
+assert(#menuEntries == 1 and menuEntries[1].text == "Nearby services", "a heading and its submenu")
+local awaySubmenu = menuEntries[1]
+local unavailable = 0
+for position = 2, #awaySubmenu.children do
+	local item = awaySubmenu.children[position]
 	if not item.title then
-		assert(item.text:find("unavailable here", 1, true) and item.enabled == false and #item.children == 0, item.text)
+		unavailable = unavailable + 1
+		assert(
+			item.text:find("unavailable here", 1, true) and item.enabled == false and #item.children == 0,
+			item.text .. " enabled=" .. tostring(item.enabled) .. " children=" .. tostring(#item.children)
+		)
 	end
 end
+assert(unavailable == #awayGroups, "every group is here, unavailable, under three section titles")
 -- No QuestieDB, and one whose zone tables do not read, each say so in a line of their own.
 assert(fresh(nil).NearbyServices.State() == "missing")
-assert(#menuEntries == 2 and menuEntries[2].text == "Nearby services need the QuestieDB addon.")
+assert(
+	#menuEntries == 1
+		and menuEntries[1].text == "Nearby services"
+		and menuEntries[1].children[2].text == "Nearby services need the QuestieDB addon."
+)
 local broken = setmetatable({}, { __index = lib })
 for _, private in ipairs({
 	{ areaIdToUiMapId = { [10] = 100 }, subZoneToParentZone = "return {[11]=10}" },
@@ -511,7 +636,11 @@ for _, private in ipairs({
 		end,
 	}
 	assert(fresh(broken).NearbyServices.State() == "failed")
-	assert(#menuEntries == 2 and menuEntries[2].text == "Nearby services could not read QuestieDB.")
+	assert(
+		#menuEntries == 1
+			and menuEntries[1].text == "Nearby services"
+			and menuEntries[1].children[2].text == "Nearby services could not read QuestieDB."
+	)
 end
 env.LibQuestieDB = lib
 -- Under the gamepad interface the services menu never opens the world map or a menu itself, even over a map the game
@@ -597,14 +726,15 @@ do
 		return { [key] = { spot } }
 	end
 	local travelNpcs = {
-		[5501] = { "Kaerbrus", place(1448, { x = 6341.38, y = -1885 }), "A", 16, n = 4 },
-		[5502] = { "Dazalar", place(1438, { x = 9347, y = 2200 }), "A", 16, n = 4 },
+		[5501] = { "Kaerbrus", place(1448, { x = 6341.38, y = -1885 }), "A", 16, nil, n = 5 },
+		[5502] = { "Dazalar", place(1438, { x = 9347, y = 2200 }), "A", 16, nil, n = 5 },
 		[5503] = {
 			"Darnassus hunter trainer",
 			place(1457, { x = 9946.25, y = 2612.97 }),
 			"A",
 			16,
-			n = 4,
+			nil,
+			n = 5,
 		},
 	}
 	local npcIds = { 5501, 5502, 5503 }
@@ -647,8 +777,9 @@ do
 	}
 	local routed
 	local api = travelEnv.ShortestPathForever.API
-	api.Navigate = function(_, map, x, y, title)
-		routed = { map = map, x = x, y = y, title = title }
+	api.NavigateRoute = function(_, stops)
+		local stop = stops[1]
+		routed = { map = stop.map, x = stop.x, y = stop.y, title = stop.title, npc = stop.npc }
 		return true
 	end
 	local estimates = 0
@@ -714,6 +845,7 @@ do
 	assert(estimates == 0, "building or refreshing the menu plans nothing")
 	assert(build().callback() == travelEnv.MenuResponse.CloseAll)
 	assert(routed.title == "Darnassus hunter trainer", "the boat's Teldrassil trainer beats the short walk to Kaerbrus")
+	assert(routed.npc == 5503, "the chosen trainer rides along as the stop's NPC id")
 	assert(estimates == 3, "only the clicked service's shortlist is planned")
 	local detail = api.EstimateDetail(1439, playerX, playerY, routed.map, routed.x, routed.y)
 	local boat = false

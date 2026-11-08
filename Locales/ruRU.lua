@@ -129,7 +129,6 @@ L["Nearby services could not read QuestieDB."] =
 	"Услуги поблизости не смогли прочитать QuestieDB."
 L["Nearby services need the QuestieDB addon."] =
 	"Для услуг поблизости нужна модификация QuestieDB."
-L["Nearest"] = "Ближайший"
 L["No location for that quest yet."] = "Для этого задания пока нет места."
 L["No way there from here."] = "Отсюда туда нет пути."
 L["Not discovered"] = "Не открыто"
@@ -169,7 +168,6 @@ L["Portal to %s"] = "Портал: %s"
 L["Portals"] = "Порталы"
 L["Quest automation, rare alerts and merchant handling for the default UI."] =
 	"Автоматизация заданий, оповещения о редких противниках и работа с торговцами для стандартного интерфейса."
-L["Reagent Vendor"] = "Торговец реагентами"
 L["Reagents"] = "Реагенты"
 L["Repair"] = "Ремонт"
 L["RestedXP guide"] = "Руководство RestedXP"
@@ -245,7 +243,6 @@ L["Through %s transport, there is a way"] = "Через транспорт фр�
 L["Through %s transport: about %d min faster"] =
 	"Через транспорт фракции «%s»: примерно на %d мин. быстрее"
 L["Tracker scale"] = "Размер панели отслеживания"
-L["Trainers by specialty"] = "Учителя по специальности"
 L["Tram to %s"] = "Поезд: %s"
 L["Tram to %s arrives in %s"] = "Поезд (%s) прибудет через %s"
 L["Transport"] = "Транспорт"
@@ -256,7 +253,6 @@ L["Turn this off to drag the shared Forever tracker anywhere on screen."] =
 	"Отключите, чтобы перетаскивать общую панель отслеживания Forever в любое место экрана."
 L["Use %s"] = "Использовать: %s"
 L["Use hearth and teleports"] = "Камень возвращения и телепорты"
-L["Vendors by specialty"] = "Торговцы по специальности"
 L["W"] = "З"
 L["Walk to %s"] = "Идти: %s"
 L["Walks go round zones whose lowest level is 4 or more above yours, but never the ones you start or end in."] =
