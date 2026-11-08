@@ -12,6 +12,8 @@ optional `### For addon authors` subsection after a version's player bullets.
 
 ## [Unreleased]
 
+- **The controller keeps working after the world map and its filter menu.** Opening either could leave the game's interact action blocked, and the client could freeze. Shortest Path now lets the game finish closing the map before it takes its own hover and tooltip down, so the controller's actions stay the game's (#158).
+
 ## [1.22.54] - 2026-11-08
 
 - **A route says when an unknown flight point would shorten it.** The planner only knows the flight points your client has reported, so a fresh install can walk a leg it would otherwise fly. When a flight from an undiscovered point would arrive sooner, the tracker now says so and asks you to visit a flight master instead of silently choosing the run. A known flight point still wins: from Stormwind with Booty Bay known, the journey flies to Booty Bay and takes the boat rather than running the whole way. Thanks to user_io8a88ev0j1zfewx on CurseForge for the report (#465).
