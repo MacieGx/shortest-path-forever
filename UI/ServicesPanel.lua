@@ -483,7 +483,9 @@ local function Attach()
 		order = 20,
 		shown = Shown,
 	})
-	Art.Icon(tab.Icon, ItemIcon(4496), ICON)
+	-- art-ok: a square item icon in the square LargeSideTabButtonTemplate, filled and masked as the client does
+	tab.Icon:SetTexture(ItemIcon(4496))
+	tab:SetFillToInterior(true)
 	ns.NearbyServices.OnReady(function()
 		if visible then
 			Requeue()

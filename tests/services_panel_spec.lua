@@ -272,7 +272,11 @@ ns.NearbyServices = {
 ns.QuestLogTabs = {
 	Register = function(key, spec)
 		ns.registered = { key = key, spec = spec }
-		return { Icon = region() }
+		ns.tab = { Icon = region() }
+		function ns.tab.SetFillToInterior(_, fill)
+			ns.tab.filled = fill
+		end
+		return ns.tab
 	end,
 	Select = function(key)
 		if ns.registered and ns.registered.key == key then
@@ -338,6 +342,8 @@ panel = ns.registered and ns.registered.spec.panel
 assert(ns.registered.key == "services", "registered under its own key")
 assert(ns.registered.spec.order == 20, "its tab order")
 assert(ns.registered.spec.name == "ShortestPathForeverServicesTab", "its tab name")
+assert(ns.tab.Icon.file == "Interface\\Icons\\INV_Misc_Bag_08", "the tab shows the pouch")
+assert(ns.tab.filled == true, "the pouch fills the tab the client's way, trimmed and masked")
 assert(ns.registered.spec.tooltip == "Nearby services", "its tooltip")
 assert(panel and not panel:IsShown(), "the panel starts hidden")
 

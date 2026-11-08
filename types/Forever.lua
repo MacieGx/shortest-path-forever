@@ -314,6 +314,7 @@ function EventUtil.ContinueAfterAllEvents(callback, ...) end
 ---@class ForeverQuestLogTab : Button
 ---@field SetCustomOnMouseUpHandler fun(self: ForeverQuestLogTab, handler: fun(self: ForeverQuestLogTab, mouseButton: string, upInside: boolean))
 ---@field SetChecked fun(self: ForeverQuestLogTab, checked: boolean)
+---@field SetFillToInterior fun(self: ForeverQuestLogTab, fill: boolean, extent?: number)
 ---@field tooltipText string
 ---@field activeAtlas? string
 ---@field inactiveAtlas? string
