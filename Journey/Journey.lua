@@ -37,6 +37,9 @@ local Search, Guide = ns.JourneySearch, ns.JourneyGuide
 local RefreshTracker, StopGuide = Guide.RefreshTracker, Guide.Stop
 -- Walking along a measured path from where you stood, how far off it you may stray and still be on it.
 local ON_PATH = 15
+-- A walk whose drawn line runs this many yards above or below the floor you are on (Floor.lua) is not the one you are
+-- on: it is on another floor of the same spot. The walking search's own height tolerance.
+local OTHER_FLOOR = 10
 -- Water Walking, Levitate and the Elixir of Water Walking make water ground. A spell you know counts too: the step
 -- asks you to cast it.
 local WATER_AURAS = { 546, 1706, 11319 }
@@ -390,8 +393,17 @@ function ns.JourneyInfo()
 	return title, rows, result, progress.index, loading
 end
 
+-- The height of a walk's segment from a to b at t along it, from whichever ends have one.
+local function SegmentHeight(a, b, t)
+	if a.z and b.z then
+		return a.z + t * (b.z - a.z)
+	end
+	return a.z or b.z
+end
+
 -- Where here falls on a walk: the segment ending at points[index], how far along it (t), and the yards still to walk
--- from there, or nil when here is more than reach (ON_PATH by default) off the walk.
+-- from there, or nil when here is more than reach (ON_PATH by default) off the walk. A here with a height (the floor
+-- Floor.lua follows) is not on a segment drawn on another floor.
 local function OnWalk(points, here, reach)
 	if not here then
 		return nil
@@ -408,7 +420,13 @@ local function OnWalk(points, here, reach)
 		local dx, dy, length = b.x - a.x, b.y - a.y, lengths[index]
 		local t = length > 0 and math.max(0, math.min(1, ((here.x - a.x) * dx + (here.y - a.y) * dy) / length ^ 2)) or 0
 		local off = math.sqrt((a.x + t * dx - here.x) ^ 2 + (a.y + t * dy - here.y) ^ 2)
-		if here.map == a.map and off <= (reach or ON_PATH) and (not best or off < best) then
+		local height = here.z and SegmentHeight(a, b, t)
+		if
+			here.map == a.map
+			and off <= (reach or ON_PATH)
+			and (not best or off < best)
+			and not (height and math.abs(height - here.z) > OTHER_FLOOR)
+		then
 			best, found, along, after = off, index, t, total - walked - t * length
 		end
 		walked = walked + length
@@ -541,6 +559,9 @@ local function Update(self, elapsed)
 	local x, y, _, map = ns.JourneyPosition()
 	if not x then
 		return
+	end
+	if ns.Floor then
+		ns.Floor.Sample(map, x, y)
 	end
 	local changed = policyChanged
 	policyChanged = nil
