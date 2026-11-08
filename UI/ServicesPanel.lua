@@ -26,6 +26,8 @@ local STATUS = {
 
 ---@type Frame?
 local panel
+-- Whether the player can see the panel, as the tab module's `shown` reports it. No script under the world map says so.
+local visible = false
 ---@type SPFScrollFrame?
 local scroll
 ---@type Frame?
@@ -304,9 +306,10 @@ end
 
 -- Rank each shown group's shortlist through the queue: one Estimate per frame, cheapest wins once it lands.
 function Queue()
-	if not panel or not panel:IsShown() then
+	if not visible then
 		return
 	end
+	---@cast panel -?
 	rankQueue, rankAt = nil, 1
 	panel:SetScript("OnUpdate", nil)
 	local world = ns.NearbyServices.PlayerWorld()
@@ -337,9 +340,10 @@ end
 
 -- A fresh look at the player's place: zones change and the ticker both come through here.
 function Refresh()
-	if not panel or not panel:IsShown() then
+	if not visible then
 		return
 	end
+	---@cast panel -?
 	---@cast list -?
 	---@cast emptyText -?
 	---@cast content -?
@@ -416,7 +420,7 @@ local function StartTicker(shown)
 	if shown then
 		if not ticker then
 			ticker = C_Timer.NewTicker(TICK, function()
-				if panel and panel:IsShown() then
+				if visible then
 					Refresh()
 					Queue()
 				end
@@ -447,34 +451,38 @@ local function Attach()
 	background:SetPoint("TOPLEFT", 0, -TOP_BAR)
 	background:SetPoint("BOTTOMRIGHT")
 	BuildContent(panel)
-	panel:SetScript("OnSizeChanged", Refresh)
 	Art.CoverFrame(panel, background, "QuestLog-main-background", 0, TOP_BAR)
-	panel:SetScript("OnShow", function()
-		Requeue()
-		StartTicker(true)
-	end)
-	panel:SetScript("OnHide", function()
-		rankQueue = nil
-		panel:SetScript("OnUpdate", nil)
-		StartTicker(false)
-	end)
 	panel:RegisterEvent("ZONE_CHANGED")
 	panel:RegisterEvent("ZONE_CHANGED_INDOORS")
 	panel:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 	panel:SetScript("OnEvent", function()
-		if panel:IsShown() then
+		if visible then
 			Requeue()
 		end
 	end)
+	-- The panel sets no show or hide script because it lives under the world map (#158); the tab module reports when
+	-- the player can see it through `shown`.
+	local function Shown(shown)
+		visible = shown
+		if shown then
+			Requeue()
+			StartTicker(true)
+		else
+			rankQueue = nil
+			panel:SetScript("OnUpdate", nil)
+			StartTicker(false)
+		end
+	end
 	local tab = ns.QuestLogTabs.Register("services", {
 		name = "ShortestPathForeverServicesTab",
 		tooltip = L["Nearby services"],
 		panel = panel,
 		order = 20,
+		shown = Shown,
 	})
 	Art.Icon(tab.Icon, ItemIcon(4496), ICON)
 	ns.NearbyServices.OnReady(function()
-		if panel:IsShown() then
+		if visible then
 			Requeue()
 		end
 	end)
