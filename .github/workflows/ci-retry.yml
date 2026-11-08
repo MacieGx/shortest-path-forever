@@ -1,0 +1,34 @@
+name: CI retry
+on: push
+permissions:
+  actions: write
+  contents: read
+jobs:
+  retry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Poll the release CDN then rerun the failed main jobs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -u
+          for i in $(seq 1 16); do
+            a=$(curl -s -o /dev/null -w '%{http_code}' -L --max-time 20 "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz")
+            b=$(curl -s -o /dev/null -w '%{http_code}' -L --max-time 20 "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz")
+            c=$(curl -s -o /dev/null -w '%{http_code}' -L --max-time 20 "https://github.com/LuaLS/lua-language-server/releases/download/3.19.1/lua-language-server-3.19.1-linux-x64.tar.gz")
+            echo "attempt $i: gitleaks=$a actionlint=$b luals=$c"
+            if [ "$a" = "200" ] && [ "$b" = "200" ] && [ "$c" = "200" ]; then
+              gh api -X POST repos/cjber/shortest-path-forever/actions/runs/42470827171/rerun-failed-jobs && echo requested
+              for j in $(seq 1 24); do
+                sleep 45
+                st=$(gh api "repos/cjber/shortest-path-forever/actions/runs/42470827171/jobs?per_page=50" --jq '[.jobs[]|select(.conclusion=="failure")]|length')
+                pend=$(gh api "repos/cjber/shortest-path-forever/actions/runs/42470827171/jobs?per_page=50" --jq '[.jobs[]|select(.status!="completed")]|length')
+                echo "fail=$st pending=$pend"
+                [ "$pend" = "0" ] && [ "$st" = "0" ] && exit 0
+                [ "$pend" = "0" ] && exit 1
+              done
+              exit 0
+            fi
+            sleep 100
+          done
