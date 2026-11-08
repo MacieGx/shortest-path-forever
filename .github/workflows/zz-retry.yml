@@ -1,0 +1,14 @@
+name: zz-retry
+on:
+  push:
+    branches: ["retry/**"]
+permissions:
+  actions: write
+jobs:
+  retry:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Rerun failed jobs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh api -X POST repos/cjber/shortest-path-forever/actions/runs/42474340826/rerun-failed-jobs
