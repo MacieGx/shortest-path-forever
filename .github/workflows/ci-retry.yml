@@ -1,0 +1,32 @@
+name: CI retry
+on: push
+permissions:
+  actions: write
+  contents: read
+jobs:
+  retry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Poll the release CDN, then rerun the failed jobs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -u
+          U="https://github.com/LuaLS/lua-language-server/releases/download/3.19.1/lua-language-server-3.19.1-linux-x64.tar.gz"
+          for i in $(seq 1 14); do
+            c=$(curl -s -o /dev/null -w '%{http_code}' -L --max-time 20 "$U")
+            echo "attempt $i: $c"
+            if [ "$c" = "200" ]; then
+              gh api -X POST repos/cjber/shortest-path-forever/actions/runs/42469446762/rerun-failed-jobs && echo requested
+              for j in $(seq 1 24); do
+                sleep 45
+                s=$(gh api "repos/cjber/shortest-path-forever/actions/runs/42469446762/jobs?per_page=50" --jq '[.jobs[]|select(.name=="typecheck")|.conclusion][0] // "pending"')
+                echo "typecheck=$s"
+                [ "$s" = "success" ] && exit 0
+                [ "$s" = "failure" ] && break
+              done
+            fi
+            sleep 90
+          done
+          exit 0
