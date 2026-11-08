@@ -71,8 +71,8 @@ L["Drink"] = "Getränke"
 L["E"] = "O"
 L["Either faction can ride any boat or zeppelin."] = "Beide Fraktionen können jedes Schiff und jeden Zeppelin nutzen."
 L["Enter %s"] = "%s betreten"
-L["A journey stop where you hand a quest in keeps the game's quest icon off it."] =
-	"Ein Reisestopp, an dem Ihr eine Quest abgebt, zeigt das Questsymbol des Spiels nicht." -- mt
+L["The controller keeps working after the world map and its filter menu."] =
+	"Der Controller funktioniert nach der Weltkarte und ihrem Filtermenü weiter." -- mt
 L["Finding the fastest way…"] = "Schnellster Weg wird gesucht…"
 L["Flight Masters"] = "Flugmeister"
 L["Flight master"] = "Flugmeister"
