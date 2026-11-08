@@ -12,6 +12,7 @@ optional `### For addon authors` subsection after a version's player bullets.
 
 ## [Unreleased]
 
+- **The controller keeps working after the world map and its filter menu.** Opening either could leave the game's interact action blocked, and the client could freeze. Shortest Path now lets the game finish closing the map before it takes its own hover and tooltip down, so the controller's actions stay the game's (#158).
 - **A stop tooltip keeps each stop's details with it.** When one pin marks two stops of the same quest, each stop now shows its own count and action with its own quest and chapter lines directly under it, shared lines appear once, the time and distance sit on the title line, and a single-leg trip no longer repeats the step it walks to (#492).
 
 ## [1.22.54] - 2026-11-08

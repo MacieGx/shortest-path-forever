@@ -373,6 +373,10 @@ local function triggerEvent(name, ...)
 		callback.fn(callback.owner, ...)
 	end
 end
+-- The panel manager fires its hide events through the registry, as the client does.
+_G.EventRegistry.TriggerEvent = function(_, name, ...)
+	triggerEvent(name, ...)
+end
 assert(loadfile(BLIZZARD_UI .. "Blizzard_SharedMapDataProviders/WaypointLocationDataProvider.lua"))()
 local waypointProvider = CreateFromMixins(WaypointLocationDataProviderMixin)
 do
@@ -435,18 +439,20 @@ local function runMapScripts(name)
 		fn(WorldMapFrame)
 	end
 end
--- The world map opened or closed. Closing hides the canvas, and with it the view's frame (its OnHide); opening runs
--- the view's first frame, as the client would.
+-- The world map opened or closed. Closing hides the canvas, and with it the view's frame; the panel manager then
+-- tells its callbacks the panel is hidden, as the client's HideUIPanel does, and the addon's view hears the close
+-- there. Opening runs the view's first frame, as the client would.
 local function setMapShown(shown)
 	local was = visible
 	visible, WorldMapFrame.shown = shown, shown
 	if was and not shown then
 		for _, child in ipairs(canvas.children or {}) do
-			if child.scripts.OnHide then
+			if child.scripts and child.scripts.OnHide then
 				child.scripts.OnHide(child)
 			end
 		end
 		runMapScripts("OnHide")
+		EventRegistry:TriggerEvent("UIParentPanelManager.HideUIPanel", WorldMapFrame)
 	elseif shown then
 		mapTick()
 		runMapScripts("OnShow")
