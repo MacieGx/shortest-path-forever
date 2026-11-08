@@ -110,3 +110,4 @@ Core\TomTom.lua
 Core\Way.lua
 Core\RestedXP.lua
 UI\DestinationPin.lua
+UI\NpcArrows.lua

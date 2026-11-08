@@ -164,6 +164,10 @@ read_globals[#read_globals + 1] = "GetCursorPosition"
 -- UI/OpenMap.lua: the seamless world map addon's public API for other addons (version 2 and up).
 read_globals[#read_globals + 1] = "OpenMapAPI"
 
+-- UI/NpcArrows.lua: the nameplate the NPC a Nearby services journey walks to carries, and the unit's own GUID.
+read_globals[#read_globals + 1] = "C_NamePlate"
+read_globals[#read_globals + 1] = "UnitGUID"
+
 read_globals[#read_globals + 1] = "IsPlayerMoving"
 read_globals[#read_globals + 1] = "InCombatLockdown"
 read_globals[#read_globals + 1] = "C_AddOnProfiler"

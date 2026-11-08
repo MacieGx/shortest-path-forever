@@ -283,6 +283,7 @@ local groups = {
 		"journey",
 		"resumeJourney",
 		"destinationPin",
+		"npcArrows",
 		"tomtom",
 		"tomtomFollow",
 		"restedxp",
@@ -331,7 +332,7 @@ local order = {
 }
 
 assert(#buttons == #order + 1, "one index button per group, then the Forever addons page")
-assert(#rows == 54, #rows)
+assert(#rows == 55, #rows)
 local cursor = 0
 for index, name in ipairs(order) do
 	local button = buttons[index].initializer
@@ -398,6 +399,9 @@ assert(Row("taxiRoute").tooltip:find("flight master", 1, true))
 Row("taxiRoute").setting.onChanged()
 assert(taxiRefreshed == 1, "flight route updates when its setting changes")
 assert(Row("corpse").setting.default == true)
+-- The NPC nameplate arrows are guidance furniture and start on, with the friendly-nameplate condition in the tooltip.
+assert(Row("npcArrows").setting.default == true, "nameplate arrows are on by default")
+assert(Row("npcArrows").tooltip:find("Friendly nameplates", 1, true), "the tooltip says friendly nameplates must be on")
 -- Party mage portals are opt-in, and every capital starts ticked for the mage to open.
 assert(Row("partyMagePortals").setting.default == false, "party mage portals are off by default")
 for _, key in ipairs({

@@ -459,7 +459,8 @@ function API.NavigateRoute(owner, stops)
 		point.hold = stop.hold == true
 		point.radius = stop.radius
 		point.questID = stop.questID
-		-- The NPC whose service this stop reaches, for the nameplate arrows Nearby services draws.
+		-- The NPC whose service this stop reaches: Shortest Path marks that NPC's nameplate while the stop is
+		-- current. Another addon's route passes no npc, so its own highlight is the only one.
 		point.npc = stop.npc
 		-- The quests whose client blobs the stop stands for, copied; StopInside prefers the client's own answer for them.
 		if stop.questID or stop.questIDs then

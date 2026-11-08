@@ -53,7 +53,7 @@
 ---@field shapes? SPFAreaShape[] -- objective areas the stop stands for, in world coordinates
 ---@field look? SPFAPIStopKind -- what the caller said stands there (API.lua)
 ---@field questID? number
----@field npc? integer -- the service NPC this stop reaches (Nearby services)
+---@field npc? integer -- the service NPC this stop reaches: Shortest Path marks its nameplate while the stop is current (Nearby services)
 ---@field pinBadge? boolean -- destination marker beside an existing map icon
 ---@field questIDs? number[] -- the quests whose client areas a held stop stands for (API.lua)
 ---@field corpse? boolean -- where your corpse lies (Corpse.lua)
@@ -175,6 +175,7 @@
 
 ---@class SPFDatabase : ForeverFamilyDB
 ---@field destinationPin boolean an on-screen marker over the journey's destination
+---@field npcArrows? boolean arrows beside the nameplate of the NPC a Nearby services journey walks to (NpcArrows.lua)
 ---@field trackerHost? ForeverTrackerSettings
 ---@field menuTest? string `/path menutest`: which world map filter menu entries to leave out ("map", "nearby", "both")
 ---@field pins? boolean
