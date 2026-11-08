@@ -33,6 +33,7 @@ Data\Taxi.lua
 Data\Portals.lua
 Data\Teleports.lua
 Data\Zones.lua
+Data\Services.lua
 Data\Walks.lua
 Transport\Model.lua
 Routing\Planner.lua

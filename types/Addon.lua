@@ -11,6 +11,10 @@
 ---@field Teleports SPFTeleport[]
 ---@field Landmasses SPFLandmass[]
 ---@field Zones table<number, SPFZone>
+---@field Food number[] items whose use spell restores health (Data/Services.lua)
+---@field Drink number[] items whose use spell restores mana (Data/Services.lua)
+---@field ProfessionTrainers table<number, number> trainer NPC -> its profession skill line (Data/Services.lua)
+---@field ClassTrainers table<number, number> class trainer NPC -> its class (Data/Services.lua)
 ---@field Walks table<number, table<string, (number|false)[]>>
 ---@field WalkPlaces table<number, table<string, number[]>>
 ---@field db SPFDatabase
