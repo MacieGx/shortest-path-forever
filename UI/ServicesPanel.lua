@@ -26,6 +26,8 @@ local STATUS = {
 
 ---@type Frame?
 local panel
+-- Whether the player can see the panel, as the tab module's `shown` reports it. No script under the world map says so.
+local visible = false
 ---@type SPFScrollFrame?
 local scroll
 ---@type Frame?
@@ -73,11 +75,13 @@ local Refresh, Queue
 ---@class SPFSearchBox : EditBox
 ---@field Instructions FontString
 
+---@class SPFCollapseButton : Button
+---@field UpdateCollapsedState fun(self: SPFCollapseButton, collapsed: boolean)
 ---@class SPFServicesHeader : Button
 ---@field key string
 ---@field Name FontString
 ---@field Count FontString
----@field CollapseButton Button
+---@field CollapseButton SPFCollapseButton
 
 ---@class SPFServicesRow : Button
 ---@field key string
@@ -102,10 +106,11 @@ end
 ---@param row SPFServicesRow
 local function PaintRow(row)
 	local group, place = row.group, row.place
-	if type(group.icon) == "number" then
-		Art.Icon(row.Icon, ItemIcon(group.icon), ICON)
+	local icon = group.icon
+	if type(icon) == "number" then
+		Art.Icon(row.Icon, ItemIcon(icon), ICON)
 	else
-		Art.Fit(row.Icon, group.icon, ICON, ICON)
+		Art.Fit(row.Icon, icon, ICON, ICON)
 	end
 	row.Label:SetText(group.label)
 	row.Detail:SetText(ns.NearbyServices.Detail(group.key, place, row.query))
@@ -152,7 +157,7 @@ local function CreateHeader(parent)
 			art:SetAlpha(0.4)
 		end
 	end
-	header.CollapseButton = CreateFrame("Button", nil, header, "CollapseButtonTemplate") --[[@as Button]]
+	header.CollapseButton = CreateFrame("Button", nil, header, "CollapseButtonTemplate") --[[@as SPFCollapseButton]]
 	header.CollapseButton:SetPoint("RIGHT", -6, 0)
 	header.Count = header:CreateFontString(nil, "ARTWORK", "Game15Font_Shadow")
 	header.Count:SetPoint("RIGHT", -28, 0)
@@ -304,9 +309,10 @@ end
 
 -- Rank each shown group's shortlist through the queue: one Estimate per frame, cheapest wins once it lands.
 function Queue()
-	if not panel or not panel:IsShown() then
+	if not visible then
 		return
 	end
+	---@cast panel -?
 	rankQueue, rankAt = nil, 1
 	panel:SetScript("OnUpdate", nil)
 	local world = ns.NearbyServices.PlayerWorld()
@@ -337,9 +343,10 @@ end
 
 -- A fresh look at the player's place: zones change and the ticker both come through here.
 function Refresh()
-	if not panel or not panel:IsShown() then
+	if not visible then
 		return
 	end
+	---@cast panel -?
 	---@cast list -?
 	---@cast emptyText -?
 	---@cast content -?
@@ -416,7 +423,7 @@ local function StartTicker(shown)
 	if shown then
 		if not ticker then
 			ticker = C_Timer.NewTicker(TICK, function()
-				if panel and panel:IsShown() then
+				if visible then
 					Refresh()
 					Queue()
 				end
@@ -447,34 +454,38 @@ local function Attach()
 	background:SetPoint("TOPLEFT", 0, -TOP_BAR)
 	background:SetPoint("BOTTOMRIGHT")
 	BuildContent(panel)
-	panel:SetScript("OnSizeChanged", Refresh)
 	Art.CoverFrame(panel, background, "QuestLog-main-background", 0, TOP_BAR)
-	panel:SetScript("OnShow", function()
-		Requeue()
-		StartTicker(true)
-	end)
-	panel:SetScript("OnHide", function()
-		rankQueue = nil
-		panel:SetScript("OnUpdate", nil)
-		StartTicker(false)
-	end)
 	panel:RegisterEvent("ZONE_CHANGED")
 	panel:RegisterEvent("ZONE_CHANGED_INDOORS")
 	panel:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 	panel:SetScript("OnEvent", function()
-		if panel:IsShown() then
+		if visible then
 			Requeue()
 		end
 	end)
+	-- The panel sets no show or hide script because it lives under the world map (#158); the tab module reports when
+	-- the player can see it through `shown`.
+	local function Shown(shown)
+		visible = shown
+		if shown then
+			Requeue()
+			StartTicker(true)
+		else
+			rankQueue = nil
+			panel:SetScript("OnUpdate", nil)
+			StartTicker(false)
+		end
+	end
 	local tab = ns.QuestLogTabs.Register("services", {
 		name = "ShortestPathForeverServicesTab",
 		tooltip = L["Nearby services"],
 		panel = panel,
 		order = 20,
+		shown = Shown,
 	})
 	Art.Icon(tab.Icon, ItemIcon(4496), ICON)
 	ns.NearbyServices.OnReady(function()
-		if panel:IsShown() then
+		if visible then
 			Requeue()
 		end
 	end)

@@ -602,6 +602,8 @@ end
 ---@field count integer
 ---@field collapsed boolean
 ---@field rows SPFNearbyRow[]
+---@alias SPFEstimate fun(...: number): number?
+---@alias SPFRank fun(places: SPFNearbyPlace[], estimate: SPFEstimate, map: number, x: number, y: number): SPFNearbyRank
 ---@class SPFNearbyServices
 ---@field Nearest fun(key: string, world: SPFPoint): SPFNearbyPlace?
 ---@field Index fun(): table<string, SPFNearbyPlace[]>
@@ -611,8 +613,6 @@ end
 ---@field OnReady fun(fn: fun())
 ---@field Sections fun(world: SPFPoint, query?: string, collapsed?: table<string, boolean>): SPFNearbySection[]
 ---@field Shortlist fun(key: string, world: SPFPoint, limit: integer, query?: string): SPFNearbyPlace[]
----@alias SPFEstimate fun(...: number): number?
----@alias SPFRank fun(places: SPFNearbyPlace[], estimate: SPFEstimate, map: number, x: number, y: number): SPFNearbyRank
 ---@field Rank SPFRank
 ---@field Detail fun(key: string, place: SPFNearbyPlace, query?: string): string
 ---@field Navigate fun(key: string, place: SPFNearbyPlace?): boolean
@@ -627,6 +627,7 @@ end
 ---@field x number
 ---@field y number
 ---@field world SPFPoint
+
 function Items(key, npcID)
 	local byNpc = vendorItems[key]
 	local items = byNpc and byNpc[npcID]
