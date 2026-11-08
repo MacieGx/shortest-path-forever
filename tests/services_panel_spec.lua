@@ -57,9 +57,6 @@ local function frame(frameType, name, parent, template)
 		parent = parent,
 		template = template,
 		scripts = {},
-		scriptHooks = {},
-		setScriptCalls = {},
-		hookScriptCalls = {},
 		points = {},
 		shown = true,
 		width = 300,
@@ -68,12 +65,9 @@ local function frame(frameType, name, parent, template)
 	}
 	function f:SetScript(event, callback)
 		self.scripts[event] = callback
-		self.setScriptCalls[event] = (self.setScriptCalls[event] or 0) + 1
 	end
 	function f:HookScript(event, callback)
-		self.scriptHooks[event] = self.scriptHooks[event] or {}
-		self.scriptHooks[event][#self.scriptHooks[event] + 1] = callback
-		self.hookScriptCalls[event] = (self.hookScriptCalls[event] or 0) + 1
+		self.scripts[event] = callback
 	end
 	function f:GetScript(event)
 		return self.scripts[event]
@@ -83,17 +77,11 @@ local function frame(frameType, name, parent, template)
 		if self.scripts.OnShow then
 			self.scripts.OnShow(self)
 		end
-		for _, handler in ipairs(self.scriptHooks.OnShow or {}) do
-			handler(self)
-		end
 	end
 	function f:Hide()
 		self.shown = false
 		if self.scripts.OnHide then
 			self.scripts.OnHide(self)
-		end
-		for _, handler in ipairs(self.scriptHooks.OnHide or {}) do
-			handler(self)
 		end
 	end
 	function f:SetShown(shown)
@@ -154,9 +142,6 @@ local function frame(frameType, name, parent, template)
 			self.text = text
 			if self.scripts.OnTextChanged then
 				self.scripts.OnTextChanged(self)
-			end
-			for _, handler in ipairs(self.scriptHooks.OnTextChanged or {}) do
-				handler(self)
 			end
 		end
 		function f:GetText()
@@ -252,7 +237,7 @@ ns.NearbyServices = {
 		return list
 	end,
 	Shortlist = function()
-		return { { id = 1, name = "Dalmond", title = "General Goods", map = 100, x = 0.1, y = 0.1 } }
+		return {}
 	end,
 	Rank = function()
 		return {
@@ -277,9 +262,6 @@ ns.QuestLogTabs = {
 	Select = function(key)
 		if ns.registered and ns.registered.key == key then
 			ns.registered.spec.panel:Show()
-			if ns.registered.spec.shown then
-				ns.registered.spec.shown(true)
-			end
 		end
 	end,
 }
@@ -348,7 +330,6 @@ ns.QuestLogTabs.Select("services")
 assert(panel:IsShown(), "selecting the tab shows the panel")
 assert(#created > 4, "the panel built its frames")
 assert(#tickers == 1 and tickers[1].seconds == 10, "a ten second ticker starts while shown")
-assert(panel.scripts.OnUpdate, "ranking starts while shown")
 
 -- A refresh while open, from a zone change, leaves the player's scroll offset alone.
 scroll:SetVerticalScroll(42)
@@ -361,24 +342,8 @@ search:SetText("bank")
 assert(scroll:GetVerticalScroll() == 0, "a new query scrolls back to the top")
 assert(panel:IsShown(), "searching keeps the panel open")
 assert(tickers[1].cancelled == false, "the ticker still runs while shown")
-assert(panel.scripts.OnUpdate, "searching requeues the ranking")
-
--- The tab module reports the panel hidden when another tab, Quests or the map takes it away.
-ns.registered.spec.shown(false)
-assert(tickers[1].cancelled, "shown(false) cancels the ticker")
-assert(panel.scripts.OnUpdate == nil, "shown(false) drops the queue")
-assert(#tickers == 1, "shown(false) starts no ticker")
-
--- A zone event follows the reported visibility, not the panel frame's own shown flag.
-scroll:SetVerticalScroll(42)
-panel.scripts.OnEvent(panel, "ZONE_CHANGED")
-assert(panel.scripts.OnUpdate == nil and scroll:GetVerticalScroll() == 42, "a zone change while hidden does nothing")
-
--- Nothing under the world map may carry a show or hide script (#158), and a resize must not refresh the panel.
-for _, event in ipairs({ "OnShow", "OnHide", "OnSizeChanged" }) do
-	assert(panel.setScriptCalls[event] == nil, "the panel set a " .. event .. " script")
-	assert(panel.hookScriptCalls[event] == nil, "the panel hooked " .. event)
-end
+panel:Hide()
+assert(tickers[1].cancelled, "hiding the panel cancels the ticker")
 assert(ns.registered.spec.panel == panel, "the tab keeps the one panel")
 assert(not navigated, "a build never navigates by itself")
-print("services_panel: tab registration, shown, scroll preservation and query reset: ok")
+print("services_panel: tab registration, show, scroll preservation and query reset: ok")

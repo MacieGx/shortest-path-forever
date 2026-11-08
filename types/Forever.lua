@@ -324,7 +324,6 @@ function EventUtil.ContinueAfterAllEvents(callback, ...) end
 ---@field tooltip string the tab's tooltip text
 ---@field panel Frame the panel the tab shows
 ---@field order number where the tab sits in the stack, lowest first
----@field shown? fun(visible: boolean) called once per change when the panel becomes visible to the player or stops being so
 
 ---@class ForeverQuestLogTabsAPI
 ---@field Register fun(key: string, spec: ForeverQuestLogTabSpec): ForeverQuestLogTab
