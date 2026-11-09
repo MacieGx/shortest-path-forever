@@ -60,7 +60,8 @@ local data = {
 	[13] = { "Both vendor", { [10] = { { 70, 70 } } }, "A", 4, "Trade Goods", n = 5 },
 	[1215] = { "Alchemy trainer", { [10] = { { 40, 40 } } }, "A", 16, "Alchemy Trainer", n = 5 },
 }
--- QuestieDB's item fields for the fixture vendors: the NPCs that sell it, its class, subclass and name.
+-- QuestieDB's item fields for the fixture vendors: the NPCs that sell it, its class, subclass and name (and the
+-- level it needs, nil here: the tiers have a fixture of their own below).
 local items = {
 	[2511] = { { 1 }, 6, 2, "Sharp Arrow" }, -- Sharp Arrow
 	[2512] = { { 1, 2 }, 6, 2, "Rough Arrow" }, -- Rough Arrow
@@ -167,9 +168,9 @@ local lib = {
 			return itemIDs
 		end,
 		GetAll = function(id, fields)
-			assert(type(id) == "number" and #fields == 4, "item fields: vendors, class, subClass, name")
+			assert(type(id) == "number" and #fields == 5, "item fields: vendors, class, subClass, name, requiredLevel")
 			local row = items[id]
-			return row and { row[1], row[2], row[3], row[4], n = 4 }
+			return row and { row[1], row[2], row[3], row[4], row[5], n = 5 }
 		end,
 	},
 }
@@ -643,6 +644,79 @@ for _, private in ipairs({
 	)
 end
 env.LibQuestieDB = lib
+-- Goods in level tiers: Orgrimmar's nearest arrow seller sells Rough and Sharp only, the bow merchant a little
+-- farther sells up to Jagged, and one vendor far off sells a level 51 arrow. The row goes to the best tier you can use
+-- from around you, never to the far one, and names it.
+do
+	local tierNpcs = {
+		[21] = { "Zendo'jian", { [10] = { { 11, 10 } } }, "H", 4, "Weapon Vendor", n = 5 },
+		[22] = { "Jin'sora", { [10] = { { 30, 10 } } }, "H", 4, "Bow Merchant", n = 5 },
+		[23] = { "Far quartermaster", { [10] = { { 90, 90 } } }, "H", 4, "Quartermaster", n = 5 },
+	}
+	local tierItems = {
+		[2512] = { { 21, 22 }, 6, 2, "Rough Arrow", 1 },
+		[2515] = { { 21, 22 }, 6, 2, "Sharp Arrow", 10 },
+		[3030] = { { 22 }, 6, 2, "Razor Arrow", 25 },
+		[11285] = { { 22 }, 6, 2, "Jagged Arrow", 40 },
+		[19316] = { { 23 }, 6, 2, "Ice Threaded Arrow", 51 },
+		[851] = { { 21 }, 2, 7, "Cutlass", 11 },
+	}
+	local tierIDs = {}
+	for id in pairs(tierItems) do
+		tierIDs[#tierIDs + 1] = id
+	end
+	table.sort(tierIDs)
+	local tierLib = setmetatable({
+		Npc = {
+			GetAllIds = function()
+				return { 21, 22, 23 }
+			end,
+			GetAll = function(id)
+				return tierNpcs[id]
+			end,
+		},
+		Item = {
+			GetAllIds = function()
+				return tierIDs
+			end,
+			GetAll = function(id, fields)
+				assert(fields[5] == "requiredLevel", "the level each item needs is read with it")
+				local row = tierItems[id]
+				return row and { row[1], row[2], row[3], row[4], row[5], n = 5 }
+			end,
+		},
+	}, { __index = lib })
+	local faction, level = env.UnitFactionGroup, nil
+	env.UnitFactionGroup = function()
+		return "Horde"
+	end
+	env.UnitLevel = function()
+		return level
+	end
+	local tiers = fresh(tierLib, false).NearbyServices
+	local orgrimmar = { map = 1, x = 100, y = 100 }
+	local function seller(query)
+		return tiers.Shortlist("arrows", orgrimmar, 1, query)[1]
+	end
+	level = 5
+	assert(seller().id == 21, "at 5 both sell the best you can use, Rough Arrow, and the nearest wins")
+	assert(tiers.Detail("arrows", seller(), "") == "Zendo'jian · Rough Arrow", "the row names what you buy")
+	level = 25
+	assert(seller().id == 22, "at 25 the bow merchant's Razor Arrow beats the nearer Sharp Arrow")
+	assert(tiers.Nearest("arrows", orgrimmar).id == 22, "the tracking menu's row goes there too")
+	assert(seller("arrows").id == 22, "a search for the group itself still picks the tier")
+	assert(tiers.Detail("arrows", seller(), "") == "Jin'sora · Razor Arrow", "and the row names it")
+	assert(seller("Sharp Arrow").id == 21, "a search for an item finds the nearest that sells it")
+	assert(seller("Zendo").id == 21, "a search for an NPC finds that NPC")
+	level = 60
+	assert(seller().id == 22, "at 60 the far quartermaster's level 51 arrow is out of reach: Jagged Arrow it is")
+	assert(tiers.Detail("arrows", seller(), "") == "Jin'sora · Jagged Arrow", "named at the tier it was chosen for")
+	assert(seller("Ice Threaded").id == 23, "and found by name")
+	assert(tiers.Nearest("gear", orgrimmar).id == 21, "gear has no tiers")
+	level = nil
+	assert(seller().id == 21, "with no level known the nearest wins, as before")
+	env.UnitFactionGroup, env.UnitLevel = faction, nil
+end
 -- Under the gamepad interface the services menu never opens the world map or a menu itself, even over a map the game
 -- opened: the player is pointed at the map's own tracking menu, which lists the services.
 gamepad = true
