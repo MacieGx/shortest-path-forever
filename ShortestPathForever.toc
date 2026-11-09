@@ -34,7 +34,10 @@ Data\Taxi.lua
 Data\Portals.lua
 Data\Teleports.lua
 Data\Zones.lua
+Data\Services.lua
 Data\Walks.lua
+Data\RoadCells.lua
+Data\RoadEdges.lua
 Transport\Model.lua
 Routing\Planner.lua
 Core\Core.lua
@@ -43,6 +46,7 @@ Transport\Timetable.lua
 Transport\TaxiTimes.lua
 Core\PlanContext.lua
 UI\MenuModifier.lua
+UI\QuestLogTabs.lua
 UI\Nearby.lua
 Transport\Observer.lua
 Transport\Sync.lua
@@ -55,6 +59,7 @@ Core\Progress.lua
 Transport\Teleports.lua
 Transport\PartyPortals.lua
 UI\Art.lua
+UI\ServicesPanel.lua
 UI\Report.lua
 UI\ForeverFamily.lua
 UI\FamilyHints.lua
@@ -70,6 +75,7 @@ UI\TrackerEqot.lua
 UI\TrackerLock.lua
 UI\TrackerOrder.lua
 UI\TrackerHost.lua
+UI\Tracker.xml
 UI\Tracker.lua
 UI\Mover.lua
 UI\TurnAround.lua
@@ -109,3 +115,4 @@ Core\Way.lua
 Core\RestedXP.lua
 Core\Guidelime.lua
 UI\DestinationPin.lua
+UI\NpcArrows.lua

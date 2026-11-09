@@ -7,6 +7,7 @@ globals = {
 	"ForeverFamily",
 	"ForeverLeaderboards",
 	"ForeverTrackerHost",
+	"ForeverQuestLogTabs",
 	"EventUtil",
 	"ShortestPathForever",
 	"ShortestPathForeverCharDB",
@@ -27,6 +28,11 @@ read_globals = {
 	"GuidelimeArrow",
 	"TomTomCrazyArrow",
 	"IsAltKeyDown",
+	"QuestMapFrame",
+	"QuestMapFrameOverrides",
+	"QUESTS_LABEL",
+	"GetSubZoneText",
+	"GetZoneText",
 	"CreateFramePoolCollection",
 	"C_XMLUtil",
 	"Ambiguate",
@@ -63,6 +69,7 @@ read_globals = {
 	"GRAY_FONT_COLOR",
 	"HIGHLIGHT_FONT_COLOR",
 	"hooksecurefunc",
+	"securecallfunction",
 	"IsInGroup",
 	"IsInGuild",
 	"IsInInstance",
@@ -119,8 +126,9 @@ read_globals = {
 }
 files["tests/"] = { std = "+luajit" }
 
--- Tracker colours.
+-- Tracker colours and the stock line's dash.
 read_globals[#read_globals + 1] = "OBJECTIVE_TRACKER_COLOR"
+read_globals[#read_globals + 1] = "QUEST_DASH"
 -- MapCanvas.lua: the Forever addons' shared list of world map markers, and the gamepad's map cursor.
 globals[#globals + 1] = "ForeverMapMarkers"
 read_globals[#read_globals + 1] = "SoftCursor"
@@ -155,10 +163,16 @@ read_globals[#read_globals + 1] = "MAP_PIN_SHARING"
 -- Journey.lua: water walking from its buffs, or a spell to cast.
 read_globals[#read_globals + 1] = "C_UnitAuras"
 read_globals[#read_globals + 1] = "C_Spell"
+-- UI/Nearby.lua: a profession trainer group's localised skill line name.
+read_globals[#read_globals + 1] = "C_TradeSkillUI"
 -- Route.lua: the cursor over the minimap.
 read_globals[#read_globals + 1] = "GetCursorPosition"
 -- UI/OpenMap.lua: the seamless world map addon's public API for other addons (version 2 and up).
 read_globals[#read_globals + 1] = "OpenMapAPI"
+
+-- UI/NpcArrows.lua: the nameplate the NPC a Nearby services journey walks to carries, and the unit's own GUID.
+read_globals[#read_globals + 1] = "C_NamePlate"
+read_globals[#read_globals + 1] = "UnitGUID"
 
 read_globals[#read_globals + 1] = "IsPlayerMoving"
 read_globals[#read_globals + 1] = "InCombatLockdown"
@@ -220,5 +234,8 @@ read_globals[#read_globals + 1] = "GetNumGuildMembers"
 
 -- A translated line is one string; StyLua already wraps what it can, and CJK text counts bytes, not columns.
 files["Locales/*.lua"] = { max_line_length = false }
+-- Generated road data carries long encoded strings; the producers decide their line length.
+files["Data/RoadCells.lua"] = { max_line_length = false }
+files["Data/RoadEdges.lua"] = { max_line_length = false }
 
 files["tests/companion_maps_spec.lua"] = { globals = { "C_AddOns", "GetTime" } }

@@ -213,6 +213,7 @@ local ns = {
 		arrivalSound = false,
 		resumeJourney = false,
 		routeColor = "gold",
+		followRoads = false,
 	}, {
 		__index = function()
 			return true
@@ -284,12 +285,14 @@ local groups = {
 		"journey",
 		"resumeJourney",
 		"destinationPin",
+		"npcArrows",
 		"tomtom",
 		"tomtomFollow",
 		"restedxp",
 		"restedxpHideArrow",
 		"guidelime",
 		"avoidHighZones",
+		"followRoads",
 		"teleports",
 		"hearthMinimumSavings",
 		"guideStops",
@@ -333,7 +336,8 @@ local order = {
 }
 
 assert(#buttons == #order + 1, "one index button per group, then the Forever addons page")
-assert(#rows == 55, #rows)
+-- The follow-roads branch added followRoads, main added npcArrows, so the merged list is one row longer.
+assert(#rows == 57, #rows)
 local cursor = 0
 for index, name in ipairs(order) do
 	local button = buttons[index].initializer
@@ -400,6 +404,9 @@ assert(Row("taxiRoute").tooltip:find("flight master", 1, true))
 Row("taxiRoute").setting.onChanged()
 assert(taxiRefreshed == 1, "flight route updates when its setting changes")
 assert(Row("corpse").setting.default == true)
+-- The NPC nameplate arrows are guidance furniture and start on, with the friendly-nameplate condition in the tooltip.
+assert(Row("npcArrows").setting.default == true, "nameplate arrows are on by default")
+assert(Row("npcArrows").tooltip:find("Friendly nameplates", 1, true), "the tooltip says friendly nameplates must be on")
 -- Party mage portals are opt-in, and every capital starts ticked for the mage to open.
 assert(Row("partyMagePortals").setting.default == false, "party mage portals are off by default")
 for _, key in ipairs({
@@ -431,6 +438,9 @@ assert(Row("avoidHighZones").setting.default == true, "avoiding high zones is on
 local policyBefore = policyChanged
 Row("avoidHighZones").setting.onChanged()
 assert(policyChanged == policyBefore + 1, "the journey plans again with the new costs")
+assert(Row("followRoads").setting.default == false, "following roads is off by default")
+Row("followRoads").setting.onChanged()
+assert(policyChanged == policyBefore + 2, "following roads plans again with the new costs")
 assert(Row("tomtom").setting.default == true)
 assert(Row("tomtom").tooltip:find("TomTom", 1, true), "the row names the addon it answers")
 Row("tomtom").setting.onChanged()

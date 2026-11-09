@@ -51,8 +51,24 @@ local function Point(map, x, y)
 	return ns.WorldPoint(map, x, y)
 end
 
-local function QuestID(questID)
-	return Number(questID) and questID % 1 == 0 and questID >= 1
+-- A positive whole number: a quest or NPC id.
+local function ID(value)
+	return Number(value) and value % 1 == 0 and value >= 1
+end
+
+-- A stop's detail is one string with one line per quest (Adventure Guide joins its quest lines with newlines).
+-- Split it here so every stop keeps its own lines for the pin tooltip (UI/StopPin.lua).
+---@param text? string
+---@return string[]?
+local function DetailLines(text)
+	if not text then
+		return nil
+	end
+	local lines = {}
+	for line in text:gmatch("[^\n]+") do
+		lines[#lines + 1] = line
+	end
+	return lines[1] and lines or nil
 end
 
 -- An objective area list: one or more places on a map, each with a yard radius. Every entry must be one this
@@ -89,7 +105,7 @@ local function Quests(quests)
 		return false
 	end
 	for key, questID in pairs(quests) do
-		if not Number(key) or key % 1 ~= 0 or key < 1 or key > count or not QuestID(questID) then
+		if not Number(key) or key % 1 ~= 0 or key < 1 or key > count or not ID(questID) then
 			return false
 		end
 	end
@@ -439,9 +455,10 @@ function API.NavigateRoute(owner, stops)
 			or (stop.tooltip ~= nil and not (canaccessvalue(stop.tooltip) and type(stop.tooltip) == "string"))
 			or (stop.hold ~= nil and not (canaccessvalue(stop.hold) and type(stop.hold) == "boolean"))
 			or (stop.radius ~= nil and (not Number(stop.radius) or stop.radius < 0))
-			or (stop.questID ~= nil and not QuestID(stop.questID))
+			or (stop.questID ~= nil and not ID(stop.questID))
 			or (stop.questIDs ~= nil and (type(stop.questIDs) ~= "table" or not Quests(stop.questIDs)))
 			or (stop.handins ~= nil and (type(stop.handins) ~= "table" or not Quests(stop.handins)))
+			or (stop.npc ~= nil and not ID(stop.npc))
 			or (stop.shapes ~= nil and (type(stop.shapes) ~= "table" or not Shapes(stop.shapes)))
 		then
 			return false
@@ -451,13 +468,16 @@ function API.NavigateRoute(owner, stops)
 			return false
 		end
 		point.label = stop.title
-		point.tooltip = stop.tooltip
+		point.details = DetailLines(stop.tooltip)
 		-- A caller such as Adventure Guide may need the route to remain visible while the
 		-- player completes an interaction at this location. It resubmits the route after
 		-- that state changes; ordinary API stops retain automatic arrival.
 		point.hold = stop.hold == true
 		point.radius = stop.radius
 		point.questID = stop.questID
+		-- The NPC whose service this stop reaches: Shortest Path marks that NPC's nameplate while the stop is
+		-- current. Another addon's route passes no npc, so its own highlight is the only one.
+		point.npc = stop.npc
 		-- The quests whose client blobs the stop stands for, copied; StopInside prefers the client's own answer for them.
 		if stop.questID or stop.questIDs then
 			point.questIDs = { stop.questID }
@@ -491,7 +511,10 @@ function API.NavigateRoute(owner, stops)
 			local location = not point.label and ns.Locate(point)
 			-- What to do there, apart from the count the tooltip gives its own line (UI/StopPin.lua).
 			point.stopLabel = point.label or location and location.zone or UNKNOWN
-			point.routeTitle = string.format(L["Stop %d of %d: %s"], index, count, point.stopLabel)
+			-- Keep the locale format beside the built title, so the tracker can colour the place inside it.
+			point.routeTitleFormat = L["Stop %d of %d: %s"]
+			point.routeCount = count
+			point.routeTitle = string.format(point.routeTitleFormat, index, count, point.stopLabel)
 		end
 		points[index] = point
 	end

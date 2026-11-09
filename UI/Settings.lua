@@ -315,6 +315,16 @@ ns.Init(function()
 		end
 	)
 	Checkbox(
+		"npcArrows",
+		L["Arrows on the NPC's nameplate"],
+		L["Shows over the nameplate of the NPC a Nearby services journey walks to."]
+			.. " "
+			.. L["Friendly nameplates must be on to see them."],
+		function()
+			ns.RefreshNpcArrows()
+		end
+	)
+	Checkbox(
 		"tomtom",
 		L["Let guides set TomTom waypoints"],
 		L["While TomTom is not installed, a guide that sets a TomTom waypoint starts a journey here instead."],
@@ -360,6 +370,14 @@ ns.Init(function()
 		"avoidHighZones",
 		L["Avoid zones far above my level"],
 		L["Walks go round zones whose lowest level is 4 or more above yours, but never the ones you start or end in."],
+		ns.TravelPolicyChanged
+	)
+	Checkbox(
+		"followRoads",
+		L["Follow roads"],
+		-- luacheck: push ignore 631
+		L["Walks keep to roads and paved streets where that adds less than half again to the walk. Roads painted with a zone's plain dirt are not known."],
+		-- luacheck: pop
 		ns.TravelPolicyChanged
 	)
 	Checkbox(

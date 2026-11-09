@@ -12,6 +12,21 @@ optional `### For addon authors` subsection after a version's player bullets.
 
 ## [Unreleased]
 
+
+## [1.24.0] - 2026-11-09
+
+- **Walks can follow the roads.** Turn on *Follow roads* in the settings and walked legs keep to roads and paved streets wherever that adds less than half again to the walk, read from the roads painted on the game's own terrain. The time shown is the real time of the road walk. Roads painted with a zone's plain dirt, such as Westfall's, are not known yet (#498).
+- **The Journey tracker reads like the rest of the column.** Each step now leads with the game's own mark for how you get there, by foot, flight, boat, zeppelin, lift, tram or portal, the place name in the tracker's gold and the time in its grey. The goal's pin heads the section and the step numbers and dashes are gone, so the way ahead reads at a glance instead of counting steps (#514).
+- **Nearby services has its own tab in the world map's quest log.** Open the map and pick the bags tab beside Quests to see vendors grouped by what they sell (arrows, bullets, food, drink, bags, trade supplies, reagents, weapons and armour), trainers by profession, and the inn, bank, auction house, flight master, stable and repairs. Each row names the nearest NPC and the travel time, and clicking it starts the journey. The search box finds a group, an NPC, or an item by name, so typing Simple Wood shows who sells it. Food and drink come from what each item restores, and profession trainers from the spells they teach, so a vendor is never filed by its title. `/spfnear` and the tracking menu's Open Nearby services entry open the tab, and the menu still lists every group. With Adventure Guide installed, both tabs sit under one Quests tab and one panel shows at a time (#430).
+- **The NPC you are walking to is marked on screen.** On a journey from Nearby services, bouncing arrows sit either side of that NPC's nameplate, and stay after you arrive until you walk away. Friendly nameplates must be on; Settings > Guidance > Arrows on the NPC's nameplate turns them off (#487).
+
+## [1.23.4] - 2026-11-09
+
+- **Adventure Guide's quest focus no longer leaves two markers.** Walking into the area of the step you are on makes Adventure Guide select that quest, which used to take the game's navigation marker away from Shortest Path: the quest's marker and the guide's arrow then led at once. The waypoint Shortest Path tracks now stays the marker, and only your own quest click takes navigation back. (#531)
+- **The Forever Leaderboards period menu works with a gamepad.** With the gamepad interface on, a press on it steps through this week or all time, for your guild and group or for players you've met, instead of opening a game menu that later had the client block `SetPreferredGamepadInteractTarget()` (cjber/forever-core#267).
+
+## [1.23.3] - 2026-11-08
+
 - **Long journeys to another continent appear again.** When a bind point's walks finished being searched after the route was already chosen, that late answer hit an error and the journey was never shown. A search that has finished now ignores answers that arrive after it (#516).
 - **The Forever addons page opens with a gamepad.** With the gamepad interface on, the Forever addons settings page can be entered from the Options list (cjber/tweaks-forever#382).
 - **Right-clicking a stop on the world map clears the journey on the first try.** While you moved with the map open, the route redrew every half second and every replan, and each redraw rebuilt the stops' buttons, so the one under the pointer lost its hover and a right-click landing then went unheard. The top half of the goal pin also never took a click. The buttons now stay put unless what they show changes, and a click counts anywhere the pin lights up.
@@ -37,6 +52,7 @@ optional `### For addon authors` subsection after a version's player bullets.
 
 - **The report keeps errors from earlier sessions.** An error Shortest Path caught before the last `/reload`, a blocked action or a Lua warning was forgotten when the client reloaded, so it could not be copied into a report once it was gone. The report now lists them under their own heading, with when each was first and last seen and the version, build and locale it happened on, and keeps the 50 most recent. It also carries Shortest Path's recent log lines, the steps that led up to a bug, and `/forever debug` turns on detailed lines for the session (cjber/forever-core#204, cjber/forever-core#206).
 - **The controller keeps working after the world map and its filter menu.** Opening either could leave the game's interact action blocked, and the client could freeze. Shortest Path now lets the game finish closing the map before it takes its own hover and tooltip down, so the controller's actions stay the game's (#158).
+- **A stop tooltip keeps each stop's details with it.** When one pin marks two stops of the same quest, each stop now shows its own count and action with its own quest and chapter lines directly under it, shared lines appear once, the time and distance sit on the title line, and a single-leg trip no longer repeats the step it walks to (#492).
 
 ## [1.22.54] - 2026-11-08
 
