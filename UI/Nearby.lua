@@ -708,6 +708,7 @@ end
 ---@field Shortlist fun(key: string, world: SPFPoint, limit: integer, query?: string): SPFNearbyPlace[]
 ---@field Rank SPFRank
 ---@field Detail fun(key: string, place: SPFNearbyPlace, query?: string): string
+---@field Goods fun(key: string, place: SPFNearbyPlace, query?: string): integer[]?
 ---@field Navigate fun(key: string, place: SPFNearbyPlace?): boolean
 ---@field PlayerUi fun(): integer?, number?, number?
 ---@field PlayerWorld fun(): SPFPoint?
@@ -763,42 +764,42 @@ local function Sections(world, query, collapsed)
 	return list
 end
 
--- The names of an NPC's goods of one tier, sorted and joined.
-local function TierNames(key, npc, tier)
-	local names = {}
-	for _, itemID in ipairs(Items(key, npc) or {}) do
-		if (itemLevels[itemID] or 0) == tier and itemNames[itemID] then
-			names[#names + 1] = itemNames[itemID]
-		end
-	end
-	table.sort(names)
-	return #names > 0 and table.concat(names, ", ") or nil
-end
-
--- A row's detail line: the NPC and its title, or while searching, the NPC and only the items that matched. A tiered
--- group names the goods for your level the NPC sells instead of the title.
-local function Detail(key, place, query)
+-- The goods a row names, sorted by name: while searching, the NPC's items that matched; otherwise, in a tiered group,
+-- the NPC's goods of the best tier you can use. nil for none.
+---@param key string
+---@param place SPFNearbyPlace
+---@param query? string
+---@return integer[]?
+local function Goods(key, place, query)
 	local folded = Fold(query)
 	local tier = folded == "" and Tier(key, place.id)
-	local goods = tier and TierNames(key, place.id, tier)
+	if folded == "" and not tier then
+		return nil
+	end
+	local goods = {}
+	for _, itemID in ipairs(Items(key, place.id) or {}) do
+		local name = itemNames[itemID]
+		if name and (tier and (itemLevels[itemID] or 0) == tier or not tier and Contains(Fold(name), folded)) then
+			goods[#goods + 1] = itemID
+		end
+	end
+	table.sort(goods, function(a, b)
+		return itemNames[a] < itemNames[b]
+	end)
+	return #goods > 0 and goods or nil
+end
+
+-- A row's detail line: the NPC and its title, or the NPC and the goods the row names (Goods) in place of the title.
+local function Detail(key, place, query)
+	local goods = Goods(key, place, query)
 	if goods then
-		return L["%s · %s"]:format(place.name, goods)
-	end
-	if folded ~= "" then
 		local names = {}
-		for _, itemID in ipairs(Items(key, place.id) or {}) do
-			local name = itemNames[itemID]
-			if name and Contains(Fold(name), folded) then
-				names[#names + 1] = name
-			end
+		for at, itemID in ipairs(goods) do
+			names[at] = itemNames[itemID]
 		end
-		if #names > 0 then
-			table.sort(names)
-			return L["%s · %s"]:format(place.name, table.concat(names, ", "))
-		end
-		return place.name
+		return L["%s · %s"]:format(place.name, table.concat(names, ", "))
 	end
-	if place.title then
+	if Fold(query) == "" and place.title then
 		return L["%s · %s"]:format(place.name, place.title)
 	end
 	return place.name
@@ -821,6 +822,7 @@ ns.NearbyServices = {
 	Shortlist = Shortlist,
 	Rank = NewRank,
 	Detail = Detail,
+	Goods = Goods,
 	Navigate = Navigate,
 	PlayerUi = PlayerUi,
 	PlayerWorld = PlayerWorld,
