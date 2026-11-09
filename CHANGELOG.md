@@ -12,6 +12,8 @@ optional `### For addon authors` subsection after a version's player bullets.
 
 ## [Unreleased]
 
+- **Nearby services find the arrows, shot, food and drink for your level.** A row went to the nearest NPC selling anything of the kind, so a level 25 hunter in Orgrimmar was sent to the weapon vendor, who sells only Rough and Sharp Arrows, past the bow merchant with Razor Arrows. Arrows, shot, food and drink now go to the nearest vendor with the best goods you can use, from among those up to about a minute's run farther than the nearest seller, so a rare top-tier vendor across the continent is never chosen. The row names what you will buy, and a search for an item or an NPC still finds exactly that.
+
 ## [1.24.7] - 2026-11-09
 
 - **Flight points you have not discovered are no longer marked as known.** Opening a flight master stored every point on its map, including ones your character has never visited, so routes could fly through them. Only the flight points you can actually use are kept now, and the next flight master you open clears the ones added before. Reported on CurseForge by user_ey1r2bwls2pf3sht32372 and on Discord by pachonaso (#593).

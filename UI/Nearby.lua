@@ -13,6 +13,14 @@ local VENDOR_GROUPS = {
 	{ key = "reagents", label = L["Reagents"], icon = 2928 },
 	{ key = "gear", label = L["Weapons and armour"], icon = 851 },
 }
+-- Groups whose goods come in level tiers (QuestieDB's requiredLevel): Rough to Jagged Arrow, Tough Hunk of Bread
+-- to Homemade Cherry Pie, Spring Water to Morning Glory Dew. The nearest arrow seller in Orgrimmar sells Rough and
+-- Sharp only, while the bow merchant beside him sells Razor and Jagged too.
+local TIERED = { arrows = true, bullets = true, food = true, drink = true }
+-- Yards farther than the nearest seller a vendor of a better tier for your level may stand and still be chosen:
+-- about a minute's run, which crosses a capital. The best tiers of all (level 51 and up) are each sold by one vendor
+-- on a continent, so a tier is only ever chosen from around you.
+local TIER_REACH = 400
 -- The other services keep their own keys and the client's tracking atlases.
 local SERVICES = {
 	{ key = "innkeeper", flag = "INNKEEPER", label = L["Innkeeper"], icon = "innkeeper" },
@@ -31,6 +39,10 @@ local SECTION_LABELS = {
 local index, vendorItems, groups, groupByKey, state = {}, {}, {}, {}, "idle"
 -- Every vendor item's name, so a search matches what a vendor sells and a row can name it.
 local itemNames = {}
+-- The level a tiered group's item needs, by item ID; 0 for none.
+local itemLevels = {}
+-- Each tiered group's best tier by NPC for one player level, since the level last asked.
+local tierLevel, tierCache = nil, {}
 -- Callers waiting for the index, so an open panel fills as soon as the read finishes.
 local waiting = {}
 
@@ -81,6 +93,9 @@ local Items
 -- Every NPC of a group on the player's continent that a folded query matches, or all of them with an empty query.
 -- A group label, an NPC's name or title, or the name of an item that puts the NPC in the group each count.
 local function Matching(key, world, query)
+	if query == "" then
+		return nil
+	end
 	local matching = {}
 	local labelHit = query ~= "" and Contains(Fold((groupByKey[key] or {}).label), query)
 	for _, place in ipairs(index[key] or {}) do
@@ -105,6 +120,74 @@ local function Matching(key, world, query)
 	return matching
 end
 
+local function PlayerLevel()
+	local level = UnitLevel and UnitLevel("player")
+	return type(level) == "number" and level > 0 and level or nil
+end
+
+-- The level of the best goods of a tiered group an NPC sells that you can use: nil when it sells none you can, or
+-- when your level or the group's tiers are unknown.
+---@param key string
+---@param npc integer
+---@return integer?
+local function Tier(key, npc)
+	local level = PlayerLevel()
+	if not (level and TIERED[key]) then
+		return nil
+	end
+	if level ~= tierLevel then
+		tierLevel, tierCache = level, {}
+	end
+	local byNpc = tierCache[key]
+	if not byNpc then
+		byNpc = {}
+		tierCache[key] = byNpc
+	end
+	local tier = byNpc[npc]
+	if tier == nil then
+		tier = false
+		local items = vendorItems[key] and vendorItems[key][npc]
+		for _, itemID in ipairs(items or {}) do
+			local needs = itemLevels[itemID] or 0
+			if needs <= level and (not tier or needs > tier) then
+				tier = needs
+			end
+		end
+		byNpc[npc] = tier
+	end
+	return tier or nil
+end
+
+-- The tier to buy here: the best one you can use that a vendor sells within TIER_REACH yards of the nearest
+-- seller. A search for an item or an NPC wants what it names, so only the group's own label (or no query) picks a
+-- tier.
+local function BestTier(key, world, folded, matching)
+	if not (TIERED[key] and PlayerLevel()) then
+		return nil
+	end
+	if folded ~= "" and not Contains(Fold((groupByKey[key] or {}).label), folded) then
+		return nil
+	end
+	local function Gap(place)
+		if place.world.map == world.map and (not matching or matching[place.id]) then
+			return math.sqrt((place.world.x - world.x) ^ 2 + (place.world.y - world.y) ^ 2)
+		end
+	end
+	local nearest = math.huge
+	for _, place in ipairs(index[key] or {}) do
+		nearest = math.min(nearest, Gap(place) or math.huge)
+	end
+	local best
+	for _, place in ipairs(index[key] or {}) do
+		local gap = Gap(place)
+		local tier = gap and gap <= nearest + TIER_REACH and Tier(key, place.id)
+		if tier and (not best or tier > best) then
+			best = tier
+		end
+	end
+	return best
+end
+
 ---@param key string
 ---@param world SPFPoint
 ---@param limit integer
@@ -113,9 +196,14 @@ end
 local function Shortlist(key, world, limit, query)
 	local list, gaps = {}, {}
 	local folded = Fold(query)
-	local matching = folded ~= "" and Matching(key, world, folded) or nil
+	local matching = Matching(key, world, folded)
+	local tier = BestTier(key, world, folded, matching)
 	for _, place in ipairs(index[key] or {}) do
-		if place.world.map == world.map and (not matching or matching[place.id]) then
+		if
+			place.world.map == world.map
+			and (not matching or matching[place.id])
+			and (not tier or Tier(key, place.id) == tier)
+		then
 			local gap = (place.world.x - world.x) ^ 2 + (place.world.y - world.y) ^ 2
 			local last = #list
 			if last < limit or gap < gaps[last] or (gap == gaps[last] and place.id < list[last].id) then
@@ -347,11 +435,11 @@ local function Build()
 		-- Every item says who sells it and what it is; that is the whole vendor grouping.
 		local item = lib.Item
 		if item and item.GetAllIds and item.GetAll then
-			local fields = { "vendors", "class", "subClass", "name" }
+			local fields = { "vendors", "class", "subClass", "name", "requiredLevel" }
 			for _, itemID in ipairs(item.GetAllIds()) do
 				local values = item.GetAll(itemID, fields)
 				if values then
-					local vendors, class, subClass, name = unpack(values, 1, values.n)
+					local vendors, class, subClass, name, requiredLevel = unpack(values, 1, values.n)
 					if type(name) == "string" then
 						itemNames[itemID] = name
 					end
@@ -360,6 +448,11 @@ local function Build()
 						for _, npc in ipairs(vendors) do
 							for _, key in ipairs(keys) do
 								AddVendorItem(key, npc, itemID)
+							end
+						end
+						for _, key in ipairs(keys) do
+							if TIERED[key] then
+								itemLevels[itemID] = type(requiredLevel) == "number" and requiredLevel or 0
 							end
 						end
 					end
@@ -670,9 +763,27 @@ local function Sections(world, query, collapsed)
 	return list
 end
 
--- A row's detail line: the NPC and its title, or while searching, the NPC and only the items that matched.
+-- The names of an NPC's goods of one tier, sorted and joined.
+local function TierNames(key, npc, tier)
+	local names = {}
+	for _, itemID in ipairs(Items(key, npc) or {}) do
+		if (itemLevels[itemID] or 0) == tier and itemNames[itemID] then
+			names[#names + 1] = itemNames[itemID]
+		end
+	end
+	table.sort(names)
+	return #names > 0 and table.concat(names, ", ") or nil
+end
+
+-- A row's detail line: the NPC and its title, or while searching, the NPC and only the items that matched. A tiered
+-- group names the goods for your level the NPC sells instead of the title.
 local function Detail(key, place, query)
 	local folded = Fold(query)
+	local tier = folded == "" and Tier(key, place.id)
+	local goods = tier and TierNames(key, place.id, tier)
+	if goods then
+		return L["%s · %s"]:format(place.name, goods)
+	end
 	if folded ~= "" then
 		local names = {}
 		for _, itemID in ipairs(Items(key, place.id) or {}) do
