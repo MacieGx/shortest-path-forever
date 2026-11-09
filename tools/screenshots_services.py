@@ -4,7 +4,8 @@ UI/ServicesPanel.lua supplies the geometry: the bank bags glyph, the title and t
 Trainers and Services sections, with 44-unit rows 2 apart, 30-unit icons and the quest log's own side tabs. The
 NPCs, their titles and the goods that group them are Auberdine's, from QuestieDB. A time is the straight line at
 7 yards a second over Darkshore's 6,550 by 4,366 yards, or the boat to Darnassus where no local NPC serves. The
-search scene types an item word into the same box and keeps the groups whose goods match it.
+search scene types an item word into the same box and keeps the groups whose goods match it. The better scene is the
+same hunter at level 25, offered better arrows farther away in a one-line row under Arrows.
 """
 
 import math
@@ -44,6 +45,11 @@ ROW_HEIGHT = 44
 ROW_GAP = 2
 ICON = 30
 TAB_ICON = 32
+# A better trip's row: one line, 16 in from its group's, a 22-unit item icon with the upgrade arrow at its top left.
+BETTER_HEIGHT = 28
+BETTER_ICON = 22
+BETTER_INDENT = 16
+BADGE_WIDTH, BADGE_HEIGHT = 11, 12
 PAD = 6
 LIST_TOP = 4 + TITLE_HEIGHT + 6
 
@@ -121,6 +127,25 @@ SEARCH = [
     ),
 ]
 SECTIONS = (("Vendors", VENDORS), ("Trainers", TRAINERS), ("Services", SERVICES))
+
+# The better scene: the same hunter at level 25, a bow in the ranged slot. QuestieDB as above, Item-<id>-10 the level
+# each needs:
+#   Auberdine's best arrow is still Dalmond's Sharp Arrow 2515 (10), and his Heavy Shot 2519 (10) the best shot.
+#   Kyndri (4190, 43 yd) sells Mulgore Spice Bread 4544 and Sweet Nectar 1708 (25), the best food and drink for 25, so
+#   neither gets a trip.
+#   Razor Arrow 3030 (25) is sold by NPC 4173 Landria, 4170 Ellandrieth and 4241 Mydrannul in Darnassus, and 3962
+#   Haljan Oakheart in Astranaar; the row says Darnassus, by the boat the other Darnassus rows take. A bow has no use
+#   for shot, so Solid Shot 3033 gets no trip.
+# A ("better", item, name, zone, time) entry is the trip's row (UI/ServicesPanel.lua's CreateBetterRow).
+BETTER_VENDORS = [
+    ("Arrows", ("item", 2515), "Dalmond", "General Goods", 37.5, 40.5, None, "Dalmond · Sharp Arrow"),
+    ("better", 3030, "Razor Arrow", "Darnassus", "6:20"),
+    ("Bullets", ("item", 2519), "Dalmond", "General Goods", 37.5, 40.5, None, "Dalmond · Heavy Shot"),
+    ("Food", ("item", 4544), "Kyndri", "Baker", 36.9, 44.6, None, "Kyndri · Mulgore Spice Bread"),
+    ("Drink", ("item", 1708), "Kyndri", "Baker", 36.9, 44.6, None, "Kyndri · Sweet Nectar"),
+    *VENDORS[4:],
+]
+BETTER_SECTIONS = (("Vendors", BETTER_VENDORS), ("Trainers", TRAINERS), ("Services", SERVICES))
 
 
 def walk(x, y):
@@ -203,15 +228,40 @@ def row(canvas, x, y, width, entry):
     )
 
 
+def better_row(canvas, x, y, width, entry):
+    """CreateBetterRow: the same card one line high, a 22-unit item icon at LEFT 6 wearing the upgrade arrow at its top
+    left, the goods and their zone in GameFontHighlight, and the time at RIGHT -8."""
+    _, item, name, zone, when = entry
+    canvas.draw(canvas.ui.atlas("common-button-list-large"), x, y, width, BETTER_HEIGHT)
+    icon_top = y + (BETTER_HEIGHT - BETTER_ICON) / 2
+    icon(canvas, ("item", item), x + 6, icon_top, BETTER_ICON)
+    badge = canvas.ui.atlas("bags-greenarrow")
+    scale = min(BADGE_WIDTH / badge.width, BADGE_HEIGHT / badge.height)
+    canvas.draw(badge, x + 6, icon_top, badge.width * scale, badge.height * scale)
+    font = FONTS["GameFontHighlight"]
+    time_width = canvas.text_width(when, font)
+    text_x = x + 6 + BETTER_ICON + 8
+    canvas.text(x, y, when, font, justify="RIGHT", width=width - 8, box_height=BETTER_HEIGHT)
+    canvas.text(
+        text_x, y, f"{name} · {zone}", font, width=x + width - 8 - 6 - time_width - text_x, box_height=BETTER_HEIGHT
+    )
+
+
 def sections(canvas, x, y, width, groups=SECTIONS):
-    """Refresh: one header per section and its rows below, 44 high and 2 apart, the list ending at the last row."""
+    """Refresh: one header per section and its rows below, 44 high and 2 apart, a better trip's 28 high and indented
+    under its group's; the count is the groups', and the list ends at the last row."""
     top = 0
     for name, entries in groups:
-        section_header(canvas, x, y + top, width, name, len(entries))
+        count = sum(1 for entry in entries if entry[0] != "better")
+        section_header(canvas, x, y + top, width, name, count)
         top += SECTION_HEIGHT + SECTION_GAP
         for entry in entries:
-            row(canvas, x, y + top, width, entry)
-            top += ROW_HEIGHT + ROW_GAP
+            if entry[0] == "better":
+                better_row(canvas, x + BETTER_INDENT, y + top, width - BETTER_INDENT, entry)
+                top += BETTER_HEIGHT + ROW_GAP
+            else:
+                row(canvas, x, y + top, width, entry)
+                top += ROW_HEIGHT + ROW_GAP
     return top
 
 
@@ -344,3 +394,7 @@ def render(ui):
 
 def render_search(ui):
     return scene(ui, [(panel(ui, SEARCH_QUERY, SEARCH), 0, 0)])
+
+
+def render_better(ui):
+    return scene(ui, [(panel(ui, groups=BETTER_SECTIONS), 0, 0)])
