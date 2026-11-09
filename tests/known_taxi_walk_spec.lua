@@ -16,7 +16,7 @@ for _, file in ipairs({
 	assert(loadfile(file))("ShortestPathForever", ns)
 end
 
-local function Plan(from, to, known)
+local function Plan(from, to, known, faction)
 	return ns.Planner.Plan({
 		from = from,
 		to = to,
@@ -28,7 +28,7 @@ local function Plan(from, to, known)
 		portals = ns.Portals,
 		landmasses = ns.Landmasses,
 		baked = ns.Walks,
-		faction = "Alliance",
+		faction = faction or "Alliance",
 		otherFaction = false,
 		walkSpeed = 7,
 		taxiKnown = known,
@@ -58,24 +58,37 @@ local from = { map = 0, x = -8800, y = 800, label = "Stormwind" }
 local walked = assert(Plan(from, entrance, {}))
 assert(not Has(walked, "flight"), "no known flight point means no flight")
 assert(walked.unknownFlight == true, "the plan explains the flight point it could not use")
+assert(walked.unknownFlightMaps and walked.unknownFlightMaps[0], "the faster flight is in the Eastern Kingdoms")
 local first = walked.legs[1]
 assert(
 	first.mode == "walk" and first.to.kind == "dock" and first.yards > 5000,
 	"with no flight point the whole way to the boat is walked"
 )
 
--- Booty Bay's flight point is known, the reported case: the same journey first walks to Stormwind's flight
--- master (learning it) and flies to Booty Bay, so the long run to the boat is gone.
+-- Knowing only Booty Bay is not enough (#537): a flight cannot leave Stormwind's flight master before the
+-- character has learned it, so the same journey still walks and reports the unknown flight point.
 local booty = assert(Plan(from, entrance, { [BOOTY_BAY] = true }))
-assert(booty.unknownFlight ~= true, "a route that flies needs no unknown-flight notice")
-assert(Has(booty, "flight"), "Booty Bay's known flight point is flown to")
-assert(booty.legs[1].to.kind == "taxi" and booty.legs[1].to.id == STORMWIND, "the flight starts at Stormwind")
-assert(booty.arrive < walked.arrive, "the known flight point beats the walked leg")
+assert(not Has(booty, "flight"), "a flight cannot depart an unknown flight point")
+assert(booty.unknownFlight == true, "the plan explains the flight point it could not use")
+assert(booty.arrive == walked.arrive, "knowing only the arrival changes nothing")
 
--- With Stormwind's flight point also known there is no walk to discover it at all, and the flight still wins.
+-- With Stormwind also known the same journey walks to its flight master and flies to Booty Bay, so the long run
+-- to the boat is gone.
 local known = assert(Plan(from, entrance, { [STORMWIND] = true, [BOOTY_BAY] = true }))
-assert(Has(known, "flight") and not known.legs[1].from.undiscovered, "both known nodes fly directly")
+assert(Has(known, "flight"), "both known flight points fly")
+assert(known.legs[1].to.kind == "taxi" and known.legs[1].to.id == STORMWIND, "the flight starts at Stormwind")
 assert(known.arrive <= booty.arrive, "knowing the nearer flight point cannot make the journey slower")
 assert(known.arrive < walked.arrive, "a known taxi node beats the walked leg")
+
+local gromgol = { map = 0, x = -12414, y = 146, label = "Grom'gol" }
+local lochModan = { map = 0, x = -5400, y = -2900, label = "Loch Modan" }
+local hordeWalk = assert(Plan(gromgol, lochModan, {}, "Horde"))
+assert(not Has(hordeWalk, "flight"), "with nothing known the Horde route to Loch Modan has no flight")
+assert(
+	hordeWalk.unknownFlightMaps and hordeWalk.unknownFlightMaps[0] and not hordeWalk.unknownFlightMaps[1],
+	"a faster Eastern Kingdoms flight is reported, Kalimdor is not"
+)
+local stroll = assert(Plan(gromgol, { map = 0, x = -12300, y = 200, label = "Grom'gol" }, {}, "Horde"))
+assert(not stroll.unknownFlightMaps, "a short walk no flight would beat reports no continent")
 
 print("known taxi walk: a known flight point flies instead of walking: ok")

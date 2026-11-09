@@ -9,7 +9,7 @@ local ns = select(2, ...)
 
 local TRACE_SHOWN = 5
 local SETTINGS = "Settings: journeys %s, teleports %s (hearth saving %ss), other faction %s, TomTom %s/follow %s, "
-	.. "RestedXP %s"
+	.. "RestedXP %s, Guidelime %s"
 
 ---@param value any
 ---@return string
@@ -96,11 +96,17 @@ function ns.ReportLines()
 			OnOff(db.otherFaction),
 			OnOff(db.tomtom),
 			OnOff(db.tomtomFollow),
-			OnOff(db.restedxp)
+			OnOff(db.restedxp),
+			OnOff(db.guidelime)
 		),
 	}
 	local bind = ns.charDB.bind
 	lines[#lines + 1] = ("Bind point: %s"):format(bind and (bind.name .. ", " .. Place(bind)) or "not known")
+	local known = {}
+	for _, continent in ipairs(ns.KnownFlightPointsByContinent()) do
+		known[#known + 1] = ("%s %d"):format(continent.name, continent.known)
+	end
+	lines[#lines + 1] = "Flight points known: " .. table.concat(known, ", ")
 	local ride = ns.CurrentRide()
 	lines[#lines + 1] = ("Ride: %s%s"):format(
 		ride and ("route " .. ride) or (ns.IsObservingRide() and "being matched" or "none"),

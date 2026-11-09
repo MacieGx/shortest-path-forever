@@ -13,8 +13,63 @@ optional `### For addon authors` subsection after a version's player bullets.
 ## [Unreleased]
 
 - **Journeys start on the floor you are on.** The game does not say how high you stand, so a walk from where you were started on the cheapest surface around you: in the Undercity that was often the Ruins of Lordaeron overhead, or a walkway above the canal, and the route led you as if you were up there. Shortest Path now follows your floor as you move, keeping only the surfaces the walking map can reach from where you were, and starts the walk on it once one floor is left, usually within a few dozen yards of walking. Until then, standing still where floors overlap or just after a hearth or a lift, it walks from the cheapest surface as before. The floor is followed during a journey, and indoors whenever you move, so a journey planned in the Undercity after a short walk there starts in the city.
-- **Right-clicking a stop on the world map clears the journey on the first try.** While you moved with the map open, the route redrew every half second and every replan, and each redraw rebuilt the stops' buttons, so the one under the pointer lost its hover and a right-click landing then went unheard. The top half of the goal pin also never took a click. The buttons now stay put unless what they show changes, and a click counts anywhere the pin lights up.
 - **A spot picked on the Undercity's map is in the city.** The map gives no height, so a journey there ended on the cheapest surface at that spot: under the throne hall that was the Ruins of Lordaeron overhead, and the route led you across the ruins instead of down into the city. A spot picked on the Undercity's map, by Shift-click, `/way` or a quest, now ends on the city's floor, and crossing the hall above it no longer counts as arriving. The Tirisfal Glades map still names the surface.
+
+## [1.24.4] - 2026-11-09
+
+- **The switch that keeps a journey out of the objective tracker is easier to find.** It moved from Interface to Guidance and is now called *Show journey steps in the objective tracker*. Off, the journey still guides with its arrow, destination pin, map line and minimap route, and the tracker shows only the departures their own switch allows. Your choice carries over. Thanks to _spada on Discord for the question (#563).
+
+- **Known flight points are never wiped.** Updating Shortest Path no longer clears the flight points a character has learned, and opening a flight master corrects the list for that continent: points the map leaves out there are dropped while points on other continents stay (#570).
+
+## [1.24.3] - 2026-11-09
+
+- **A journey starts even when the client withholds the player's position.** Journey, the world map line, the minimap route and the arrow read the player's place from the client's own map position when `UnitPosition` hands addons secret values instead. A journey from Stormwind to Ironforge now plans and draws the walk from the Deeprun Tram to the quest givers, and the tracker lists its steps, instead of leaving no route and only Adventure Guide's own estimate line (#553).
+- **Only flight points the character really has are learned.** Opening a flight master still stored every node the map's new query returned, and this client reports undiscovered nodes as reachable, so a level 16 character could be routed through Light's Hope or Booty Bay. Learning now walks the flight master's own list (`NumTaxiNodes`, `TaxiNodeGetType` and `TaxiNodeName`), which the stock frame draws and only the character's points fill; an empty list learns nothing. The known list starts again from empty so wrongly learned points are dropped, and `/path debug` records the list and each node's type and name to confirm it (#555).
+- **Zone changes and reloads no longer teach flight points.** A flight point's status can change with no flight master open, and Shortest Path read the flight list then too; it now learns only while a flight master's map is open. Thanks to Exo_NA, user_ey1r2bwls2pf3sht32372 and legortiz on CurseForge for the reports (#555).
+
+## [1.24.2] - 2026-11-09
+
+- **The journey says when it knows none of your flight points.** Since 1.23.1 the known list starts empty and fills only when you open a flight master, so until then every journey walks, even when a flight would be far quicker. When a flight would make the journey quicker on Eastern Kingdoms or Kalimdor and Shortest Path knows none of your flight points there, the journey now shows a slowly pulsing red line asking you to open a flight master's map once to sync them. It goes as soon as one is known. When the journey is set, chat says the same once in red, unless *Remind me about new flight masters* is off, and `/path report` lists how many it knows on each. Thanks to aryaxo for the request (#539).
+- **The note that an undiscovered flight point would shorten a walk shows every time.** When a journey proved the walk it was already showing, it kept the walk without the finding that a flight would be quicker, so the grey note under the journey appeared on only some walks. It now shows on every walk it applies to (#539).
+- **Zooming the map with a journey on it is lighter.** The route redraws ten times a second while the map zooms and lays out only the dots near the view, so a long walk over OpenMap's stitched map no longer works through thousands of off-screen breadcrumbs (#529).
+- **Right-clicking a stop on the world map clears the journey on the first try.** While you moved with the map open, the route redrew every half second and every replan, and each redraw rebuilt the stops' buttons, so the one under the pointer lost its hover and a right-click landing then went unheard. The top half of the goal pin also never took a click. The buttons now stay put unless what they show changes, and a click counts anywhere the pin lights up. Fixed by MacieGx (#542).
+- **A journey only flies between flight points you know.** The planner checked that you knew the flight point you left from but not the one you landed at, so a journey could fly you to a flight master you had never spoken to. Both ends must now be known; a flight point you have not learned is walked to instead. Reported by chris-chrysos (#537).
+
+## [1.24.1] - 2026-11-09
+
+- **Zooming the map with a journey on it is lighter.** The route redraws ten times a second while the map zooms and lays out only the dots near the view, so a long walk over OpenMap's stitched map no longer works through thousands of off-screen breadcrumbs (#529).
+- **Right-clicking a stop on the world map clears the journey on the first try.** While you moved with the map open, the route redrew every half second and every replan, and each redraw rebuilt the stops' buttons, so the one under the pointer lost its hover and a right-click landing then went unheard. The top half of the goal pin also never took a click. The buttons now stay put unless what they show changes, and a click counts anywhere the pin lights up. Fixed by MacieGx (#542).
+- **A journey only flies between flight points you know.** The planner checked that you knew the flight point you left from but not the one you landed at, so a journey could fly you to a flight master you had never spoken to. Both ends must now be known; a flight point you have not learned is walked to instead. Reported by chris-chrysos (#537).
+
+## [1.24.0] - 2026-11-09
+
+- **Walks can follow the roads.** Turn on *Follow roads* in the settings and walked legs keep to roads and paved streets wherever that adds less than half again to the walk, read from the roads painted on the game's own terrain. The time shown is the real time of the road walk. Roads painted with a zone's plain dirt, such as Westfall's, are not known yet (#498).
+- **The Journey tracker reads like the rest of the column.** Each step now leads with the game's own mark for how you get there, by foot, flight, boat, zeppelin, lift, tram or portal, the place name in the tracker's gold and the time in its grey. The goal's pin heads the section and the step numbers and dashes are gone, so the way ahead reads at a glance instead of counting steps (#514).
+- **Nearby services has its own tab in the world map's quest log.** Open the map and pick the bags tab beside Quests to see vendors grouped by what they sell (arrows, bullets, food, drink, bags, trade supplies, reagents, weapons and armour), trainers by profession, and the inn, bank, auction house, flight master, stable and repairs. Each row names the nearest NPC and the travel time, and clicking it starts the journey. The search box finds a group, an NPC, or an item by name, so typing Simple Wood shows who sells it. Food and drink come from what each item restores, and profession trainers from the spells they teach, so a vendor is never filed by its title. `/spfnear` and the tracking menu's Open Nearby services entry open the tab, and the menu still lists every group. With Adventure Guide installed, both tabs sit under one Quests tab and one panel shows at a time (#430).
+- **The NPC you are walking to is marked on screen.** On a journey from Nearby services, bouncing arrows sit either side of that NPC's nameplate, and stay after you arrive until you walk away. Friendly nameplates must be on; Settings > Guidance > Arrows on the NPC's nameplate turns them off (#487).
+
+## [1.23.4] - 2026-11-09
+
+- **Adventure Guide's quest focus no longer leaves two markers.** Walking into the area of the step you are on makes Adventure Guide select that quest, which used to take the game's navigation marker away from Shortest Path: the quest's marker and the guide's arrow then led at once. The waypoint Shortest Path tracks now stays the marker, and only your own quest click takes navigation back. (#531)
+- **The Forever Leaderboards period menu works with a gamepad.** With the gamepad interface on, a press on it steps through this week or all time, for your guild and group or for players you've met, instead of opening a game menu that later had the client block `SetPreferredGamepadInteractTarget()` (cjber/forever-core#267).
+
+## [1.23.3] - 2026-11-08
+
+- **Long journeys to another continent appear again.** When a bind point's walks finished being searched after the route was already chosen, that late answer hit an error and the journey was never shown. A search that has finished now ignores answers that arrive after it (#516).
+- **The Forever addons page opens with a gamepad.** With the gamepad interface on, the Forever addons settings page can be entered from the Options list (cjber/tweaks-forever#382).
+
+## [1.23.2] - 2026-11-08
+
+- **`/way reset all` ends the journey without TomTom.** Shortest Path's own `/way` now reads TomTom's reset forms. `all` ends the journey, `away`, `<zone>` and `not <zone>` end the one the last `/way` line started, and a bare `reset` shows how to use it. Before, every reset printed the coordinate usage line and left the journey running (#159).
+
+## [1.23.1] - 2026-11-08
+
+- **Journeys no longer fly to flight points the character has not discovered.** The flight master's map only drew the points this character can actually see, but Shortest Path learned every node the map's query returned, so a level 16 character could be routed through flights it had never unlocked. It now learns a point only when the map draws it, and the known list starts again from empty, relearning at the next flight master (#512).
+
+## [1.23.0] - 2026-11-08
+
+- **The tracker can have a background.** Right-click any section's title in the Forever tracker and pick *Tracker background*: Off, or the game's tooltip fill at 25, 50, 75 or 100%, so quest text stays readable over bright ground. The choice is shared by every Forever addon in the column (cjber/forever-core#246).
+- **Guidelime guides can lead the journey too.** With *Follow Guidelime guides* on, the guide's current step plans the journey and moves it on as the guide advances; Guidelime's own arrow steps aside while Shortest Path draws one, and returns when ours is off. *Resume guide* takes the current step back after another journey. Thanks to deathmvp1 on CurseForge for the request (#506).
 - **The guide arrow and the compass let clicks through again.** Both took the mouse even with "Move the arrow" and "Move the compass" off, so a click near them could drag them away. They now take it only while being moved. (#509)
 
 - **The gold quest area on the minimap replaces the game's blue one instead of circling it.** Standing in a held stop's quest area recoloured the minimap's edge ring, which draws around the whole map, so a larger gold outline appeared around the client's blue area. The area itself now wears the gold, and the edge ring is left alone, so the gold area sits at the client's own shape and scale instead of becoming a second, larger outline (#504).
@@ -24,6 +79,7 @@ optional `### For addon authors` subsection after a version's player bullets.
 
 - **The report keeps errors from earlier sessions.** An error Shortest Path caught before the last `/reload`, a blocked action or a Lua warning was forgotten when the client reloaded, so it could not be copied into a report once it was gone. The report now lists them under their own heading, with when each was first and last seen and the version, build and locale it happened on, and keeps the 50 most recent. It also carries Shortest Path's recent log lines, the steps that led up to a bug, and `/forever debug` turns on detailed lines for the session (cjber/forever-core#204, cjber/forever-core#206).
 - **The controller keeps working after the world map and its filter menu.** Opening either could leave the game's interact action blocked, and the client could freeze. Shortest Path now lets the game finish closing the map before it takes its own hover and tooltip down, so the controller's actions stay the game's (#158).
+- **A stop tooltip keeps each stop's details with it.** When one pin marks two stops of the same quest, each stop now shows its own count and action with its own quest and chapter lines directly under it, shared lines appear once, the time and distance sit on the title line, and a single-leg trip no longer repeats the step it walks to (#492).
 
 ## [1.22.54] - 2026-11-08
 

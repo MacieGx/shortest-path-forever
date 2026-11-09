@@ -8,7 +8,7 @@ Alt-click the world map to place a destination directly over a Questie icon. Shi
 
 In **Map marks**, scale transport, flight master and minimap icons separately from 25% to 200%. Right-click a flight master icon to mark its path as known or unknown; opening a flight master's map also syncs paths reported by the client.
 
-In **Interface**, turn **Show journey in tracker** and **Show direction arrow** off independently, leaving the map route visible. Choose yards or metres, resize the tracker and compass, give the compass a background, or enable the optional minimap settings button. Turn off **Attach to quest tracker** in Guidance, or in the right-click menu of the tracker's "Journey to …" line (out of combat), to drag the Forever column by its heading.
+In **Guidance**, turn **Show journey steps in the objective tracker** off to leave the arrow, pin, map line and minimap route without a journey block in the tracker; **Interface**'s **Show direction arrow** turns the arrow off too. Choose yards or metres, resize the tracker and compass, give the compass a background, or enable the optional minimap settings button. Turn off **Attach to quest tracker** in Guidance, or in the right-click menu of the tracker's "Journey to …" line (out of combat), to drag the Forever column by its heading.
 
 The direction arrow swings smoothly to each new bearing and rests while you stand still. **Move the arrow** and **Arrow scale** in Interface place and size it, together with the cast prompt that takes its place on a Hearthstone or teleport step. While moving the arrow or the compass, hold Shift as you drag to move it a quarter as far as the mouse, or rest the pointer on it and press the arrow keys to nudge it (ten times as far with Shift). The arrow keys walk as usual everywhere else and in combat. **Show the time left under the compass** (off by default) puts the journey's time left beside the distance to your next turn.
 
@@ -22,7 +22,7 @@ With the game's gamepad interface on, Shortest Path never opens or turns the wor
 
 Click the current journey step and choose **Complete this step** to advance it. Skipping a Hearthstone leaves it out of plans for that journey. Other steps may return if your actual position still requires them.
 
-With RestedXP installed, **Resume guide** in Guidance or the Journey header menu resumes its current target after another journey. Adventure Guide owns this action when its RestedXP display is enabled; update both addons to use the integrated resume control.
+With RestedXP or Guidelime installed, **Resume guide** in Guidance or the Journey header menu resumes that guide's current target after another journey. Adventure Guide owns this action when its RestedXP display is enabled; update both addons to use the integrated resume control.
 
 ## Routes and map marks
 
@@ -72,6 +72,8 @@ With RestedXP installed, **Resume guide** in Guidance or the Journey header menu
 - **Typed waypoints.** `/way [zone] x y [title]` plans a journey to that spot, read as TomTom reads it: x and y are
   percentages of the map, `#1429` names a map by its ID, a zone can be shortened to any part of its name
   (`/way elwynn 42 65 Goldshire`, `/way hinterlands 14 44`), and a decimal comma works. Without a zone the spot is on the map you stand on.
+  `/way reset all` ends the journey; `/way reset away`, `/way reset <zone>` and `/way reset not <zone>` end the one
+  the last `/way` line started, as TomTom's own resets do.
   `/way` is registered only when TomTom isn't installed and no other addon has claimed it; Polestar's `/way` waits
   for it, as Polestar's own TomTom stand-in waits for this one ([docs/api.md](api.md#alongside-polestar)). `/path way`
   takes the same line and always works. With TomTom installed, *Follow TomTom's arrow* in Guidance (off by default) plans a journey
@@ -110,8 +112,9 @@ With RestedXP installed, **Resume guide** in Guidance or the Journey header menu
   ![The compass strip with the next turns and destination](screenshots/compass.png)
 
 - **Find nearby services.** Open the minimap's tracking menu or the world map's and pick *Nearby services*, or use
-  `/spfnear`. It lists class and profession trainers, repairs, reagents, vendors, innkeepers, banks, auction houses, flight
-  masters and stable masters. Pick a trainer or vendor specialty to route to the nearest friendly location in your
+  `/spfnear`. Vendors are grouped by what they sell: arrows, bullets, food, drink, bags, trade supplies, reagents,
+  and weapons and armour. Trainers are grouped by class or profession. It also lists repairs, innkeepers, banks,
+  auction houses, flight masters and stable masters. Pick a group to route to the nearest friendly location in your
   installed QuestieDB.
 
 - **Back to your corpse.** Release as a ghost and a red-orange dotted path, the colour of your corpse's tombstone,

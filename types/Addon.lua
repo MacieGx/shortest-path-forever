@@ -11,12 +11,19 @@
 ---@field Teleports SPFTeleport[]
 ---@field Landmasses SPFLandmass[]
 ---@field Zones table<number, SPFZone>
+---@field Food number[] items whose use spell restores health (Data/Services.lua)
+---@field Drink number[] items whose use spell restores mana (Data/Services.lua)
+---@field ProfessionTrainers table<number, number> trainer NPC -> its profession skill line (Data/Services.lua)
+---@field ClassTrainers table<number, number> class trainer NPC -> its class (Data/Services.lua)
 ---@field Walks table<number, table<string, (number|false)[]>>
 ---@field WalkPlaces table<number, table<string, number[]>>
+---@field RoadCells table<number, table<number, string>>
+---@field RoadEdges table<number, table<number, string>>
 ---@field db SPFDatabase
 ---@field charDB SPFCharacterDatabase
 ---@field Defaults table<string, boolean|number|string>
 ---@field NearbyServices SPFNearbyServices
+---@field QuestLogTabs ForeverQuestLogTabsAPI the shared quest log side tabs (UI/QuestLogTabs.lua)
 ---@field ProgressJourneyChanged? fun(point: SPFPoint?, reason?: "arrived"|"cleared")
 ---@field PeerStats ForeverPeerStatsNamespace
 ---@field LeaderboardsData? ForeverLeaderboardsData the shared leaderboards' data half (Core/LeaderboardsData.lua)
@@ -44,8 +51,10 @@
 ---@field z? number
 ---@field jump? number
 ---@field label? string
----@field tooltip? string
+---@field details? string[] -- a stop's own detail lines, in the caller's order (API.lua)
 ---@field routeTitle? string
+---@field routeTitleFormat? string -- the locale format behind an addon-built routeTitle (API.lua)
+---@field routeCount? integer -- stops in a multi-stop routeTitle (API.lua)
 ---@field stopLabel? string -- what to do at a multi-stop stop, without its count (API.lua)
 ---@field number? integer -- the stop's place in a multi-stop itinerary (API.lua)
 ---@field hold? boolean -- remain visible at the destination until the caller submits an updated route
@@ -53,6 +62,7 @@
 ---@field shapes? SPFAreaShape[] -- objective areas the stop stands for, in world coordinates
 ---@field look? SPFAPIStopKind -- what the caller said stands there (API.lua)
 ---@field questID? number
+---@field npc? integer -- the service NPC this stop reaches: Shortest Path marks its nameplate while the stop is current (Nearby services)
 ---@field pinBadge? boolean -- destination marker beside an existing map icon
 ---@field questIDs? number[] -- the quests whose client areas a held stop stands for (API.lua)
 ---@field handins? number[] -- the quests handed in at an API stop, hidden from the game's own map pins (API.lua)
@@ -172,11 +182,17 @@
 ---@field text string
 ---@field current? boolean
 ---@field grey? boolean
+---@field mode? SPFMode -- the leg's mode, whose mark leads its tracker line
+---@field action? string -- the step's words without its number or mark (the tracker's line, place already wrapped)
+---@field time? string -- the step's time, greyed after it
+---@field icon? number -- a teleport's own item or spell icon, leading its line
+---@field warning? boolean
 
 ---@class SPFDatabase : ForeverFamilyDB
 ---@field errors? ForeverCaughtError[] the shared error journal (Core/SafeCall.lua): earlier sessions' errors, for the report
 ---@field log? ForeverDebugLogStore the shared debug log ring (Core/Log.lua): recent lines, for the report
 ---@field destinationPin boolean an on-screen marker over the journey's destination
+---@field npcArrows? boolean arrows beside the nameplate of the NPC a Nearby services journey walks to (NpcArrows.lua)
 ---@field trackerHost? ForeverTrackerSettings
 ---@field menuTest? string `/path menutest`: which world map filter menu entries to leave out ("map", "nearby", "both")
 ---@field pins? boolean
@@ -196,6 +212,7 @@
 ---@field resumeJourney? boolean -- start the player's own journey again after a reload or relog (Resume.lua)
 ---@field restedxp? boolean -- follow RestedXP guide targets
 ---@field restedxpHideArrow? boolean -- Shortest Path's arrow replaces the guide's while a guide target is followed (RestedXP.lua)
+---@field guidelime? boolean -- follow Guidelime's current guide step (Guidelime.lua)
 ---@field tomtom? boolean -- answer third-party guides' TomTom waypoints with a journey while TomTom is absent
 ---@field tomtomFollow? boolean -- with TomTom installed, a journey follows the waypoint its arrow points to
 ---@field taxiRoute? boolean
@@ -230,6 +247,7 @@
 ---@field compassY? number
 ---@field corpse? boolean
 ---@field avoidHighZones? boolean -- walks go round zones whose lowest level is 4 or more above yours (Hazards.lua)
+---@field followRoads? boolean -- walks keep to roads where the detour is short (Data/RoadCells.lua)
 ---@field whatsNew? boolean
 ---@field seenVersion? string -- the version last loaded, for the line after an update (WhatsNew.lua)
 ---@field debug? boolean
@@ -346,6 +364,7 @@ ShortestPathForeverPathData = nil
 ---@field hazards? string -- the key of the hazards its walks were searched with (Hazards.lua)
 ---@field preferred? boolean a ride the planner chose over a slightly quicker long walk
 ---@field unknownFlight? boolean the route walks only because a flight point it would use is undiscovered
+---@field unknownFlightMaps? table<number, true> the continents whose undiscovered flight points would shorten the route
 ---@class SPFWalkCost
 ---@field from SPFPoint
 ---@field to SPFPoint

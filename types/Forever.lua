@@ -46,8 +46,11 @@ ChatEdit_GetActiveWindow = nil
 ChatFrameUtil = nil
 ---@type {AddMessage: fun(message: string, color: {r: number, g: number, b: number})}
 RaidWarningUtil = nil
----@type {Normal: ColorMixin, NormalHighlight: ColorMixin, Header: ColorMixin}
+---@type {Normal: colorRGBA, NormalHighlight: colorRGBA, Header: colorRGBA}
 OBJECTIVE_TRACKER_COLOR = nil
+-- The stock objective line's dash, which the client also leaves as the line's indent.
+---@type string
+QUEST_DASH = nil
 ---@type string
 OFF = nil
 -- Blizzard_Menu/MenuConstants.lua: what a menu button's responder answers; CloseAll closes every menu.
@@ -127,6 +130,7 @@ function GameTooltip_AddColoredDoubleLine(tooltip, left, right, leftColor, right
 ---@field GetGlobalPinScale fun(self: SPFMapCanvas): number
 ---@field GetCanvasScale fun(self: SPFMapCanvas): number
 ---@field GetCanvasZoomPercent fun(self: SPFMapCanvas): number
+---@field GetViewRect fun(self: SPFMapCanvas): {left: number, right: number, top: number, bottom: number}
 ---@field GetNormalizedCursorPosition fun(self: SPFMapCanvas): number, number
 ---@field GetPinFrameLevelsManager fun(self: SPFMapCanvas): {GetValidFrameLevel: fun(self: table, levelType: string, index?: number): number}
 ---@field EnumeratePinsByTemplate fun(self: SPFMapCanvas, template: string): fun(): SPFMapPin
@@ -181,6 +185,8 @@ ForeverMapMarkers = nil
 
 ---@class SPFTrackerLine : Frame
 ---@field Text FontString
+---@field Dash FontString
+---@field template string the XML template whose pool this line belongs to
 ---@field used boolean
 ---@class SPFTrackerBlockHeader : Button
 ---@field questID? number
@@ -202,6 +208,7 @@ ForeverMapMarkers = nil
 ---@class SPFTrackerModule : Frame
 ---@field Header SPFTrackerHeader
 ---@field headerText string
+---@field lineTemplate string
 ---@field uiOrder number
 ---@field hasDisplayPriority boolean
 ---@field GetBlock fun(self: SPFTrackerModule, id: number|string): SPFTrackerBlock
@@ -216,19 +223,6 @@ ObjectiveTrackerFrame = nil
 ---@class SPFTrackerManager
 ---@type SPFTrackerManager
 ObjectiveTrackerManager = nil
-
----@class ForeverTrackerHostAPI
----@field IsAttachedToQuestTracker fun(): boolean
----@field SetAttached fun(attached: boolean)
----@field GetSettings fun(): ForeverTrackerSettings
----@field GetScale fun(): number
----@field SetScale fun(scale: number)
----@field OnAttachmentChanged fun(callback: fun(attached: boolean))
----@field SavePosition fun(x: number, y: number)
----@field IsLocked fun(): boolean
----@field SetLocked fun(value: boolean)
----@type ForeverTrackerHostAPI?
-ForeverTrackerHost = nil
 
 ---@class SPFSetting
 ---@field SetValue fun(self: SPFSetting, value: boolean|number|string)
@@ -252,6 +246,7 @@ ForeverTrackerHost = nil
 ---@field CreateSliderOptions fun(minimum: number, maximum: number, step: number): table
 ---@field CreateSliderInitializer fun(setting: SPFSetting, options: table, tooltip?: string): SPFSettingsInitializer
 ---@field CreateCheckboxInitializer fun(setting: SPFSetting, options?: table, tooltip?: string): SPFSettingsInitializer
+---@field CreateCheckbox fun(category: SPFSettingsCategory, setting: SPFSetting, tooltip?: string)
 ---@field CreateControlTextContainer fun(): SPFControlTextContainer
 ---@field CreateDropdownInitializer fun(setting: SPFSetting, getData: (fun(): table[]), tooltip?: string): SPFSettingsInitializer
 ---@field RegisterInitializer fun(category: SPFSettingsCategory, initializer: SPFSettingsInitializer)
@@ -262,12 +257,18 @@ Settings = nil
 
 -- Blizzard's settings button initializer, absent from the pinned annotations (Ketho/vscode-wow-api).
 ---@param name string
----@param description string
----@param callback function
----@param searchTags? table
+---@param buttonText string
+---@param click fun()
+---@param tooltip? string
 ---@param addSearchTags? boolean
 ---@return SPFSettingsInitializer
-function CreateSettingsButtonInitializer(name, description, callback, searchTags, addSearchTags) end
+function CreateSettingsButtonInitializer(name, buttonText, click, tooltip, addSearchTags) end
+
+-- Blizzard_SharedXMLGame InputUtil.lua: the client's input-device switch, read by UI/ForeverFamily.lua.
+---@class SPFInputUtil
+---@field IsGamepadUIEnabled fun(): boolean
+---@type SPFInputUtil?
+InputUtil = nil
 
 ---@class SPFUiMapPointFactory
 ---@field CreateFromVector2D fun(uiMapID: number, position: Vector2DMixin): UiMapPoint
@@ -275,35 +276,52 @@ function CreateSettingsButtonInitializer(name, description, callback, searchTags
 ---@type SPFUiMapPointFactory
 UiMapPoint = nil
 
+---@type {ContinueOnAddOnLoaded: fun(name: string, callback: fun()), ContinueAfterAllEvents: fun(callback: fun(), ...: string)}
 EventUtil = {}
 ---@param callback function
 ---@param ... string
 function EventUtil.ContinueAfterAllEvents(callback, ...) end
 
----@class ForeverTrackerSettings
----@field attached boolean
----@field locked? boolean the grip ignores drag while the tracker is locked
----@field scale? number tracker size, 1 is the stock size
----@field x? number
----@field y? number
+-- The shared quest log side tab (UI/QuestLogTabs.lua), and the map frame it hangs from. The registry is published by
+-- the first Forever addon to load, so every addon's tab stacks in the one column.
+---@class ForeverQuestLogTab : Button
+---@field SetCustomOnMouseUpHandler fun(self: ForeverQuestLogTab, handler: fun(self: ForeverQuestLogTab, mouseButton: string, upInside: boolean))
+---@field SetChecked fun(self: ForeverQuestLogTab, checked: boolean)
+---@field tooltipText string
+---@field activeAtlas? string
+---@field inactiveAtlas? string
+---@field Icon Texture the tab's art, fitted to its template
 
----@class ForeverTrackerGrip
----@field Show fun(value: boolean) shows or hides the grip, which the host keeps hidden while attached
----@field SetLabel fun(value: boolean) redraws the label from the switch, without waiting for a hover
+---@class ForeverQuestLogTabSpec
+---@field name string the tab frame's global name
+---@field tooltip string the tab's tooltip text
+---@field panel Frame the panel the tab shows
+---@field order number where the tab sits in the stack, lowest first
+---@field shown? fun(visible: boolean) called once per change when the panel becomes visible to the player or stops being so
 
----@class ForeverTrackerOrderAPI
----@field Sort fun(modules: ForeverTrackerModule[]) orders the shared column's sections in place
+---@class ForeverQuestLogTabsAPI
+---@field Register fun(key: string, spec: ForeverQuestLogTabSpec): ForeverQuestLogTab
+---@field Select fun(key: string)
+---@field ShowQuests fun()
+---@field Selected fun(): string?
 
----@class ForeverTrackerLock
----@field Locked fun(): boolean reads the saved switch through the host
----@field Grip fun(host: Frame, source: ForeverTrackerHostAPI): ForeverTrackerGrip draws the grip on the column it drags
+---@type ForeverQuestLogTabsAPI?
+ForeverQuestLogTabs = nil
 
----@class ForeverTrackerNamespace
----@field TrackerHost? ForeverTrackerHostAPI
----@field TrackerOrder? ForeverTrackerOrderAPI the section order, from UI/TrackerOrder.lua
----@field TrackerQuestie? ForeverTrackerQuestie Questie's quest list, from UI/TrackerQuestie.lua
----@field TrackerEqot? ForeverTrackerEqot EQOT's quest list, from UI/TrackerEqot.lua
----@field TrackerLock? ForeverTrackerLock the grip and its Lock switch, from UI/TrackerLock.lua
----@field TrackerHostSettings? fun(): ForeverTrackerSettings
----@field L table<string, string>
----@field ContextMenu? fun(owner: Frame, generator: fun(owner: Frame, root: any)): any the addon's own context menu, when it draws one
+---@class ForeverQuestLogContentFrame : Frame
+---@field displayMode any
+---@class ForeverQuestMapFrame : Frame
+---@field ContentsAnchor Frame
+---@field ContentFrames ForeverQuestLogContentFrame[]
+---@field QuestsTab Button
+---@field MapLegendTab Button
+---@field displayMode any
+---@type ForeverQuestMapFrame
+QuestMapFrame = nil
+---@class ForeverQuestMapFrameOverrides
+---@field questTabHidden? boolean
+---@field GetQuestsTabAnchorOffset fun(): number, number
+---@type ForeverQuestMapFrameOverrides
+QuestMapFrameOverrides = nil
+---@type string
+QUESTS_LABEL = nil

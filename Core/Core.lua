@@ -34,12 +34,15 @@ local DEFAULTS = {
 	-- An on-screen marker over the destination, like the client's own waypoint pin. Off by default: it is
 	-- new screen furniture, and a player asks for it from Settings > Guidance.
 	destinationPin = false,
+	-- Bouncing arrows beside the nameplate of the NPC a Nearby services journey walks to.
+	npcArrows = true,
 	resumeJourney = false,
 	tomtom = true,
 	tomtomFollow = false,
 	restedxp = true,
 	-- The arrow takeover alone: keep RestedXP's arrow while still following its guide.
 	restedxpHideArrow = true,
+	guidelime = true,
 	taxiRoute = true,
 	teleports = true,
 	-- Another player's spellbook is not queryable, so a party mage's portals are declared. Off by default; when on,
@@ -69,6 +72,7 @@ local DEFAULTS = {
 	compassBackground = 0,
 	corpse = true,
 	avoidHighZones = true,
+	followRoads = false,
 	whatsNew = true,
 }
 ns.Defaults = DEFAULTS

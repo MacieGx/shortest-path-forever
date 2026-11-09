@@ -8,8 +8,24 @@ local mapNodes = {
 	{ nodeID = 103, slotIndex = 1, state = reachable, name = "Sturmwind" },
 	{ nodeID = 101, slotIndex = 3, state = current },
 	{ nodeID = 102, slotIndex = 4, state = reachable },
+	-- The flight master reports this node reachable, but the client gives its slot type NONE, so it is not shown.
+	{ nodeID = 104, slotIndex = 5, state = reachable, name = "Ghostlands" },
+	{ nodeID = 105, slotIndex = 2, state = reachable, name = "Kharanos" },
+	-- The new query returns this undiscovered node and this client still gives its slot a non-NONE type, but the
+	-- classic list ends at five entries, so the character does not really have it.
+	{ nodeID = 106, slotIndex = 6, state = reachable, name = "Light's Hope" },
 }
-local nodeTypes = { "REACHABLE", "DISTANT", "CURRENT", "REACHABLE" }
+local nodeTypes = { "REACHABLE", "DISTANT", "CURRENT", "REACHABLE", "NONE" }
+local staleTypes = { [6] = "REACHABLE" }
+local nodeNames = {
+	[1] = "Sturmwind",
+	[2] = "Kharanos",
+	[3] = "Ironforge",
+	[4] = "Menethil Harbor",
+	[5] = "Ghostlands",
+	[6] = "Light's Hope",
+}
+local numNodes = #nodeTypes
 -- The client's chosen route deliberately differs from the planner's intermediate hop.
 local routes = { [1] = { { 3, 2 }, { 2, 1 } }, [4] = { { 3, 4 } } }
 local textures, eventFrame = {}, nil
@@ -90,10 +106,10 @@ local env = setmetatable({
 		return 99
 	end,
 	NumTaxiNodes = function()
-		return #nodeTypes
+		return numNodes
 	end,
 	TaxiNodeGetType = function(slot)
-		return nodeTypes[slot]
+		return staleTypes[slot] or nodeTypes[slot]
 	end,
 	GetNumRoutes = function(slot)
 		routeQueries = routeQueries + 1
@@ -102,8 +118,8 @@ local env = setmetatable({
 	TaxiGetNodeSlot = function(slot, hop, source)
 		return routes[slot][hop][source and 1 or 2]
 	end,
-	TaxiNodeName = function()
-		error("never match by name")
+	TaxiNodeName = function(slot)
+		return nodeNames[slot] or ""
 	end,
 	TaxiNodePosition = function()
 		error("never guess a slot from unverified coordinates")
@@ -188,11 +204,33 @@ assert(ns.TaxiDestination({ { mode = "boat" }, flight }, 101) == nil, "do not sk
 assert(ns.TaxiDestination(nil, 101) == nil and ns.TaxiDestination({}, 101) == nil)
 
 ns.db = { taxiRoute = true }
-ns.TaxiNodes = { [101] = { name = "Ironforge" }, [102] = {}, [103] = { name = "Stormwind" } }
+ns.TaxiNodes = {
+	[101] = { name = "Ironforge", map = 0 },
+	[102] = { map = 0 },
+	[103] = { name = "Stormwind", map = 0 },
+	[104] = { name = "Ghostlands", map = 0 },
+	[105] = { name = "Kharanos", map = 0 },
+	[106] = { name = "Light's Hope", map = 1 },
+}
 ns.TaxiNodes[101].faction, ns.TaxiNodes[103].faction = "Alliance", "Horde"
 ns.SetJourneyRoute = function() end
 ns.JourneyChanged = function() end
+-- A list saved under any older taxiVersion is kept: an update never forgets learned flight points.
+env.ShortestPathForeverCharDB = {
+	taxi = { [101] = true, [106] = true },
+	taxiNames = { [101] = "Ironforge", [106] = "Light's Hope" },
+	taxiVersion = 3,
+}
 ns.init()
+assert(
+	env.ShortestPathForeverCharDB.taxi[101] and env.ShortestPathForeverCharDB.taxi[106],
+	"a list saved under an old taxiVersion is kept on load"
+)
+assert(
+	env.ShortestPathForeverCharDB.taxiNames[101] == "Ironforge"
+		and env.ShortestPathForeverCharDB.taxiNames[106] == "Light's Hope",
+	"an old list keeps its names on load"
+)
 env.ShortestPathForeverCharDB.taxi = {}
 env.ShortestPathForeverCharDB.taxiNames = {}
 ns.charDB = env.ShortestPathForeverCharDB
@@ -224,6 +262,9 @@ end
 local target = env.TaxiButton1
 publish()
 assert(routeQueries == 0, "a closed map does no route work")
+-- A zone change or a login fires this with no flight master's map open, so nothing may be learned from it.
+event("TAXI_NODE_STATUS_CHANGED")
+assert(next(ns.KnownTaxiNodes()) == nil, "a status change with no flight master open learns nothing")
 -- A flight point reads by its shipped name until a flight map has named it, in the game's language.
 ns.L = setmetatable({}, {
 	__index = function(_, phrase)
@@ -244,6 +285,18 @@ assert(
 	"replace stock one-hop lines and reveal a distant connection"
 )
 assert(ns.KnownTaxiNodes()[103], "flight discovery still runs")
+assert(
+	ns.KnownTaxiNodes()[101] and ns.KnownTaxiNodes()[102] and ns.KnownTaxiNodes()[105],
+	"current, reachable and distant slots are all known flight points"
+)
+assert(not ns.KnownTaxiNodes()[104], "a node whose slot type is NONE is never learned")
+assert(not env.ShortestPathForeverCharDB.taxiNames[104], "an unlearned node keeps its name out of the list")
+assert(
+	not ns.KnownTaxiNodes()[106],
+	"an undiscovered node beyond the classic list is never learned, even with a non-NONE slot type"
+)
+assert(not env.ShortestPathForeverCharDB.taxiNames[106], "an undiscovered node keeps its name out of the list")
+assert(ns.TaxiName(105) == "Kharanos", "a learned node keeps the client's name")
 assert(textures[1].path == "Interface\\TaxiFrame\\UI-Taxi-Line")
 assert(table.concat(textures[1].points, ",") == "60,90,40,60", "first client hop uses displayed button anchors")
 assert(
@@ -314,11 +367,66 @@ assert(visibleLines() == 2)
 
 event("TAXIMAP_CLOSED")
 assert(visibleLines() == 0 and not target.locked, "closed event clears before the frame hides")
+-- A zone change after leaving the flight master fires this too: the list describes no open map any more.
+local learned = env.ShortestPathForeverCharDB.taxi
+env.ShortestPathForeverCharDB.taxi = {}
+event("TAXI_NODE_STATUS_CHANGED")
+assert(next(ns.KnownTaxiNodes()) == nil, "a status change after the flight master is left learns nothing")
+env.ShortestPathForeverCharDB.taxi = learned
 env.TaxiFrame:Hide()
 env.TaxiFrame:Show()
 event("TAXIMAP_OPENED")
 assert(visibleLines() == 2 and target.locked, "also support open events after the stock OnShow")
 env.TaxiFrame:Hide()
 assert(visibleLines() == 0 and not target.locked, "hiding the frame clears without waiting for the event")
+
+-- An empty classic list is not a reason to fall back to the new query's nodes, and it forgets nothing.
+numNodes = 0
+env.ShortestPathForeverCharDB.taxi = { [101] = true, [106] = true }
+env.ShortestPathForeverCharDB.taxiNames = { [101] = "Ironforge", [106] = "Light's Hope" }
+event("TAXIMAP_OPENED")
+assert(ns.KnownTaxiNodes()[101] and ns.KnownTaxiNodes()[106], "an empty scan keeps every known flight point")
+assert(
+	env.ShortestPathForeverCharDB.taxiNames[101] == "Ironforge"
+		and env.ShortestPathForeverCharDB.taxiNames[106] == "Light's Hope",
+	"an empty scan keeps every known name"
+)
+
+-- A scan lists every flight point the character knows on that continent, so points it leaves out are forgotten
+-- there while points on another continent stay.
+numNodes = 2
+env.ShortestPathForeverCharDB.taxi = {
+	[101] = true,
+	[102] = true,
+	[103] = true,
+	[104] = true,
+	[106] = true,
+}
+env.ShortestPathForeverCharDB.taxiNames = {
+	[101] = "Ironforge",
+	[102] = "Kharanos",
+	[103] = "Stormwind",
+	[104] = "Ghostlands",
+	[106] = "Light's Hope",
+}
+event("TAXI_NODE_STATUS_CHANGED")
+assert(ns.KnownTaxiNodes()[103] and ns.KnownTaxiNodes()[105], "the listed nodes are known")
+assert(
+	not ns.KnownTaxiNodes()[101] and not ns.KnownTaxiNodes()[102] and not ns.KnownTaxiNodes()[104],
+	"unlisted nodes on that continent are dropped"
+)
+assert(ns.KnownTaxiNodes()[106], "an unlisted node on another continent is kept")
+assert(
+	env.ShortestPathForeverCharDB.taxiNames[103] == "Sturmwind"
+		and env.ShortestPathForeverCharDB.taxiNames[105] == "Kharanos",
+	"the listed nodes keep their names"
+)
+assert(
+	not env.ShortestPathForeverCharDB.taxiNames[101]
+		and not env.ShortestPathForeverCharDB.taxiNames[102]
+		and not env.ShortestPathForeverCharDB.taxiNames[104],
+	"dropped nodes lose their names"
+)
+assert(env.ShortestPathForeverCharDB.taxiNames[106] == "Light's Hope", "a kept node keeps its name")
 
 print("taxi_spec: ok")

@@ -292,7 +292,15 @@ ns.Init(function()
 			if not ns.db.journey then
 				ns.ClearJourney()
 			end
+			-- The guide follower only ticks while journeys are on; turning them back on starts it again.
+			ns.RefreshGuidelime()
 		end
+	)
+	Checkbox(
+		"journeyTracker",
+		L["Show journey steps in the objective tracker"],
+		L["Off keeps the arrow, pin, map line and minimap route, with no journey block in the objective tracker."],
+		ns.RefreshTracker
 	)
 	Checkbox(
 		"resumeJourney",
@@ -310,6 +318,16 @@ ns.Init(function()
 			.. L["It stands down while Waypoint UI is navigating, so the two never draw over each other."],
 		function()
 			ns.DestinationPinChanged()
+		end
+	)
+	Checkbox(
+		"npcArrows",
+		L["Arrows on the NPC's nameplate"],
+		L["Shows over the nameplate of the NPC a Nearby services journey walks to."]
+			.. " "
+			.. L["Friendly nameplates must be on to see them."],
+		function()
+			ns.RefreshNpcArrows()
 		end
 	)
 	Checkbox(
@@ -347,9 +365,25 @@ ns.Init(function()
 		end
 	)
 	Checkbox(
+		"guidelime",
+		L["Follow Guidelime guides"],
+		L["Plan journeys to Guidelime's current guide step. Guidelime's arrow steps aside while ours draws."],
+		function()
+			ns.RefreshGuidelime()
+		end
+	)
+	Checkbox(
 		"avoidHighZones",
 		L["Avoid zones far above my level"],
 		L["Walks go round zones whose lowest level is 4 or more above yours, but never the ones you start or end in."],
+		ns.TravelPolicyChanged
+	)
+	Checkbox(
+		"followRoads",
+		L["Follow roads"],
+		-- luacheck: push ignore 631
+		L["Walks keep to roads and paved streets where that adds less than half again to the walk. Roads painted with a zone's plain dirt are not known."],
+		-- luacheck: pop
 		ns.TravelPolicyChanged
 	)
 	Checkbox(
@@ -405,6 +439,12 @@ ns.Init(function()
 			ns.ResumeRestedXP()
 		end, nil, false)
 	)
+	Settings.RegisterInitializer(
+		page,
+		CreateSettingsButtonInitializer(L["Guidelime"], L["Resume guide"], function()
+			ns.ResumeGuidelime()
+		end, nil, false)
+	)
 
 	-- Party portals: another player's mage portals, declared because the client cannot read their spellbook. The
 	-- planner only offers them while another mage is in the party or raid.
@@ -445,12 +485,6 @@ ns.Init(function()
 
 	-- Interface: what the addon puts on screen.
 	Page(L["Interface"])
-	Checkbox(
-		"journeyTracker",
-		L["Show journey in tracker"],
-		L["Keep the route on the map when the journey list is hidden."],
-		ns.RefreshTracker
-	)
 	Checkbox(
 		"arrow",
 		L["Show direction arrow"],
@@ -626,11 +660,9 @@ ns.Init(function()
 	)
 
 	-- The Forever addons page is shared by all five addons (UI/ForeverFamily.lua), with the hint setting on it.
-	local family = Settings.RegisterCanvasLayoutSubcategory(
-		category,
-		ns.Family.CreatePanel(nil, ns.db, addonName, L),
-		L["Forever addons"]
-	)
+	-- With the gamepad interface on the page is the client's own rows so the Options navigation can enter it
+	-- (cjber/tweaks-forever#382).
+	local family = ns.Family.Register(category, ns.db, addonName, L)
 	Settings.RegisterInitializer(
 		category,
 		CreateSettingsButtonInitializer(L["Forever addons"], L["Open"], function()

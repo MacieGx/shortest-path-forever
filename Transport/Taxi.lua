@@ -1,12 +1,11 @@
 ---@class SPFNamespace
 local ns = select(2, ...)
 
--- The flight points this character knows, for the journey planner and the map's flight master pins. Only a
--- flight master's own map says which nodes a character can fly to: the world map's taxi query answers anywhere
--- but reports every node as discovered on this client (the other faction's included), so it is not a source.
-
--- Lists built from that query before it was dropped; they claim every node, so start again from empty.
-local KNOWN_VERSION = 2
+-- The flight points this character knows, for the journey planner and the map's flight master pins. Only the
+-- classic flight-master list says which nodes a character can fly to: slots 1 to NumTaxiNodes(), each with
+-- TaxiNodeGetType and TaxiNodeName, are the entries the stock TaxiFrame draws and only contain nodes the character
+-- really has. The new node query reports every node on the continent as reachable here, so its presence is not a
+-- source.
 
 ---@type SPFLeg[]?
 local journeyLegs
@@ -17,6 +16,9 @@ local lines = {}
 ---@type Button?
 local highlighted, hovered
 local ownsMap = false
+-- Set by TAXIMAP_OPENED and cleared by TAXIMAP_CLOSED (and the map hiding): the only window in which the classic
+-- list describes a flight master's map, so the only window in which a scan may learn a node.
+local taxiMapOpen = false
 local hookedFrame
 local hookedButtons = {}
 
@@ -192,23 +194,35 @@ local function Log(key, uiMap, nodes)
 	local rows = {}
 	for _, node in ipairs(nodes) do
 		rows[#rows + 1] = string.format(
-			"%d %s undiscovered=%s state=%s",
+			"%d %s type=%s undiscovered=%s state=%s",
 			node.nodeID,
 			node.name,
+			tostring(node.slotIndex and TaxiNodeGetType(node.slotIndex)),
 			tostring(node.isUndiscovered),
 			tostring(node.state)
 		)
+	end
+	local count = NumTaxiNodes()
+	local slots = {}
+	for index = 1, count do
+		slots[#slots + 1] =
+			string.format("%d %s type=%s", index, tostring(TaxiNodeName(index)), tostring(TaxiNodeGetType(index)))
 	end
 	ns.db.taxiLog = ns.db.taxiLog or {}
 	ns.db.taxiLog[key .. uiMap] = {
 		seen = GetServerTime(),
 		showsNodes = C_TaxiMap.ShouldMapShowTaxiNodes(uiMap),
+		numTaxiNodes = count,
 		nodes = rows,
+		slots = slots,
 	}
 end
 
--- At a flight master, every node it can fly to is known (absence never unlearns one), by the name the client gives
--- it there, which is in the game's language.
+-- At a flight master, only the classic list's entries are nodes the character really has. Walk slots 1 to
+-- NumTaxiNodes() and learn those whose type is not "NONE", using the new query only to resolve the slot to its
+-- nodeID. The list covers every flight point the character knows on that continent, so once it has listed a node,
+-- forget the points already known on the same continent that it leaves out. Nodes on other continents stay, and a
+-- scan that lists nothing changes nothing.
 local function ScanFlightMaster()
 	local uiMap = GetTaxiMapID and GetTaxiMapID()
 	local nodes = uiMap and C_TaxiMap.GetAllTaxiNodes(uiMap) or {}
@@ -216,13 +230,34 @@ local function ScanFlightMaster()
 	if uiMap then
 		Log("master", uiMap, nodes)
 	end
+	local bySlot = {}
 	for _, node in ipairs(nodes) do
-		if ns.TaxiNodes[node.nodeID] then
-			if node.state ~= Enum.FlightPathState.Unreachable then
-				ns.charDB.taxi[node.nodeID] = true
+		if node.slotIndex and ns.TaxiNodes[node.nodeID] then
+			bySlot[node.slotIndex] = node
+		end
+	end
+	local listed, continent = {}, nil
+	for slot = 1, NumTaxiNodes() do
+		local node = bySlot[slot]
+		if node and TaxiNodeGetType(slot) ~= "NONE" then
+			ns.charDB.taxi[node.nodeID] = true
+			listed[node.nodeID] = true
+			continent = continent or ns.TaxiNodes[node.nodeID].map
+			local name = TaxiNodeName(slot)
+			if not name or name == "" then
+				name = node.name
 			end
-			if node.name and node.name ~= "" then
-				ns.charDB.taxiNames[node.nodeID] = node.name
+			if name and name ~= "" then
+				ns.charDB.taxiNames[node.nodeID] = name
+			end
+		end
+	end
+	if continent ~= nil then
+		for nodeID in pairs(ns.charDB.taxi) do
+			local node = ns.TaxiNodes[nodeID]
+			if node and node.map == continent and not listed[nodeID] then
+				ns.charDB.taxi[nodeID] = nil
+				ns.charDB.taxiNames[nodeID] = nil
 			end
 		end
 	end
@@ -257,6 +292,7 @@ function ns.SetTaxiKnown(nodeID, known)
 end
 
 local function Closed()
+	taxiMapOpen = false
 	hovered, mapNodes = nil, {}
 	ClearRoute(false)
 end
@@ -297,9 +333,7 @@ end
 ns.Init(function()
 	ShortestPathForeverCharDB = ShortestPathForeverCharDB or {}
 	ns.charDB = ShortestPathForeverCharDB
-	if ns.charDB.taxiVersion ~= KNOWN_VERSION then
-		ns.charDB.taxi, ns.charDB.taxiScanned, ns.charDB.taxiVersion = {}, nil, KNOWN_VERSION
-	end
+	ns.charDB.taxi = ns.charDB.taxi or {}
 	ns.charDB.taxiNames = ns.charDB.taxiNames or {}
 	local frame = CreateFrame("Frame")
 	frame:RegisterEvent("TAXIMAP_OPENED")
@@ -309,13 +343,19 @@ ns.Init(function()
 	frame:SetScript("OnEvent", function(_, event)
 		if event == "TAXIMAP_CLOSED" then
 			Closed()
+			return
+		end
+		if event == "TAXIMAP_OPENED" then
+			taxiMapOpen = true
+		elseif not taxiMapOpen then
+			-- A status change away from a flight master (a zone change, a /reload) describes no flight map.
+			return
+		end
+		HookTaxiFrame()
+		if TaxiFrame and TaxiFrame:IsShown() then
+			Shown()
 		else
-			HookTaxiFrame()
-			if TaxiFrame and TaxiFrame:IsShown() then
-				Shown()
-			else
-				ScanFlightMaster()
-			end
+			ScanFlightMaster()
 		end
 	end)
 	HookTaxiFrame()

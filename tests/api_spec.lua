@@ -90,6 +90,13 @@ driver.path.settle()
 equal(API.Ended("AGF"), nil, "running")
 equal(ns.IsJourneyGuided(), true, "arrow enabled")
 equal(ns.JourneyInfo(), "Journey to Quest giver", "title propagated")
+equal(
+	ns.JourneyInfo(function(place)
+		return "[" .. place .. "]"
+	end),
+	"Journey to [Quest giver]",
+	"the tracker asks for the title with its place already wrapped"
+)
 local shown, waypoint = driver.shown(), driver.waypoint()
 local _, _, plan, index = ns.JourneyInfo()
 near(API.Estimate(1, 0.5, 0.5, 1, 0.5014, 0.5), 10, "estimate during journey")
@@ -198,6 +205,13 @@ equal(API.CurrentStop("AGF"), 1, "first stop")
 equal(API.CurrentStop("OtherAddon"), nil, "foreign current stop")
 equal(API.CurrentStop(driver.secret), nil, "secret owner")
 equal(ns.JourneyInfo(), "Stop 1 of 4: First", "route progress title")
+equal(
+	ns.JourneyInfo(function(place)
+		return "[" .. place .. "]"
+	end),
+	"Stop 1 of 4: [First]",
+	"the tracker asks for the route title with its place already wrapped"
+)
 for _, invalid in ipairs({
 	false,
 	{},
@@ -842,12 +856,20 @@ equal(boat.wait ~= nil and boat.wait >= 60, true, "an untimed boat's average wai
 equal(estimate(26, 67, API.EstimateDetail).legs[4].wait, nil, "flight boarding is too short to report")
 ns.known[26] = nil
 local learn = estimate(26, 39, API.EstimateDetail, 300)
-for position, leg in ipairs(learn.legs) do
-	equal(leg.newFlightPath, position == 1 or nil, "only the walk to the unknown flight master learns it")
+for _, leg in ipairs(learn.legs) do
+	equal(leg.newFlightPath, nil, "walking to an unknown flight point does not learn it")
 end
-equal(learn.legs[1].mode, "walk", "walk to Auberdine's flight master")
-equal(learn.legs[2].mode, "flight", "then fly from it")
+local auberdine, gadgetzan = ns.TaxiNodes[26], ns.TaxiNodes[39]
+local walkStart = { map = auberdine.map, x = auberdine.x + 300, y = auberdine.y + 300 }
+local to = { map = gadgetzan.map, x = gadgetzan.x, y = gadgetzan.y }
+local unknownDeparture = ns.EstimateLegs(walkStart, to)
+for _, leg in ipairs(unknownDeparture) do
+	equal(leg.mode ~= "flight" or leg.from.id ~= 26, true, "no flight departs an unknown flight point")
+end
 ns.known[26] = true
+local knownDeparture = ns.EstimateLegs(walkStart, to)
+equal(knownDeparture[2].mode, "flight", "knowing Auberdine flies from it")
+equal(knownDeparture[2].from.id, 26, "the flight starts at Auberdine")
 -- Relabelling a running route's stop in place, for a guide that renamed a step at an unchanged position.
 equal(
 	API.NavigateRoute("AGF", {

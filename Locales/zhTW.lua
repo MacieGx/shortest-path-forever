@@ -18,8 +18,10 @@ L["%s station"] = "%s車站"
 L["%s tower"] = "%s塔"
 L["%s · %s"] = "%s · %s"
 L["%s — unavailable here"] = "%s——此處無法使用"
+L["%s, %s"] = "%s，%s"
 L["%s, then %s"] = "%s，然後%s"
 L["/way [zone] x y [title], with x and y from 0 to 100."] = "/way [地區] x y [標題]，x和y為0到100。"
+L["/way reset all, away, <zone> or not <zone>"] = "/way reset all, away, <地區> 或 not <地區>"
 L["Adventure Guide couldn't start that just now. Choose it again from its guide."] =
 	"Adventure Guide暫時無法開始。請在其指南中重新選擇。"
 L["Adventure Guide suggests"] = "Adventure Guide推薦"
@@ -28,10 +30,13 @@ L["Alerts"] = "提醒"
 L["Alliance"] = "聯盟"
 L["Arriving at %s in %s"] = "抵達%s還需%s"
 L["Arrow scale"] = "箭頭大小"
+L["Arrows"] = "箭"
+L["Arrows on the NPC's nameplate"] = "NPC姓名板上的箭頭"
 L["Attach to quest tracker"] = "附著到任務追蹤器"
 L["Auction house"] = "拍賣場"
 L["Avoid zones far above my level"] = "避開遠高於我等級的區域"
 L["Avoids %s (level %s)"] = "繞開%s（等級 %s）"
+L["Bags"] = "背包"
 L["Bank"] = "銀行"
 L["Boat and Zeppelin Routes"] = "船隻與飛艇航線"
 L["Boat and zeppelin routes, drawn while you point at a dock."] =
@@ -40,6 +45,7 @@ L["Boat to %s"] = "前往%s的船"
 L["Boat to %s arrives in %s"] = "前往%s的船將在%s後抵達"
 L["Boats"] = "船隻"
 L["Boats & Zeppelins"] = "船隻與飛艇"
+L["Bullets"] = "子彈"
 L["Cast %s"] = "施放%s"
 L["Class trainer"] = "職業訓練師"
 L["Clear journey"] = "清除旅程"
@@ -62,11 +68,10 @@ L["Don't suggest this again"] = "不再推薦"
 L["Drag to move"] = "拖曳以移動"
 L["Drag to move; Shift-drag or the arrow keys to nudge. Right-click to reset."] =
 	"拖曳以移動；Shift拖曳或方向鍵微調。右鍵點擊重置。"
+L["Drink"] = "飲料"
 L["E"] = "東"
 L["Either faction can ride any boat or zeppelin."] = "任何陣營都可以搭乘任何船隻或飛艇。"
 L["Enter %s"] = "進入%s"
-L["The controller keeps working after the world map and its filter menu."] =
-	"開啟世界地圖及其過濾選單後，控制器仍可繼續使用。" -- mt
 L["Finding the fastest way…"] = "正在尋找最快路線…"
 L["Flight Masters"] = "飛行管理員"
 L["Flight master"] = "飛行管理員"
@@ -74,15 +79,19 @@ L["Flight master icon size"] = "飛行管理員圖示大小"
 L["Flight path known"] = "已知飛行路線"
 L["Flights from here"] = "從這裡出發的航班"
 L["Fly to %s"] = "飛往%s"
+L["Follow Guidelime guides"] = "跟隨 Guidelime 攻略"
 L["Follow RestedXP guides"] = "跟隨RestedXP指南"
 L["Follow TomTom's arrow"] = "跟隨TomTom的箭頭"
+L["Food"] = "食物"
 L["Forever addons"] = "Forever插件"
 L["Forever tracker"] = "Forever追蹤器"
+L["Friendly nameplates must be on to see them."] = "需要開啟友方姓名板才能看到。"
 L["Go through to %s"] = "穿過前往%s"
 L["Guidance"] = "引導"
 L["Guide marks the next boat, lift, flight master or your destination, not each turn of the walk on the way."] =
 	"引導會標記下一艘船、升降梯、飛行管理員或你的目的地，而不是步行途中的每個轉彎。"
 L["Guide me"] = "為我引路"
+L["Guidelime"] = "Guidelime"
 L["Horde"] = "部落"
 L["Hostile town: %s"] = "敵對城鎮：%s"
 L["In the objective tracker while you are near a dock, lift or tram."] =
@@ -98,7 +107,6 @@ L["Journeys are off. Turn on Shift-click to plan journeys in settings."] =
 L["Journeys, and other addons' estimates from here, can start with your hearthstone or a teleport, cooldown counted."] =
 	"旅程以及其他插件從這裡算起的估計，可以從爐石或傳送開始，並計入冷卻時間。"
 L["Keep journeys after a reload"] = "重載後保留旅程"
-L["Keep the route on the map when the journey list is hidden."] = "旅程清單隱藏時仍在地圖上保留路線。"
 L["Keeps the shared Forever tracker where you put it. The grip at its top no longer drags it."] =
 	"將共用的 Forever 追蹤器保持在您放置的位置。頂部的拖曳握把不再移動它。"
 L["Last seen %d min ago by another player"] = "%d分鐘前由其他玩家最後看到"
@@ -112,6 +120,7 @@ L["Lifts & Tram"] = "升降梯與地鐵"
 L["Lifts and the Deeprun Tram, on the world map."] = "升降梯和礦道地鐵，顯示在世界地圖上。"
 L["Loading QuestieDB…"] = "正在載入QuestieDB…"
 L["Lock the tracker"] = "鎖定追蹤器"
+L["Tracker background"] = "追蹤器背景"
 L["Map marks"] = "地圖標記"
 L["Mark only where steps end"] = "只標記步驟終點"
 L["Minimap icon size"] = "小地圖圖示大小"
@@ -122,13 +131,15 @@ L["N"] = "北"
 L["Nearby services"] = "附近服務"
 L["Nearby services could not read QuestieDB."] = "附近服務無法讀取QuestieDB。"
 L["Nearby services need the QuestieDB addon."] = "附近服務需要QuestieDB插件。"
-L["Nearest"] = "最近"
 L["A flight point you have not discovered yet would shorten this route: visit a flight master to learn it."] =
 	"尚未發現的飛行點會縮短這條路線：去拜訪飛行管理員以了解它。"
 L["No location for that quest yet."] = "該任務還沒有位置。"
+L["No services nearby."] = "附近沒有服務。"
 L["No way there from here."] = "從這裡無法抵達那裡。"
 L["Not discovered"] = "未發現"
 L["Not installed"] = "未安裝"
+L["Off keeps the arrow, pin, map line and minimap route, with no journey block in the objective tracker."] =
+	"關閉後仍保留箭頭、標記、地圖路線和小地圖路線，但不在目標追蹤器中顯示旅程區塊。"
 L["On"] = "開啟"
 L["On board to %s"] = "搭乘前往%s"
 L["On the world map."] = "顯示在世界地圖上。"
@@ -136,6 +147,7 @@ L["One line in chat the first time you log in after an update."] = "更新後首
 L["Only use the Hearthstone when it saves at least this much time."] =
 	"只在爐石至少節省這麼多時間時使用。"
 L["Open"] = "開啟"
+L["Open Nearby services"] = "開啟附近服務"
 L["Open settings."] = "開啟設定。"
 L["Open the world map and choose Nearby services in its tracking menu."] =
 	"開啟世界地圖，在其追蹤選單中選擇「附近服務」。"
@@ -149,6 +161,8 @@ L["Other Faction's Routes"] = "另一陣營的航線"
 L["Picks quests for your level and plans them into one journey."] =
 	"挑選適合你等級的任務，並規劃成一段旅程。"
 L["Plan journey"] = "規劃旅程"
+L["Plan journeys to Guidelime's current guide step. Guidelime's arrow steps aside while ours draws."] =
+	"規劃前往 Guidelime 目前攻略步驟的旅程。在我們的箭頭顯示時，Guidelime 的箭頭會讓開。"
 L["Plan journeys to RestedXP guide targets and hide its arrow. No TomTom needed."] =
 	"規劃前往RestedXP指南目標的旅程並隱藏其箭頭。無需TomTom。"
 L["Plans the cheapest route to your next profession rank."] = "規劃升到下一個專業等級最省錢的路線。"
@@ -161,10 +175,10 @@ L["Portal to %s"] = "前往%s的傳送門"
 L["Portals"] = "傳送門"
 L["Quest automation, rare alerts and merchant handling for the default UI."] =
 	"為預設介面提供任務自動化、稀有怪提醒與商人處理。"
-L["Reagent Vendor"] = "材料商"
 L["Reagents"] = "材料"
 L["Repair"] = "修理"
 L["RestedXP guide"] = "RestedXP指南"
+L["Resume Guidelime guide"] = "繼續 Guidelime 攻略"
 L["Resume RestedXP guide"] = "繼續RestedXP指南"
 L["Resume guide"] = "繼續指南"
 L["Return to your corpse"] = "返回你的屍體"
@@ -174,8 +188,10 @@ L["Scales the arrow and the cast prompt."] = "調整箭頭和施法提示的大�
 L["Scales the compass. 100% matches the game's own art."] = "調整羅盤大小。100%與遊戲本身的美術一致。"
 L["Scales the shared Forever tracker. 100% matches the game's own tracker."] =
 	"調整共用Forever追蹤器的大小。100%與遊戲本身的追蹤器一致。"
+L["Search services and goods"] = "搜尋服務和物品"
 L["Sends and receives sighting times over guild, party and at the dock. No chat messages are shown."] =
 	"透過公會、隊伍和在碼頭收發目擊時間。不會顯示聊天訊息。"
+L["Services"] = "服務"
 L["Share departure times"] = "共用出發時間"
 L["Shift-click the world map or the minimap to plan a journey there."] =
 	"Shift點擊世界地圖或小地圖以規劃前往該處的旅程。"
@@ -186,7 +202,7 @@ L["Show a quiet line where one of my other Forever addons would help. Only for a
 L["Show boats and zeppelins"] = "顯示船隻與飛艇"
 L["Show direction arrow"] = "顯示方向箭頭"
 L["Show flight masters"] = "顯示飛行管理員"
-L["Show journey in tracker"] = "在追蹤器中顯示旅程"
+L["Show journey steps in the objective tracker"] = "在目標追蹤器中顯示旅程步驟"
 L["Show lifts and the tram"] = "顯示升降梯與地鐵"
 L["Show marks on the minimap"] = "在小地圖上顯示標記"
 L["Show metres and kilometres instead of yards."] = "以公尺和公里代替碼顯示。"
@@ -200,6 +216,8 @@ L["Show the flight to take"] = "顯示要搭乘的航班"
 L["Show the next direction and the game's navigation marker."] = "顯示下一個方向和遊戲的導航標記。"
 L["Show the time left under the compass"] = "在羅盤下顯示剩餘時間"
 L["Show the way to your corpse"] = "顯示前往屍體的路"
+L["Shows over the nameplate of the NPC a Nearby services journey walks to."] =
+	"顯示在附近服務旅程所前往的NPC姓名板上方。"
 L["Shows the Legacy challenges you can advance in each zone."] =
 	"顯示每個地區中你可以推進的傳承挑戰。"
 L["Shows the arrow to drag anywhere; Shift-drag or the arrow keys nudge it. Right-click it to put it back."] =
@@ -229,7 +247,8 @@ L["This addon"] = "本插件"
 L["Through %s transport, there is a way"] = "藉助%s的交通工具可以抵達"
 L["Through %s transport: about %d min faster"] = "藉助%s的交通工具：約快%d分鐘"
 L["Tracker scale"] = "追蹤器大小"
-L["Trainers by specialty"] = "依專長分類的訓練師"
+L["Trade supplies"] = "貿易品"
+L["Trainers"] = "訓練師"
 L["Tram to %s"] = "前往%s的地鐵"
 L["Tram to %s arrives in %s"] = "前往%s的地鐵將在%s後抵達"
 L["Transport"] = "交通"
@@ -239,11 +258,12 @@ L["Turn this off to drag the shared Forever tracker anywhere on screen."] =
 	"關閉此項可將共用Forever追蹤器拖曳到螢幕上任意位置。"
 L["Use %s"] = "使用%s"
 L["Use hearth and teleports"] = "使用爐石和傳送"
-L["Vendors by specialty"] = "依專長分類的商人"
+L["Vendors"] = "商人"
 L["W"] = "西"
 L["Walk to %s"] = "步行前往%s"
 L["Walks go round zones whose lowest level is 4 or more above yours, but never the ones you start or end in."] =
 	"步行路線會繞開最低等級比你高 4 級或以上的區域，但不會繞開起點和終點所在的區域。"
+L["Weapons and armour"] = "武器與護甲"
 L["What next? Adventure Guide Forever suggests quests for your level."] =
 	"接下來做什麼？Adventure Guide Forever會推薦適合你等級的任務。"
 L["What's new after an update"] = "更新後的新內容"
@@ -393,6 +413,7 @@ L["Forever Leaderboards"] = "Forever 排行榜" -- mt
 L["Overall"] = "總覽" -- mt
 L["Forever standing"] = "Forever 總排名" -- mt
 L["Your guild and group"] = "你的公會和隊伍" -- mt
+L["Players you've met"] = "遇過的玩家" -- mt
 L["This week"] = "本週" -- mt
 L["All time"] = "全部時間" -- mt
 L["Rank"] = "排名" -- mt
@@ -430,3 +451,13 @@ L["%s (last %d):"] = "%s（最近 %d 筆）：" -- mt
 L["%s: no lines yet."] = "%s：還沒有記錄行。" -- mt
 L["Usage: /forever debug, /forever debug pin, /forever debug off, /forever debug show"] =
 	"用法：/forever debug、/forever debug pin、/forever debug off、/forever debug show" -- mt
+L["Follow roads"] = "沿道路行走" -- mt
+L["Walks keep to roads and paved streets where that adds less than half again to the walk. Roads painted with a zone's plain dirt are not known."] =
+	"當繞行不到一半時，步行路線會沿道路和鋪設街道前進。以區域一般泥土繪製的道路尚無法辨識。" -- mt
+L["A flight would be quicker. Open a flight master's map in %s once to sync your flight points."] =
+	"飛行會更快。在%s開啟一次飛行管理員的地圖，以同步你的飛行點。" -- mt
+L["Eastern Kingdoms"] = "東部王國" -- mt
+L["Kalimdor"] = "卡林多" -- mt
+L["No flight points learned in %s: open a flight master's map once to sync them."] =
+	"尚未在%s學會任何飛行點：開啟一次飛行管理員的地圖以同步它們。" -- mt
+L["Only the flight points your character has are learned now."] = "現在只會記錄你的角色已有的飛行點。" -- mt

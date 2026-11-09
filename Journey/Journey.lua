@@ -96,6 +96,84 @@ function ns.NewFlightPathReminderRow(plan, current)
 	return nil
 end
 
+local CONTINENTS = {
+	{ map = 0, uiMap = 1415, name = L["Eastern Kingdoms"] },
+	{ map = 1, uiMap = 1414, name = L["Kalimdor"] },
+}
+local continentsNamed = false
+local NONE = {}
+
+local function Continents()
+	if not continentsNamed then
+		continentsNamed = true
+		for _, continent in ipairs(CONTINENTS) do
+			local info = C_Map.GetMapInfo(continent.uiMap)
+			if info and info.name and info.name ~= "" then
+				continent.name = info.name
+			end
+		end
+	end
+	return CONTINENTS
+end
+
+local function KnownCounts()
+	local counts = {}
+	for nodeID in pairs(ns.KnownTaxiNodes()) do
+		local node = ns.TaxiNodes[nodeID]
+		if node then
+			counts[node.map] = (counts[node.map] or 0) + 1
+		end
+	end
+	return counts
+end
+
+---@return {map: number, name: string, known: integer}[]
+function ns.KnownFlightPointsByContinent()
+	local counts, continents = KnownCounts(), {}
+	for _, continent in ipairs(Continents()) do
+		continents[#continents + 1] = { map = continent.map, name = continent.name, known = counts[continent.map] or 0 }
+	end
+	return continents
+end
+
+---@param plan SPFPlan
+---@return {map: number, name: string}[]
+local function UnsyncedContinents(plan)
+	local maps = plan.unknownFlightMaps
+	if not maps then
+		return NONE
+	end
+	local counts, unsynced = KnownCounts(), NONE
+	for _, continent in ipairs(Continents()) do
+		if maps[continent.map] and not counts[continent.map] then
+			unsynced = unsynced == NONE and {} or unsynced
+			unsynced[#unsynced + 1] = continent
+		end
+	end
+	return unsynced
+end
+
+---@param plan SPFPlan
+---@return SPFRow[]
+function ns.UnsyncedFlightPointRows(plan)
+	local unsynced = UnsyncedContinents(plan)
+	if unsynced == NONE then
+		return NONE
+	end
+	local rows = {}
+	for _, continent in ipairs(unsynced) do
+		rows[#rows + 1] = {
+			key = "no-flight-points-" .. continent.map,
+			text = string.format(
+				L["No flight points learned in %s: open a flight master's map once to sync them."],
+				continent.name
+			),
+			warning = true,
+		}
+	end
+	return rows
+end
+
 -- Where the journey goes, also while it waits behind a corpse run; nil with no journey.
 ---@return SPFPoint?
 function ns.JourneyGoal()
@@ -133,15 +211,37 @@ end
 -- Read-only capability query shared by the public estimator and the guided planner.
 ns.JourneyWaterWalking = WaterWalking
 
--- A missing/secret sample is not evidence that the journey is unreachable. Every read of the player's position goes
--- through this gate; ride observation alone also takes the client's height, nil while it is secret.
+-- The player's world position, from UnitPosition or the map the client puts the player on. The client may withhold
+-- UnitPosition from addons (its values are secret) while the map APIs still answer with the same place; the journey,
+-- its route, the minimap and the arrow then keep working instead of silently waiting for a sample that never comes
+-- (#553).
 ---@return number? x, number? y, number? z, number? map
 function ns.PlayerPosition()
 	local x, y, z, map = UnitPosition("player")
-	if not (canaccessvalue(x) and canaccessvalue(y) and canaccessvalue(map)) or not (x and y and map) then
+	if canaccessvalue(x) and canaccessvalue(y) and canaccessvalue(map) and x and y and map then
+		return x, y, canaccessvalue(z) and z or nil, map
+	end
+	local uiMap = C_Map.GetBestMapForUnit("player")
+	if not (uiMap and canaccessvalue(uiMap)) then
 		return nil
 	end
-	return x, y, canaccessvalue(z) and z or nil, map
+	local position = C_Map.GetPlayerMapPosition(uiMap, "player")
+	if not (position and canaccessvalue(position)) then
+		return nil
+	end
+	local mapX, mapY = position:GetXY()
+	if not (canaccessvalue(mapX) and canaccessvalue(mapY)) or not (mapX and mapY) then
+		return nil
+	end
+	local continent, world = C_Map.GetWorldPosFromMapPos(uiMap, CreateVector2D(mapX, mapY))
+	if not (continent and world and canaccessvalue(continent) and canaccessvalue(world)) then
+		return nil
+	end
+	x, y = world:GetXY()
+	if not (canaccessvalue(x) and canaccessvalue(y)) or not (x and y) then
+		return nil
+	end
+	return x, y, nil, continent
 end
 
 -- Planning, Guide and lines share this gate. UnitPosition's third value is no floor to plan from, so the player's
@@ -331,13 +431,19 @@ function ns.ShowJourneyMap()
 	ns.OpenWorldMap(location and location.uiMap)
 end
 
--- The tracker and screen prompt name the same item or spell in the client's language.
+-- The tracker and screen prompt name the same item or spell in the client's language. `formatPlace`, when the
+-- tracker asks for it, wraps the capital a party mage opens inside the same locale sentence.
 ---@param teleport SPFTeleportPlace
+---@param formatPlace? fun(place: string): string
 ---@return string action, number? icon
-function ns.TeleportAction(teleport)
+function ns.TeleportAction(teleport, formatPlace)
 	if teleport.partyMage then
 		local icon = C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(teleport.spell)
-		return L["Ask %s for a portal to %s"]:format(teleport.partyMage, teleport.destination or UNKNOWN), icon
+		local place = teleport.destination or UNKNOWN
+		if formatPlace then
+			place = formatPlace(place)
+		end
+		return L["Ask %s for a portal to %s"]:format(teleport.partyMage, place), icon
 	end
 	local name = teleport.item and C_Item.GetItemNameByID(teleport.item)
 		or C_Spell.GetSpellName(teleport.spell)
@@ -346,48 +452,92 @@ function ns.TeleportAction(teleport)
 	return (teleport.item and USE_ITEM or CAST_SPELL):format(name), icon
 end
 
--- Shared by the tracker and the goal pin, including on a fullscreen map.
+-- The journey's name. `formatPlace` wraps the place this addon named inside the same locale sentence; a caller's
+-- own title (`routeTitle`) keeps its words, since only a title this addon built knows where its place sits.
+---@param point SPFPoint
+---@param formatPlace? fun(place: string): string
+---@return string
+function ns.JourneyTitle(point, formatPlace)
+	local function place(text)
+		return formatPlace and formatPlace(text) or text
+	end
+	if point.routeTitleFormat and point.stopLabel then
+		return string.format(point.routeTitleFormat, point.number, point.routeCount, place(point.stopLabel))
+	end
+	if point.routeTitle then
+		return point.routeTitle
+	end
+	return string.format(L["Journey to %s"], place(ns.PlaceLabel(point)))
+end
+
+-- One step's words with its suffixes. The tracker asks for a second copy with the place wrapped; the plain copy stays
+-- for the goal pin's tooltip, the arrow's progress line and other addons.
+---@param leg SPFLeg
+---@param spell number?
+---@param formatPlace? fun(place: string): string
+---@return string action, number? icon
+local function StepText(leg, spell, formatPlace)
+	local action, icon
+	if leg.teleport then
+		action, icon = ns.TeleportAction(leg.teleport, formatPlace)
+	else
+		action = ns.LegStep(leg, formatPlace)
+	end
+	if leg.mode == "walk" and leg.to.undiscovered then
+		action = string.format(L["%s (new flight path)"], action)
+	end
+	if leg.walkError then
+		action = action .. " (" .. (WALK_FAILURE[leg.walkError] or L["walking search failed"]) .. ")"
+	end
+	if spell and leg.wet and leg.wet >= WATER_HINT then
+		action = string.format(L["%s (cast %s)"], action, C_Spell.GetSpellName(spell))
+	end
+	return action, icon
+end
+
+-- Shared by the tracker and the goal pin, including on a fullscreen map. `formatPlace` asks for the places in the
+-- title and each step already wrapped in the tracker's colour; the plain text is left as it is.
+---@param formatPlace? fun(place: string): string
 ---@return string? title, SPFRow[]? rows, SPFPlan? plan, number? index, boolean? loading
-function ns.JourneyInfo()
+function ns.JourneyInfo(formatPlace)
 	if CorpseRun() then
-		return ns.Corpse.Info()
+		return ns.Corpse.Info(formatPlace)
 	end
 	if not goal or Guide.Paused() then
 		return nil
 	end
-	local title = goal.routeTitle or string.format(L["Journey to %s"], ns.PlaceLabel(goal))
+	local title = ns.JourneyTitle(goal, formatPlace)
 	local rows = {}
 	local _, _, costError, loading = Search.Status()
 	if not result and loading then
 		rows[1] = { key = "searching", text = L["Finding the fastest way…"], grey = true }
 	elseif result then
 		local _, spell = WaterWalking()
+		local unsynced = ns.UnsyncedFlightPointRows(result)
 		local reminder = ns.NewFlightPathReminderRow(result, progress.index)
-		if reminder then
+		if reminder and not (unsynced[1] and reminder.key == "unknown-flight-path") then
 			rows[#rows + 1] = reminder
+		end
+		for _, row in ipairs(unsynced) do
+			rows[#rows + 1] = row
 		end
 		for index = progress.index, #result.legs do
 			local leg = result.legs[index]
-			local text
-			local teleport = leg.teleport
-			if teleport then
-				local action, icon = ns.TeleportAction(teleport)
-				text = string.format("%d. %s%s", index, icon and ICON:format(icon) or "", action)
-			else
-				text = string.format("%d. %s", index, ns.LegStep(leg))
-			end
-			if leg.mode == "walk" and leg.to.undiscovered then
-				text = string.format(L["%s (new flight path)"], text)
-			end
-			if leg.walkError then
-				text = text .. " (" .. (WALK_FAILURE[leg.walkError] or L["walking search failed"]) .. ")"
-			end
-			if spell and leg.wet and leg.wet >= WATER_HINT then
-				text = string.format(L["%s (cast %s)"], text, C_Spell.GetSpellName(spell))
+			local action, icon = StepText(leg, spell)
+			local shown = formatPlace and StepText(leg, spell, formatPlace) or action
+			-- The tracker draws the mode's mark and the time in its quieter colour.
+			local time = not loading and ns.LegTime(leg) or nil
+			local text = string.format("%d. %s%s", index, icon and ICON:format(icon) or "", action)
+			if time then
+				text = text .. "   " .. time
 			end
 			rows[#rows + 1] = {
 				key = index,
-				text = loading and text or text .. "   " .. ns.LegTime(leg),
+				text = text,
+				mode = leg.mode,
+				action = shown,
+				time = time,
+				icon = icon,
 				current = index == progress.index,
 			}
 			-- Hostile towns and high zones on this walk, under its step.
@@ -506,6 +656,30 @@ end
 
 local SamePlace = Search.SamePlace
 
+local announcedGoal, announced = nil, {}
+
+local function AnnounceUnsyncedFlightPoints()
+	if not (result and result.unknownFlightMaps and goal and ns.db.flightPathReminder) then
+		return
+	end
+	if announcedGoal ~= goal then
+		announcedGoal, announced = goal, {}
+	end
+	for _, continent in ipairs(UnsyncedContinents(result)) do
+		if not announced[continent.map] then
+			announced[continent.map] = true
+			ns.Print(
+				RED_FONT_COLOR:WrapTextInColorCode(
+					string.format(
+						L["A flight would be quicker. Open a flight master's map in %s once to sync your flight points."],
+						continent.name
+					)
+				)
+			)
+		end
+	end
+end
+
 -- Everything the search changes about what to follow arrives here, possibly while it is being started or stepped.
 ---@param route SPFPlan?
 ---@param news SPFSearchNews
@@ -524,6 +698,7 @@ local function Follow(route, news)
 		Guide.Retarget()
 	end
 	UpdateProgress()
+	AnnounceUnsyncedFlightPoints()
 	if news == "times" then
 		return RefreshTracker()
 	end

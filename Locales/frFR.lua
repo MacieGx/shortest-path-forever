@@ -19,8 +19,10 @@ L["%s station"] = "station %s" -- mt
 L["%s tower"] = "tour %s" -- mt
 L["%s · %s"] = "%s · %s" -- mt
 L["%s — unavailable here"] = "%s – indisponible ici" -- mt
+L["%s, %s"] = "%s, %s"
 L["%s, then %s"] = "%s, puis %s" -- mt
 L["/way [zone] x y [title], with x and y from 0 to 100."] = "/way [zone] x y [titre], avec x et y de 0 à 100." -- mt
+L["/way reset all, away, <zone> or not <zone>"] = "/way reset all, away, <zone> ou not <zone>" -- mt
 L["Adventure Guide couldn't start that just now. Choose it again from its guide."] =
 	"Adventure Guide n'a pas pu lancer cela pour l'instant. Choisissez-le de nouveau dans son guide." -- mt
 L["Adventure Guide suggests"] = "Adventure Guide suggère" -- mt
@@ -29,10 +31,13 @@ L["Alerts"] = "Alertes" -- mt
 L["Alliance"] = "Alliance" -- mt
 L["Arriving at %s in %s"] = "Arrivée à %s dans %s" -- mt
 L["Arrow scale"] = "Taille de la flèche" -- mt
+L["Arrows"] = "Flèches"
+L["Arrows on the NPC's nameplate"] = "Flèches sur la plaque de nom du PNJ"
 L["Attach to quest tracker"] = "Attacher au suivi des quêtes"
 L["Auction house"] = "Hôtel des ventes" -- mt
 L["Avoid zones far above my level"] = "Éviter les zones bien au-dessus de mon niveau" -- mt
 L["Avoids %s (level %s)"] = "Contourne %s (niveau %s)" -- mt
+L["Bags"] = "Sacs"
 L["Bank"] = "Banque" -- mt
 L["Boat and Zeppelin Routes"] = "Routes des bateaux et zeppelins" -- mt
 L["Boat and zeppelin routes, drawn while you point at a dock."] =
@@ -41,6 +46,7 @@ L["Boat to %s"] = "Bateau pour %s" -- mt
 L["Boat to %s arrives in %s"] = "Le bateau pour %s arrive dans %s" -- mt
 L["Boats"] = "Bateaux" -- mt
 L["Boats & Zeppelins"] = "Bateaux et zeppelins" -- mt
+L["Bullets"] = "Balles"
 L["Cast %s"] = "Lancer %s" -- mt
 L["Class trainer"] = "Maître de classe" -- mt
 L["Clear journey"] = "Effacer le trajet" -- mt
@@ -63,12 +69,11 @@ L["Don't suggest this again"] = "Ne plus me le suggérer" -- mt
 L["Drag to move"] = "Glisser pour déplacer"
 L["Drag to move; Shift-drag or the arrow keys to nudge. Right-click to reset."] =
 	"Glisser pour déplacer ; Maj-glisser ou les flèches pour ajuster. Clic droit pour réinitialiser." -- mt
+L["Drink"] = "Boissons"
 L["E"] = "E" -- mt
 L["Either faction can ride any boat or zeppelin."] =
 	"Les deux factions peuvent prendre n'importe quel bateau ou zeppelin." -- mt
 L["Enter %s"] = "Entrer dans %s" -- mt
-L["The controller keeps working after the world map and its filter menu."] =
-	"La manette continue de fonctionner après la carte du monde et son menu de filtres." -- mt
 L["Finding the fastest way…"] = "Recherche du chemin le plus rapide…" -- mt
 L["Flight Masters"] = "Maîtres de vol" -- mt
 L["Flight master"] = "Maître de vol" -- mt
@@ -76,15 +81,20 @@ L["Flight master icon size"] = "Taille des icônes des maîtres de vol" -- mt
 L["Flight path known"] = "Trajet aérien connu" -- mt
 L["Flights from here"] = "Vols depuis ici" -- mt
 L["Fly to %s"] = "Voler vers %s" -- mt
+L["Follow Guidelime guides"] = "Suivre les guides Guidelime" -- mt
 L["Follow RestedXP guides"] = "Suivre les guides RestedXP" -- mt
 L["Follow TomTom's arrow"] = "Suivre la flèche de TomTom" -- mt
+L["Food"] = "Nourriture"
 L["Forever addons"] = "Addons Forever" -- mt
 L["Forever tracker"] = "Suivi Forever"
+L["Friendly nameplates must be on to see them."] =
+	"Les plaques de nom des unités amies doivent être activées pour les voir."
 L["Go through to %s"] = "Passer vers %s" -- mt
 L["Guidance"] = "Guidage" -- mt
 L["Guide marks the next boat, lift, flight master or your destination, not each turn of the walk on the way."] =
 	"Le guidage marque le prochain bateau, ascenseur, maître de vol ou votre destination, pas chaque virage du trajet à pied." -- mt
 L["Guide me"] = "Me guider" -- mt
+L["Guidelime"] = "Guidelime" -- mt
 L["Horde"] = "Horde" -- mt
 L["Hostile town: %s"] = "Ville hostile : %s" -- mt
 L["In the objective tracker while you are near a dock, lift or tram."] =
@@ -100,8 +110,6 @@ L["Journeys are off. Turn on Shift-click to plan journeys in settings."] =
 L["Journeys, and other addons' estimates from here, can start with your hearthstone or a teleport, cooldown counted."] =
 	"Les trajets, et les estimations d'autres addons depuis ici, peuvent commencer par votre pierre de foyer ou une téléportation, temps de recharge compris." -- mt
 L["Keep journeys after a reload"] = "Garder les trajets après un rechargement" -- mt
-L["Keep the route on the map when the journey list is hidden."] =
-	"Garder l'itinéraire sur la carte quand la liste du trajet est masquée." -- mt
 L["Keeps the shared Forever tracker where you put it. The grip at its top no longer drags it."] =
 	"Garde le suivi Forever partagé là où vous l'avez placé. La poignée en haut ne le déplace plus." -- mt
 L["Last seen %d min ago by another player"] = "Vu il y a %d min par un autre joueur" -- mt
@@ -115,6 +123,7 @@ L["Lifts & Tram"] = "Ascenseurs et tram" -- mt
 L["Lifts and the Deeprun Tram, on the world map."] = "Les ascenseurs et le Tram des profondeurs, sur la carte du monde." -- mt
 L["Loading QuestieDB…"] = "Chargement de QuestieDB…" -- mt
 L["Lock the tracker"] = "Verrouiller le suivi" -- mt
+L["Tracker background"] = "Fond du suivi"
 L["Map marks"] = "Repères sur la carte" -- mt
 L["Mark only where steps end"] = "Marquer seulement la fin des étapes" -- mt
 L["Minimap icon size"] = "Taille des icônes de la minicarte" -- mt
@@ -125,13 +134,15 @@ L["N"] = "N" -- mt
 L["Nearby services"] = "Services à proximité" -- mt
 L["Nearby services could not read QuestieDB."] = "Les services à proximité n'ont pas pu lire QuestieDB." -- mt
 L["Nearby services need the QuestieDB addon."] = "Les services à proximité nécessitent l'addon QuestieDB." -- mt
-L["Nearest"] = "Le plus proche" -- mt
 L["A flight point you have not discovered yet would shorten this route: visit a flight master to learn it."] =
 	"Un point de vol que vous n'avez pas encore découvert raccourcirait cet itinéraire : visitez un maître de vol pour l'apprendre." -- mt
 L["No location for that quest yet."] = "Pas encore d'emplacement pour cette quête." -- mt
+L["No services nearby."] = "Aucun service à proximité."
 L["No way there from here."] = "Aucun chemin d'ici jusque-là." -- mt
 L["Not discovered"] = "Non découvert" -- mt
 L["Not installed"] = "Non installé" -- mt
+L["Off keeps the arrow, pin, map line and minimap route, with no journey block in the objective tracker."] =
+	"Désactivé garde la flèche, le repère, la ligne de carte et l'itinéraire de la minicarte, sans bloc de trajet dans le suivi." -- mt
 L["On"] = "Activé" -- mt
 L["On board to %s"] = "À bord pour %s" -- mt
 L["On the world map."] = "Sur la carte du monde." -- mt
@@ -140,6 +151,7 @@ L["One line in chat the first time you log in after an update."] =
 L["Only use the Hearthstone when it saves at least this much time."] =
 	"N'utiliser la pierre de foyer que si elle fait gagner au moins ce temps." -- mt
 L["Open"] = "Ouvrir"
+L["Open Nearby services"] = "Ouvrir Services à proximité"
 L["Open settings."] = "Ouvrir les réglages." -- mt
 L["Open the world map and choose Nearby services in its tracking menu."] =
 	"Ouvrez la carte du monde et choisissez Services à proximité dans son menu de pistage." -- mt
@@ -153,6 +165,8 @@ L["Other Faction's Routes"] = "Routes de l'autre faction" -- mt
 L["Picks quests for your level and plans them into one journey."] =
 	"Choisit des quêtes de votre niveau et les enchaîne en un seul trajet." -- mt
 L["Plan journey"] = "Planifier un trajet" -- mt
+L["Plan journeys to Guidelime's current guide step. Guidelime's arrow steps aside while ours draws."] =
+	"Planifier des trajets vers l'étape actuelle du guide Guidelime. Sa flèche s'efface pendant que la nôtre s'affiche." -- mt
 L["Plan journeys to RestedXP guide targets and hide its arrow. No TomTom needed."] =
 	"Planifier des trajets vers les cibles des guides RestedXP et masquer leur flèche. TomTom n'est pas nécessaire." -- mt
 L["Plans the cheapest route to your next profession rank."] =
@@ -166,10 +180,10 @@ L["Portal to %s"] = "Portail vers %s" -- mt
 L["Portals"] = "Portails" -- mt
 L["Quest automation, rare alerts and merchant handling for the default UI."] =
 	"Automatisation des quêtes, alertes de rares et gestion des marchands pour l'interface par défaut." -- mt
-L["Reagent Vendor"] = "Fournisseur de composants" -- mt
 L["Reagents"] = "Composants" -- mt
 L["Repair"] = "Réparations" -- mt
 L["RestedXP guide"] = "Guide RestedXP" -- mt
+L["Resume Guidelime guide"] = "Reprendre le guide Guidelime" -- mt
 L["Resume RestedXP guide"] = "Reprendre le guide RestedXP" -- mt
 L["Resume guide"] = "Reprendre le guide" -- mt
 L["Return to your corpse"] = "Retourner à votre cadavre" -- mt
@@ -180,8 +194,10 @@ L["Scales the compass. 100% matches the game's own art."] =
 	"Ajuste la taille de la boussole. 100 % correspond aux graphismes du jeu." -- mt
 L["Scales the shared Forever tracker. 100% matches the game's own tracker."] =
 	"Ajuste la taille du suivi Forever partagé. 100 % correspond au suivi du jeu." -- mt
+L["Search services and goods"] = "Rechercher des services et des biens"
 L["Sends and receives sighting times over guild, party and at the dock. No chat messages are shown."] =
 	"Envoie et reçoit les heures d'observation via la guilde, le groupe et au quai. Aucun message n'apparaît dans la discussion." -- mt
+L["Services"] = "Services"
 L["Share departure times"] = "Partager les horaires de départ" -- mt
 L["Shift-click the world map or the minimap to plan a journey there."] =
 	"Maj-clic sur la carte du monde ou la minicarte pour y planifier un trajet." -- mt
@@ -192,7 +208,7 @@ L["Show a quiet line where one of my other Forever addons would help. Only for a
 L["Show boats and zeppelins"] = "Afficher bateaux et zeppelins" -- mt
 L["Show direction arrow"] = "Afficher la flèche de direction" -- mt
 L["Show flight masters"] = "Afficher les maîtres de vol" -- mt
-L["Show journey in tracker"] = "Afficher le trajet dans le suivi" -- mt
+L["Show journey steps in the objective tracker"] = "Afficher les étapes du trajet dans le suivi des objectifs" -- mt
 L["Show lifts and the tram"] = "Afficher ascenseurs et tram" -- mt
 L["Show marks on the minimap"] = "Afficher les repères sur la minicarte" -- mt
 L["Show metres and kilometres instead of yards."] =
@@ -208,6 +224,8 @@ L["Show the next direction and the game's navigation marker."] =
 	"Afficher la prochaine direction et le marqueur de navigation du jeu." -- mt
 L["Show the time left under the compass"] = "Temps restant sous la boussole" -- mt
 L["Show the way to your corpse"] = "Afficher le chemin vers votre cadavre" -- mt
+L["Shows over the nameplate of the NPC a Nearby services journey walks to."] =
+	"Les affiche sur la plaque de nom du PNJ vers lequel mène un trajet de services à proximité."
 L["Shows the Legacy challenges you can advance in each zone."] =
 	"Affiche les défis d'héritage que vous pouvez faire avancer dans chaque région." -- mt
 L["Shows the arrow to drag anywhere; Shift-drag or the arrow keys nudge it. Right-click it to put it back."] =
@@ -238,7 +256,8 @@ L["This addon"] = "Cet addon" -- mt
 L["Through %s transport, there is a way"] = "Par les transports de la faction %s, un chemin existe" -- mt
 L["Through %s transport: about %d min faster"] = "Par les transports de la faction %s : environ %d min plus vite" -- mt
 L["Tracker scale"] = "Taille du suivi" -- mt
-L["Trainers by specialty"] = "Maîtres par spécialité" -- mt
+L["Trade supplies"] = "Artisanat"
+L["Trainers"] = "Maîtres"
 L["Tram to %s"] = "Tram pour %s" -- mt
 L["Tram to %s arrives in %s"] = "Le tram pour %s arrive dans %s" -- mt
 L["Transport"] = "Transport" -- mt
@@ -249,11 +268,12 @@ L["Turn this off to drag the shared Forever tracker anywhere on screen."] =
 	"Désactivez cette option pour déplacer le suivi Forever partagé n'importe où à l'écran."
 L["Use %s"] = "Utiliser %s" -- mt
 L["Use hearth and teleports"] = "Utiliser foyer et téléportations" -- mt
-L["Vendors by specialty"] = "Marchands par spécialité" -- mt
+L["Vendors"] = "Marchands"
 L["W"] = "O" -- mt
 L["Walk to %s"] = "Marcher jusqu'à %s" -- mt
 L["Walks go round zones whose lowest level is 4 or more above yours, but never the ones you start or end in."] =
 	"Les trajets à pied contournent les zones dont le niveau minimum dépasse le vôtre de 4 ou plus, mais jamais celles de départ ou d'arrivée." -- mt
+L["Weapons and armour"] = "Armes et armures"
 L["What next? Adventure Guide Forever suggests quests for your level."] =
 	"Et maintenant ? Adventure Guide Forever suggère des quêtes de votre niveau." -- mt
 L["What's new after an update"] = "Nouveautés après une mise à jour"
@@ -404,6 +424,7 @@ L["Forever Leaderboards"] = "Classements Forever" -- mt
 L["Overall"] = "Général" -- mt
 L["Forever standing"] = "Classement Forever" -- mt
 L["Your guild and group"] = "Votre guilde et votre groupe" -- mt
+L["Players you've met"] = "Joueurs rencontrés" -- mt
 L["This week"] = "Cette semaine" -- mt
 L["All time"] = "Depuis toujours" -- mt
 L["Rank"] = "Rang" -- mt
@@ -443,3 +464,14 @@ L["%s (last %d):"] = "%s (dernières %d) :" -- mt
 L["%s: no lines yet."] = "%s : aucune ligne pour l'instant." -- mt
 L["Usage: /forever debug, /forever debug pin, /forever debug off, /forever debug show"] =
 	"Utilisation : /forever debug, /forever debug pin, /forever debug off, /forever debug show" -- mt
+L["Follow roads"] = "Suivre les routes" -- mt
+L["Walks keep to roads and paved streets where that adds less than half again to the walk. Roads painted with a zone's plain dirt are not known."] =
+	"Les trajets à pied suivent les routes et les rues pavées lorsque cela rallonge le trajet de moins de moitié. Les routes peintes avec la terre simple d'une zone ne sont pas reconnues." -- mt
+L["A flight would be quicker. Open a flight master's map in %s once to sync your flight points."] =
+	"Un vol serait plus rapide. Ouvrez une fois la carte d'un maître de vol en %s pour synchroniser vos points de vol." -- mt
+L["Eastern Kingdoms"] = "Royaumes de l'est" -- mt
+L["Kalimdor"] = "Kalimdor" -- mt
+L["No flight points learned in %s: open a flight master's map once to sync them."] =
+	"Aucun point de vol appris en %s : ouvrez une fois la carte d'un maître de vol pour les synchroniser." -- mt
+L["Only the flight points your character has are learned now."] =
+	"Seuls les points de vol de votre personnage sont désormais appris." -- mt

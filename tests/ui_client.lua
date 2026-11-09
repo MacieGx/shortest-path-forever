@@ -99,6 +99,9 @@ local function font()
 	function f:GetHeight()
 		return 12
 	end
+	function f:CreateAnimationGroup()
+		return animationGroup(self)
+	end
 	return setmetatable(f, mt)
 end
 local fontmt = {
@@ -388,7 +391,7 @@ _G.CreateFrame = function(_, name, parent, template)
 		function f:GetBlock(id)
 			local b = self.liveBlocks[id]
 			if not b then
-				b = { id = id, HeaderText = font(), lines = {} }
+				b = { id = id, HeaderText = font(), lines = {}, parentModule = self }
 				function b:SetHeader(text)
 					self.HeaderText:SetText(text)
 				end
@@ -398,6 +401,9 @@ _G.CreateFrame = function(_, name, parent, template)
 					return fs:GetHeight()
 				end
 				function b:AddObjective(key, text, template, full, dash, color)
+					-- Blizzard's GetLine falls back to the module's template; the stock line comes from a pool shared by
+					-- every tracker module, so a spec reads which template each SPF row actually asked for.
+					template = template or self.parentModule.lineTemplate
 					local line = {
 						EnableMouse = function(self, value)
 							self.mouseEnabled = value
@@ -405,12 +411,20 @@ _G.CreateFrame = function(_, name, parent, template)
 						SetScript = function(self, name, callback)
 							self[name] = callback
 						end,
+						HookScript = function(self, name, callback)
+							self.hooks = self.hooks or {}
+							self.hooks[name] = callback
+						end,
 						Text = font(),
+						Dash = font(),
+						template = template,
 						used = true,
 						GetHeight = function()
 							return 12
 						end,
 					}
+					-- The stock line keeps its dash text hidden or shown with the line; the line's text hangs after it.
+					line.Dash:SetText(_G.QUEST_DASH)
 					line.Text:SetText(text)
 					line.Text.colorStyle = color
 					self.lines[key] = line
@@ -547,6 +561,9 @@ _G.IsInInstance = function()
 end
 local function color(r, g, b)
 	return {
+		r = r,
+		g = g,
+		b = b,
 		GetRGBA = function()
 			return r, g, b, 1
 		end,
@@ -555,12 +572,18 @@ local function color(r, g, b)
 		end,
 	}
 end
-_G.OBJECTIVE_TRACKER_COLOR = { Normal = {}, NormalHighlight = {}, Header = {} }
+_G.OBJECTIVE_TRACKER_COLOR = {
+	Normal = color(0.8, 0.8, 0.8),
+	NormalHighlight = color(1, 1, 1),
+	Header = color(1, 0.82, 0),
+}
+_G.QUEST_DASH = "- "
 _G.CreateColor = color
 _G.NORMAL_FONT_COLOR = color(1, 0.82, 0)
 _G.ORANGE_FONT_COLOR = color(1, 0.5, 0)
 _G.AM_PIN_SCALE_STYLE_WITH_TERRAIN = 3
 _G.GRAY_FONT_COLOR = _G.NORMAL_FONT_COLOR
+_G.RED_FONT_COLOR = color(1, 0.125, 0.125)
 _G.HIGHLIGHT_FONT_COLOR = color(1, 1, 1)
 _G.ChatTypeInfo = { RAID_WARNING = {} }
 _G.RaidWarningUtil = { AddMessage = noop }
@@ -630,6 +653,16 @@ _G.C_Texture = {
 		return { width = 36, height = 44 }
 	end,
 }
+-- The classic flight-master list: empty here, so a scan at a flight master learns nothing (ScanFlightMaster).
+_G.NumTaxiNodes = function()
+	return 0
+end
+_G.TaxiNodeGetType = function()
+	return "NONE"
+end
+_G.TaxiNodeName = function()
+	return ""
+end
 _G.C_TaxiMap = {
 	ShouldMapShowTaxiNodes = function()
 		return false
@@ -717,6 +750,14 @@ _G.C_Map = {
 	end,
 	HasUserWaypoint = function()
 		return waypoint ~= nil
+	end,
+	-- The player's place on `m`, from the same world point UnitPosition reports; nil until a check places them.
+	GetPlayerMapPosition = function(m)
+		if not (posX and posY and posMap) then
+			return nil
+		end
+		local _, position = C_Map.GetMapPosFromWorldPos(posMap, CreateVector2D(posX, posY), m)
+		return position
 	end,
 	GetMapPosFromWorldPos = function(cont, v, override)
 		local x, y = v:GetXY()

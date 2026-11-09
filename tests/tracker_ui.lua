@@ -8,6 +8,20 @@ for _, part in ipairs({ "ui_client.lua", "ui_map.lua" }) do
 end
 assert(loadstring(source .. [[
 local tracker = ShortestPathForeverObjectiveTracker
+-- The fixture's colours leave markup out; the tracker's own line wraps the place and the time, so give each a
+-- marker this check can read. ColorText builds a colour from the three fields, so each marker carries them too.
+local gold = { r = 1, g = 0.82, b = 0, WrapTextInColorCode = function(_, s) return "[gold]" .. s .. "[/gold]" end }
+local grey = { r = 0.5, g = 0.5, b = 0.5, WrapTextInColorCode = function(_, s) return "[grey]" .. s .. "[/grey]" end }
+local plain = { r = 0.8, g = 0.8, b = 0.8, WrapTextInColorCode = function(_, s) return s end }
+_G.OBJECTIVE_TRACKER_COLOR = { Normal = plain, NormalHighlight = plain, Header = gold }
+_G.GRAY_FONT_COLOR = grey
+local createColor = _G.CreateColor
+_G.CreateColor = function(r, g, b)
+ for _, color in ipairs({ gold, grey }) do
+  if color.r == r and color.g == g and color.b == b then return color end
+ end
+ return createColor(r, g, b)
+end
 local dirty, headers, geometry = 0, 0, 0
 local markDirty, legPoints = tracker.MarkDirty, ns.Planner.LegPoints
 tracker.MarkDirty = function(self) dirty = dirty + 1 markDirty(self) end
@@ -17,11 +31,20 @@ ns.db.tracker = false
 local route, index, settling, suffix
 ns.HasJourney = function() return route ~= nil end
 ns.CurrentRide = function() return onTaxi and 123 end
-ns.JourneyInfo = function()
+local VERB = {walk="Walk to", flight="Fly to", boat="Boat to", zeppelin="Zeppelin to", lift="Lift to",
+ tram="Tram to", portal="Portal to", passage="Go through to", teleport="Teleport to"}
+ns.JourneyInfo = function(formatPlace)
  if not route then return end
  local title = "Journey to Silithus"
  local rows = {}
- for i = index, #route.legs do rows[#rows + 1] = {key=i, text="Step " .. i .. (suffix or ""), current=i==index} end
+ for i = index, #route.legs do
+  local place = "Place " .. i
+  local shown = formatPlace and formatPlace(place) or place
+  local action = (VERB[route.legs[i].mode] or "Go to") .. " " .. shown .. (suffix or "")
+  rows[#rows + 1] = {key=i, text="Step " .. i .. (suffix or ""), mode=route.legs[i].mode,
+   action=action, time=ns.FormatCountdown(route.legs[i].arrive - route.legs[i].depart),
+   current=i==index}
+ end
  return title, rows, route, index, settling
 end
 local function point(x, y, map, z) return {x=x, y=y or 0, map=map or 1, z=z} end
@@ -52,8 +75,38 @@ walk.yards, walk.walkCost = 99999, 99999
 local flight = leg("flight", {point(400, 300), point(8900, 300)}, 2640)
 local header = start({walk, flight})
 assert(header == "Journey  44:47 · 9.2k yd", "missing journey totals: " .. tostring(header))
-assert(tracker:GetExistingBlock("journey").HeaderText:GetText() == "Journey to Silithus")
+local headerText = tracker:GetExistingBlock("journey").HeaderText:GetText()
+assert(headerText:find("Journey to Silithus", 1, true) and headerText:find("|T", 1, true), headerText)
 local block, line = tracker:GetExistingBlock("journey"), tracker:GetExistingBlock("journey"):GetExistingLine(1)
+local flight = block:GetExistingLine(2)
+local flightDash, flightLine = flight.Dash:GetText(), flight.Text:GetText()
+assert(
+ flightDash:find("|A:taxinode_alliance:", 1, true) and flightDash:find("|a ", 1, true),
+ "a flight leg's mark stands in the dash column so wrapped text hangs after it: " .. flightDash
+)
+assert(not flightLine:find("|A:", 1, true), "the mark is not inline in the line: " .. flightLine)
+assert(flightLine:find("[grey]44:00[/grey]", 1, true), "a flight leg's time is grey: " .. flightLine)
+assert(
+ flightLine:find("Fly to [gold]Place 2[/gold]", 1, true) == 1 and not flightLine:find("^%d+%."),
+ "the place is gold and no number leads: " .. flightLine
+)
+-- SPF's lines live in a pool of their own. A line that carried a leg's mark is released back there, never to the
+-- stock pool every other tracker module draws from.
+local LINE_TEMPLATE = "ShortestPathForeverTrackerLineTemplate"
+assert(tracker.lineTemplate == LINE_TEMPLATE, "the journey module draws on SPF's own line template")
+local function checkLines()
+ for _, entry in ipairs(tracker.blocks) do
+  local entryBlock = tracker:GetExistingBlock(entry.key)
+  for _, row in ipairs(entry.rows) do
+   local entryLine = entryBlock and entryBlock:GetExistingLine(row.key)
+   assert(
+    entryLine and entryLine.template == LINE_TEMPLATE,
+    "an SPF row left its own line pool: " .. tostring(row.key)
+   )
+  end
+ end
+end
+checkLines()
 local marks, texts, points, blocks = dirty, headers, geometry, tracker.blocks
 for _ = 1, 100 do refresh() end
 assert(dirty == marks and headers == texts and geometry == points and tracker.blocks == blocks,
@@ -88,6 +141,7 @@ for _, row in pairs(block.lines) do row.GetHeight = function() return 12 end end
 index, onTaxi = 2, true
 assert(refresh(true) == "Journey  44:00 · 8.5k yd")
 assert(dirty == marks + 1 and not block:GetExistingLine(1), "leg changes still relayout rows")
+checkLines()
 posX = 4600
 assert(tick() == "Journey  44:00 · 4.3k yd", "flight progresses along its drawn path")
 
@@ -101,6 +155,27 @@ ns.db.journeyTracker = false
 refresh()
 assert(#tracker.blocks == 0, "hiding journey steps removes the journey block")
 assert(route ~= nil, "hiding the tracker keeps the active journey")
+-- Departures keep their own switch: a ride still lists where it calls next while the journey block is hidden.
+ns.db.tracker = true
+onTaxi = true
+local dockTitle = ns.DockTitle
+local nextStop = ns.Timetable.NextStop
+ns.Timetable.NextStop = function()
+	return 42, 60
+end
+ns.DockTitle = function()
+	return "Dock"
+end
+ns.Routes = ns.Routes or {}
+ns.Routes[123] = { period = 6000, kind = "boat", frames = {} }
+refresh(true)
+assert(
+	#tracker.blocks == 1 and tracker.blocks[1].key == "ride42",
+	"departures still show with journey steps off"
+)
+ns.db.tracker, onTaxi, route, ns.DockTitle = false, false, nil, dockTitle
+ns.Timetable.NextStop = nextStop
+refresh(true)
 ns.db.journeyTracker, ns.db.metres = true, false
 assert(start({leg("walk", {point(0), point(0)}, 0)}) == "Journey  0:00 · 0 yd")
 posX = nil
@@ -135,7 +210,7 @@ walk.walkPoints = {point(0), point(0, 400), point(300, 400), point(300)}
 assert(refresh(true) == "Journey  44:47 · 1.1k yd", "measured geometry invalidates cached distance")
 settling = true
 refresh(true)
-assert(block.HeaderText:GetText() == "Journey to Silithus" and tracker.Spinner.Anim:IsPlaying())
+assert(block.HeaderText:GetText():find("Journey to Silithus", 1, true) and tracker.Spinner.Anim:IsPlaying())
 assert(tracker.Header.text == "Journey", "loading suppresses totals")
 combat = true
 marks, texts = dirty, headers
@@ -145,9 +220,37 @@ assert(dirty == marks and headers == texts, "combat defers the new header too")
 combat = false
 settling = false
 assert(refresh() == "Journey  44:47 · 900 yd")
+local journeyInfo = ns.JourneyInfo
+ns.JourneyInfo = function()
+ local title, rows, plan, at, loading = journeyInfo()
+ table.insert(rows, 1, {key="no-flight-points-0", text="No flight points learned in Eastern Kingdoms", warning=true})
+ return title, rows, plan, at, loading
+end
+refresh(true)
+local warning = tracker:GetExistingBlock("journey"):GetExistingLine("no-flight-points-0")
+assert(warning.Text.colorStyle == RED_FONT_COLOR, "the flight point warning is red")
+assert(warning.spfPulse and warning.spfPulse:IsPlaying() and warning.spfPulse.looping == "BOUNCE",
+ "the flight point warning pulses")
+assert(warning.spfPulse.animations[1].Duration >= 1, "the pulse is slow")
+assert(not tracker:GetExistingBlock("journey"):GetExistingLine(1).spfPulse, "steps do not pulse")
+warning.hooks.OnHide(warning)
+assert(not warning.spfPulse:IsPlaying(), "a freed warning line stops pulsing")
+ns.JourneyInfo = journeyInfo
+refresh(true)
+assert(tracker.blocks[1].rows[1].key == 1, "the warning leaves with its row")
 route = nil
 refresh(true)
 assert(tracker.Header.text == "Boats" and #tracker.blocks == 0 and not tracker.distance)
+-- A family footer row goes through the same layout: it must not borrow a stock line either.
+ns.FamilyHints.Footer = function()
+ return { key = "family", title = "What next?", rows = { { key = "family", text = "Adventure Guide", grey = true } } }
+end
+refresh(true)
+checkLines()
+assert(
+ tracker:GetExistingBlock("family"):GetExistingLine("family").template == LINE_TEMPLATE,
+ "family rows also use SPF's line template"
+)
 assert(#errors == 0, table.concat(errors, "\n"))
 print("tracker_ui: remaining walking/transport yards, step times, geometry cache and no header layout churn ok")
 ]]))()

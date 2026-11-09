@@ -4,7 +4,7 @@
 -- blamed on this addon. The index buttons go through RegisterInitializer too, and keep themselves out of search.
 local rows, buttons, settings = {}, {}, {}
 local opened = {}
-local canvas, familyPanel
+local familyPage
 
 local attachmentNotified, attachmentChanged
 local trackerState = { attached = true }
@@ -49,15 +49,8 @@ local env = setmetatable({
 				end,
 			}
 		end,
-		RegisterCanvasLayoutSubcategory = function(parent, frame, name)
-			canvas = { parent = parent, frame = frame, name = name }
-			return {
-				name = name,
-				parent = parent,
-				GetID = function(self)
-					return self.name
-				end,
-			}
+		RegisterCanvasLayoutSubcategory = function()
+			error("the Forever addons page registers with ns.Family.Register, not a canvas")
 		end,
 		RegisterVerticalLayoutSubcategory = function(parent, name)
 			return {
@@ -144,7 +137,8 @@ local env = setmetatable({
 	SlashCmdList = {},
 }, { __index = _G })
 
-local refreshed, taxiRefreshed, policyChanged, tomtomRefreshed = 0, 0, 0, 0
+local refreshed, taxiRefreshed, policyChanged, tomtomRefreshed, guidelimeRefreshed = 0, 0, 0, 0, 0
+local trackerRefreshed = 0
 local compassMoving = false
 local arrowMoving, arrowScaled = false, nil
 local tomtomFollowRefreshed, ways = 0, {}
@@ -176,6 +170,12 @@ local ns = {
 		policyChanged = policyChanged + 1
 	end,
 	RefreshRestedXP = function() end,
+	RefreshTracker = function()
+		trackerRefreshed = trackerRefreshed + 1
+	end,
+	RefreshGuidelime = function()
+		guidelimeRefreshed = guidelimeRefreshed + 1
+	end,
 	RefreshTomTom = function()
 		tomtomRefreshed = tomtomRefreshed + 1
 	end,
@@ -186,9 +186,14 @@ local ns = {
 		ways[#ways + 1] = message
 	end,
 	Family = {
-		CreatePanel = function(parent, db, current, locale)
-			familyPanel = { parent = parent, db = db, current = current, locale = locale }
-			return familyPanel
+		Register = function(category, db, current, locale)
+			familyPage = { category = category, db = db, current = current, locale = locale }
+			return {
+				name = "Forever addons",
+				GetID = function(self)
+					return self.name
+				end,
+			}
 		end,
 	},
 	TravelSharingChanged = function()
@@ -212,6 +217,7 @@ local ns = {
 		arrivalSound = false,
 		resumeJourney = false,
 		routeColor = "gold",
+		followRoads = false,
 	}, {
 		__index = function()
 			return true
@@ -281,13 +287,17 @@ local groups = {
 		"trackerAttached",
 		"trackerLocked",
 		"journey",
+		"journeyTracker",
 		"resumeJourney",
 		"destinationPin",
+		"npcArrows",
 		"tomtom",
 		"tomtomFollow",
 		"restedxp",
 		"restedxpHideArrow",
+		"guidelime",
 		"avoidHighZones",
+		"followRoads",
 		"teleports",
 		"hearthMinimumSavings",
 		"guideStops",
@@ -305,7 +315,6 @@ local groups = {
 	},
 	Alerts = { "alerts", "flightPathReminder", "alertSound", "arrivalSound" },
 	Interface = {
-		"journeyTracker",
 		"arrow",
 		"arrowMove",
 		"arrowScale",
@@ -331,7 +340,8 @@ local order = {
 }
 
 assert(#buttons == #order + 1, "one index button per group, then the Forever addons page")
-assert(#rows == 54, #rows)
+-- The follow-roads branch added followRoads, main added npcArrows, so the merged list is one row longer.
+assert(#rows == 57, #rows)
 local cursor = 0
 for index, name in ipairs(order) do
 	local button = buttons[index].initializer
@@ -350,10 +360,10 @@ assert(cursor == #rows, "every row belongs to a group")
 -- The shared Forever addons page (UI/ForeverFamily.lua) is the last subpage, with this addon's saved variables.
 local family = buttons[#order + 1]
 assert(family.target.name == "Shortest Path Forever" and family.initializer.name == "Forever addons")
-assert(canvas and canvas.name == "Forever addons" and canvas.parent.name == "Shortest Path Forever")
-assert(canvas.frame == familyPanel and familyPanel.db == ns.db, "the page reads and writes this addon's settings")
-assert(familyPanel.current == "ShortestPathForever", "its own row is this addon's")
-assert(familyPanel.locale == ns.L, "and it reads in this addon's own translations")
+assert(familyPage and familyPage.category.name == "Shortest Path Forever", "the page sits under the addon's category")
+assert(familyPage.db == ns.db, "the page reads and writes this addon's settings")
+assert(familyPage.current == "ShortestPathForever", "its own row is this addon's")
+assert(familyPage.locale == ns.L, "and it reads in this addon's own translations")
 family.initializer.callback()
 assert(opened[#opened] == "Forever addons", "the button opens the page")
 
@@ -385,6 +395,20 @@ assert(
 	Row("tracker").setting.name == "Show boat, lift and tram departures in the tracker",
 	"the departures switch names boats, lifts and the tram"
 )
+-- The journey's own block has its switch in Guidance, on by default, and turning it off redraws the tracker.
+local journeySteps = Row("journeyTracker")
+assert(
+	journeySteps.setting.name == "Show journey steps in the objective tracker",
+	"the journey switch names the steps and where they show"
+)
+assert(journeySteps.setting.default == true, "journey steps show in the tracker by default")
+assert(
+	journeySteps.tooltip:find("arrow", 1, true) and journeySteps.tooltip:find("objective tracker", 1, true),
+	"the tooltip says the guidance stays and the block goes"
+)
+local trackerRefreshes = trackerRefreshed
+journeySteps.setting.onChanged()
+assert(trackerRefreshed == trackerRefreshes + 1, "the journey switch redraws the tracker")
 assert(Row("guideStops").setting.default == true)
 assert(Row("taxiRoute").setting.default == true)
 assert(Row("flightPathReminder").setting.default == true, "new flight-master reminders are on by default")
@@ -398,6 +422,9 @@ assert(Row("taxiRoute").tooltip:find("flight master", 1, true))
 Row("taxiRoute").setting.onChanged()
 assert(taxiRefreshed == 1, "flight route updates when its setting changes")
 assert(Row("corpse").setting.default == true)
+-- The NPC nameplate arrows are guidance furniture and start on, with the friendly-nameplate condition in the tooltip.
+assert(Row("npcArrows").setting.default == true, "nameplate arrows are on by default")
+assert(Row("npcArrows").tooltip:find("Friendly nameplates", 1, true), "the tooltip says friendly nameplates must be on")
 -- Party mage portals are opt-in, and every capital starts ticked for the mage to open.
 assert(Row("partyMagePortals").setting.default == false, "party mage portals are off by default")
 for _, key in ipairs({
@@ -420,11 +447,18 @@ assert(mover.default == false and mover:GetValue() == false, "the compass starts
 mover:SetValue(true)
 assert(compassMoving == true and mover:GetValue() == true, "the row unlocks the compass for dragging")
 assert(Row("restedxp").setting.default == true, "RestedXP journeys are enabled by default")
+assert(Row("guidelime").setting.default == true, "Guidelime journeys are enabled by default")
+assert(Row("guidelime").tooltip:find("Guidelime's arrow", 1, true), "the row says the guide arrow steps aside")
+Row("guidelime").setting.onChanged()
+assert(guidelimeRefreshed == 1, "the row follows its setting")
 -- Walks keep out of zones far above your level unless this is off; changing it plans the journey again.
 assert(Row("avoidHighZones").setting.default == true, "avoiding high zones is on by default")
 local policyBefore = policyChanged
 Row("avoidHighZones").setting.onChanged()
 assert(policyChanged == policyBefore + 1, "the journey plans again with the new costs")
+assert(Row("followRoads").setting.default == false, "following roads is off by default")
+Row("followRoads").setting.onChanged()
+assert(policyChanged == policyBefore + 2, "following roads plans again with the new costs")
 assert(Row("tomtom").setting.default == true)
 assert(Row("tomtom").tooltip:find("TomTom", 1, true), "the row names the addon it answers")
 Row("tomtom").setting.onChanged()
