@@ -165,6 +165,8 @@ read_globals[#read_globals + 1] = "MAP_PIN_SHARING"
 -- Journey.lua: water walking from its buffs, or a spell to cast.
 read_globals[#read_globals + 1] = "C_UnitAuras"
 read_globals[#read_globals + 1] = "C_Spell"
+-- UI/ServicesPanel.lua: Shift-click on a row's goods links them, as on any item button.
+read_globals[#read_globals + 1] = "HandleModifiedItemClick"
 -- UI/Nearby.lua: a profession trainer group's localised skill line name.
 read_globals[#read_globals + 1] = "C_TradeSkillUI"
 -- Route.lua: the cursor over the minimap.

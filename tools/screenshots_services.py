@@ -50,13 +50,17 @@ LIST_TOP = 4 + TITLE_HEIGHT + 6
 PLAYER = (36.3, 45.0)
 W_YARDS, H_YARDS, SPEED = 6550, 4366, 7
 
-# (label, icon, NPC, NPC title, x, y, time): x and y are the NPC's Darkshore position in map percent, and a
-# row with no local NPC carries the boat's time instead.
+# (label, icon, NPC, NPC title, x, y, time[, detail]): x and y are the NPC's Darkshore position in map percent, and a
+# row with no local NPC carries the boat's time instead. The player is a level 15 hunter, so the tiered groups name
+# and show the goods for that level in place of the title (UI/Nearby.lua's Goods, from QuestieDB's requiredLevel):
+#   Dalmond (4182) sells Sharp Arrow 2515 and Heavy Shot 2519 (level 10), the best arrows and shot in Auberdine.
+#   Kyndri (4190, 43 yd) sells Moist Cornbread 4542 and Melon Juice 1205 (level 15); Laird (4200, 44 yd) is the
+#   other level 15 food seller, a yard farther.
 VENDORS = [
-    ("Arrows", ("item", 2512), "Dalmond", "General Goods", 37.5, 40.5, None),
-    ("Bullets", ("item", 2516), "Dalmond", "General Goods", 37.5, 40.5, None),
-    ("Food", ("item", 4540), "Kyndri", "Baker", 36.9, 44.6, None),
-    ("Drink", ("item", 159), "Kyndri", "Baker", 36.9, 44.6, None),
+    ("Arrows", ("item", 2515), "Dalmond", "General Goods", 37.5, 40.5, None, "Dalmond · Sharp Arrow"),
+    ("Bullets", ("item", 2519), "Dalmond", "General Goods", 37.5, 40.5, None, "Dalmond · Heavy Shot"),
+    ("Food", ("item", 4542), "Kyndri", "Baker", 36.9, 44.6, None, "Kyndri · Moist Cornbread"),
+    ("Drink", ("item", 1205), "Kyndri", "Baker", 36.9, 44.6, None, "Kyndri · Melon Juice"),
     ("Bags", ("item", 4498), "Dalmond", "General Goods", 37.5, 40.5, None),
     ("Trade supplies", ("item", 2320), "Gorbold Steelhand", "General Trade Supplier", 38.1, 41.2, None),
     ("Reagents", ("item", 2928), "Gorbold Steelhand", "General Trade Supplier", 38.1, 41.2, None),
@@ -80,8 +84,9 @@ SERVICES = [
 
 # The search scene types "water", the first thing a player runs out of. UI/Nearby.lua's Matching keeps an NPC when
 # the folded query is a substring of its group's label, its name or title, or the name of an item that puts it in the
-# group; Detail then lists only the matching item names. QuestieDB 1.0.12, Forever baked build (X-BUILD-COMMIT
-# 4d31c10394b11bd1), Npc-<id>-7 spawns and Item-<id>-14 vendors in QuestieDB_Forever.toc:
+# group; Detail then lists only the matching item names, and the row's icon is the first of them. QuestieDB 1.0.12,
+# Forever baked build (X-BUILD-COMMIT 4d31c10394b11bd1), Npc-<id>-7 spawns and Item-<id>-14 vendors in
+# QuestieDB_Forever.toc:
 #   159 Refreshing Spring Water, in ns.Drink, sold in Darkshore by NPC 4190 Kyndri (36.9, 44.6), 4192 Taldan
 #   (36.83, 43.91), 6737 Innkeeper Shaussiy (37.04, 44.13), 4191 Allyndia (37.12, 43.62), 4182 Dalmond and 4195
 #   Tiyani; Kyndri is the nearest to the player at 36.3, 45.0.
@@ -94,7 +99,7 @@ SEARCH = [
         [
             (
                 "Food",
-                ("item", 4540),
+                ("item", 4538),
                 "Allyndia",
                 "Food & Drink Vendor",
                 37.12,

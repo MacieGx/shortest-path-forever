@@ -94,6 +94,8 @@ local Refresh, Queue
 ---@field place SPFNearbyPlace
 ---@field seconds number?
 ---@field query string
+---@field itemID integer? the goods the row names first (NearbyServices.Goods), which its icon shows
+---@field Item Button the icon's hover and click: the item's own tooltip, and Shift-click links it
 ---@field Icon Texture
 ---@field Label FontString
 ---@field Detail FontString
@@ -111,8 +113,12 @@ end
 ---@param row SPFServicesRow
 local function PaintRow(row)
 	local group, place = row.group, row.place
+	local goods = ns.NearbyServices.Goods(group.key, place, row.query)
+	row.itemID = goods and goods[1]
 	local icon = group.icon
-	if type(icon) == "number" then
+	if row.itemID then
+		Art.Icon(row.Icon, ItemIcon(row.itemID), ICON)
+	elseif type(icon) == "number" then
 		Art.Icon(row.Icon, ItemIcon(icon), ICON)
 	else
 		Art.Fit(row.Icon, icon, ICON, ICON)
@@ -130,6 +136,31 @@ local function CreateRow(parent)
 	Art.RowArt(row)
 	row.Icon = row:CreateTexture(nil, "ARTWORK")
 	row.Icon:SetPoint("LEFT", 8, 0)
+	-- Over the icon, the goods the row names show their own tooltip, as a merchant's or a quest reward's do; the row
+	-- keeps its hover light meanwhile, and a click that links nothing still starts the journey.
+	row.Item = CreateFrame("Button", nil, row)
+	row.Item:SetSize(ICON, ICON)
+	row.Item:SetPoint("CENTER", row.Icon)
+	row.Item:SetScript("OnEnter", function(self)
+		row:LockHighlight()
+		if row.itemID then
+			GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+			GameTooltip:SetItemByID(row.itemID)
+			GameTooltip:Show()
+		end
+	end)
+	row.Item:SetScript("OnLeave", function(self)
+		row:UnlockHighlight()
+		if GameTooltip:IsOwned(self) then
+			GameTooltip:Hide()
+		end
+	end)
+	row.Item:SetScript("OnClick", function()
+		local link = row.itemID and select(2, C_Item.GetItemInfo(row.itemID)) -- multi-value: the link is second
+		if not (link and HandleModifiedItemClick(link)) then
+			ns.NearbyServices.Navigate(row.key, row.place)
+		end
+	end)
 	row.Label = row:CreateFontString(nil, "ARTWORK", "GameFontNormalMed3")
 	row.Label:SetJustifyH("LEFT")
 	row.Label:SetWordWrap(false)

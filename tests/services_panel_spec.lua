@@ -118,6 +118,12 @@ local function frame(frameType, name, parent, template)
 	function f:SetSize(width, height)
 		self.width, self.height, self.sized = width, height, true
 	end
+	function f:LockHighlight()
+		self.highlightLocked = true
+	end
+	function f:UnlockHighlight()
+		self.highlightLocked = false
+	end
 	function f:GetSize()
 		return self.width, self.height
 	end
@@ -222,9 +228,27 @@ local places = {
 	class = { { id = 3, name = "Mage trainer", title = "Mage Trainer", map = 100, x = 0.3, y = 0.3 } },
 }
 local navigated
+-- The item tooltip a row's icon shows, and Shift-click's link.
+local shift, linked = false, nil
+local tooltip = { shown = false }
+function tooltip:SetOwner(owner)
+	self.owner = owner
+end
+function tooltip:SetItemByID(itemID)
+	self.itemID = itemID
+end
+function tooltip:Show()
+	self.shown = true
+end
+function tooltip:Hide()
+	self.shown, self.owner = false, nil
+end
+function tooltip:IsOwned(owner)
+	return self.owner == owner
+end
 ns.Art = {
-	Icon = function(texture)
-		texture.icon = true
+	Icon = function(texture, file)
+		texture.icon = file
 	end,
 	Fit = function(texture, atlas, width, height)
 		texture.fit = { atlas = atlas, width = width, height = height }
@@ -273,6 +297,10 @@ ns.NearbyServices = {
 	Detail = function(_, place)
 		return place.name
 	end,
+	-- The arrow row names Razor Arrow, as a level 25 hunter's would; the others name no goods.
+	Goods = function(key)
+		return key == "arrows" and { 3030 } or nil
+	end,
 	Navigate = function(key, place)
 		navigated = { key = key, place = place }
 	end,
@@ -301,10 +329,21 @@ local env = setmetatable({
 	QuestMapFrame = map,
 	CreateFrame = frame,
 	C_Item = {
-		GetItemIconByID = function()
-			return "Interface\\Icons\\INV_Misc_Bag_08"
+		GetItemIconByID = function(itemID)
+			return "icon:" .. itemID
+		end,
+		GetItemInfo = function(itemID)
+			return "Razor Arrow", "|Hitem:" .. itemID .. "|h[Razor Arrow]|h"
 		end,
 	},
+	GameTooltip = tooltip,
+	HandleModifiedItemClick = function(link)
+		if shift then
+			linked = link
+			return true
+		end
+		return false
+	end,
 	C_Timer = {
 		NewTicker = function(seconds, callback)
 			local ticker = { seconds = seconds, callback = callback, cancelled = false }
@@ -392,6 +431,35 @@ assert(scroll:GetVerticalScroll() == 0, "a new query scrolls back to the top")
 assert(panel:IsShown(), "searching keeps the panel open")
 assert(tickers[1].cancelled == false, "the ticker still runs while shown")
 assert(panel.scripts.OnUpdate, "searching requeues the ranking")
+
+-- A row's icon is the goods it names: over it, the item's own tooltip with the row still lit; Shift-click links the
+-- item, a plain click goes there. A row that names no goods keeps its group's icon and shows no tooltip.
+search:SetText("")
+local arrowRow, bankRow
+for _, f in ipairs(created) do
+	if f.key == "arrows" and f.Item then
+		arrowRow = f
+	elseif f.key == "bank" and f.Item then
+		bankRow = f
+	end
+end
+assert(arrowRow and arrowRow.itemID == 3030 and arrowRow.Icon.icon == "icon:3030", "the arrow row shows Razor Arrow")
+arrowRow.Item.scripts.OnEnter(arrowRow.Item)
+assert(tooltip.shown and tooltip.itemID == 3030 and tooltip:IsOwned(arrowRow.Item), "its icon shows the item tooltip")
+assert(arrowRow.highlightLocked, "and keeps the row lit")
+arrowRow.Item.scripts.OnLeave(arrowRow.Item)
+assert(not tooltip.shown and not arrowRow.highlightLocked, "leaving hides both")
+shift = true
+arrowRow.Item.scripts.OnClick(arrowRow.Item)
+assert(linked and linked:find("Hitem:3030", 1, true) and not navigated, "Shift-click links the item")
+shift = false
+arrowRow.Item.scripts.OnClick(arrowRow.Item)
+assert(navigated and navigated.key == "arrows", "a plain click on the icon goes there")
+navigated = nil
+assert(bankRow and bankRow.itemID == nil, "the bank row names no goods")
+bankRow.Item.scripts.OnEnter(bankRow.Item)
+assert(not tooltip.shown and bankRow.highlightLocked, "and its icon shows no tooltip, only the row's light")
+bankRow.Item.scripts.OnLeave(bankRow.Item)
 
 -- The tab module reports the panel hidden when another tab, Quests or the map takes it away.
 ns.registered.spec.shown(false)
