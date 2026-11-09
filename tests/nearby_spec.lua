@@ -706,6 +706,10 @@ do
 	assert(tiers.Nearest("arrows", orgrimmar).id == 22, "the tracking menu's row goes there too")
 	assert(seller("arrows").id == 22, "a search for the group itself still picks the tier")
 	assert(tiers.Detail("arrows", seller(), "") == "Jin'sora · Razor Arrow", "and the row names it")
+	local goods = tiers.Goods("arrows", seller(), "")
+	assert(goods and #goods == 1 and goods[1] == 3030, "the goods a row names, for its icon and tooltip")
+	assert(tiers.Goods("arrows", seller(), "Sharp")[1] == 2515, "while searching, the goods that matched")
+	assert(tiers.Goods("gear", tiers.Nearest("gear", orgrimmar), "") == nil, "an untiered row names none")
 	assert(seller("Sharp Arrow").id == 21, "a search for an item finds the nearest that sells it")
 	assert(seller("Zendo").id == 21, "a search for an NPC finds that NPC")
 	level = 60
