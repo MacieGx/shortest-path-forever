@@ -227,6 +227,9 @@ local places = {
 	bank = { { id = 2, name = "Karus", title = "Banker", map = 100, x = 0.2, y = 0.2 } },
 	class = { { id = 3, name = "Mage trainer", title = "Mage Trainer", map = 100, x = 0.3, y = 0.3 } },
 }
+-- The better trip under Arrows: Jagged Arrow from a vendor farther off, with a time of its own.
+local far = { id = 4, name = "Jin'sora", title = "Bow Merchant", map = 1454, x = 0.5, y = 0.5 }
+local shortlisted = {}
 local navigated
 -- The item tooltip a row's icon shows, and Shift-click's link.
 local shift, linked = false, nil
@@ -236,6 +239,9 @@ function tooltip:SetOwner(owner)
 end
 function tooltip:SetItemByID(itemID)
 	self.itemID = itemID
+end
+function tooltip:SetBetter(itemID, place)
+	self.better = { itemID = itemID, place = place }
 end
 function tooltip:Show()
 	self.shown = true
@@ -275,22 +281,26 @@ ns.NearbyServices = {
 				local place = places[group.key][1]
 				local match = query == "" or group.label:lower():find(query:lower(), 1, true) ~= nil
 				if group.section == section and match then
-					rows[#rows + 1] = { group = group, npc = place }
+					rows[#rows + 1] = { id = group.key, group = group, npc = place }
+					if group.key == "arrows" and query == "" then
+						rows[#rows + 1] = { id = "better:arrows", group = group, npc = far, tier = 40 }
+					end
 				end
 			end
 			if #rows > 0 then
-				list[#list + 1] = { section = section, label = section, count = #rows, collapsed = false, rows = rows }
+				list[#list + 1] = { section = section, label = section, count = 0, collapsed = false, rows = rows }
 			end
 		end
 		return list
 	end,
-	Shortlist = function()
-		return { { id = 1, name = "Dalmond", title = "General Goods", map = 100, x = 0.1, y = 0.1 } }
+	Shortlist = function(key, _, _, _, tier)
+		shortlisted[#shortlisted + 1] = { key = key, tier = tier }
+		return { tier and far or { id = 1, name = "Dalmond", title = "General Goods", map = 100, x = 0.1, y = 0.1 } }
 	end,
-	Rank = function()
+	Rank = function(candidates)
 		return {
 			Step = function()
-				return nil, nil, false
+				return candidates[1], candidates[1] == far and 372 or 31, false
 			end,
 		}
 	end,
@@ -298,8 +308,17 @@ ns.NearbyServices = {
 		return place.name
 	end,
 	-- The arrow row names Razor Arrow, as a level 25 hunter's would; the others name no goods.
-	Goods = function(key)
-		return key == "arrows" and { 3030 } or nil
+	Goods = function(key, place)
+		return key == "arrows" and { place == far and 11285 or 3030 } or nil
+	end,
+	ItemName = function(itemID)
+		return itemID == 11285 and "Jagged Arrow" or "Razor Arrow"
+	end,
+	Zone = function(place)
+		return place == far and "Orgrimmar" or nil
+	end,
+	BetterTooltip = function(tip, itemID, place)
+		tip:SetBetter(itemID, place)
 	end,
 	Navigate = function(key, place)
 		navigated = { key = key, place = place }
@@ -334,6 +353,13 @@ local env = setmetatable({
 		end,
 		GetItemInfo = function(itemID)
 			return "Razor Arrow", "|Hitem:" .. itemID .. "|h[Razor Arrow]|h"
+		end,
+		GetItemQualityByID = function()
+			return 1
+		end,
+		GetItemQualityColor = function(quality)
+			assert(quality == 1)
+			return 1, 1, 1, "ffffffff"
 		end,
 	},
 	GameTooltip = tooltip,
@@ -437,7 +463,7 @@ assert(panel.scripts.OnUpdate, "searching requeues the ranking")
 search:SetText("")
 local arrowRow, bankRow
 for _, f in ipairs(created) do
-	if f.key == "arrows" and f.Item then
+	if f.key == "arrows" and f.Item and not f.Badge then
 		arrowRow = f
 	elseif f.key == "bank" and f.Item then
 		bankRow = f
@@ -460,6 +486,46 @@ assert(bankRow and bankRow.itemID == nil, "the bank row names no goods")
 bankRow.Item.scripts.OnEnter(bankRow.Item)
 assert(not tooltip.shown and bankRow.highlightLocked, "and its icon shows no tooltip, only the row's light")
 bankRow.Item.scripts.OnLeave(bankRow.Item)
+
+-- Better goods farther away: a one-line row right under Arrows, its item icon wearing the client's upgrade arrow, its
+-- goods and their zone, and a time of its own from its own ranking.
+local betterRow
+for _, f in ipairs(created) do
+	if f.Badge and f:IsShown() then
+		betterRow = f
+	end
+end
+assert(betterRow and betterRow.id == "better:arrows" and betterRow.key == "arrows", "a better trip's row")
+assert(betterRow.height == 28 and betterRow.Icon.icon == "icon:11285", "one line, with Jagged Arrow's icon")
+local badge = betterRow.Badge.fit
+assert(badge and badge.atlas == "bags-greenarrow" and badge.width == 11, "and the upgrade arrow on it")
+assert(betterRow.Label.text == "|cffffffffJagged Arrow|r · Orgrimmar", "the goods in their colour, and the zone")
+local under = betterRow.points[1]
+assert(under[1] == "TOPLEFT" and under[2] == 22 and under[3] == -(22 + 4 + 44 + 2), "indented under Arrows")
+for _ = 1, 10 do
+	if panel.scripts.OnUpdate then
+		panel.scripts.OnUpdate(panel)
+	end
+end
+local tiers = {}
+for _, call in ipairs(shortlisted) do
+	tiers[call.key .. ":" .. tostring(call.tier)] = true
+end
+assert(tiers["arrows:40"] and tiers["arrows:nil"], "the trip is ranked at its tier, apart from the row above")
+assert(arrowRow.Time.text == "0:31" and betterRow.Time.text == "6:12", "each shows its own time")
+betterRow.scripts.OnEnter(betterRow)
+assert(tooltip.shown and tooltip.better.itemID == 11285 and tooltip.better.place == far, "it says why, and where")
+betterRow.scripts.OnLeave(betterRow)
+assert(not tooltip.shown, "leaving hides it")
+betterRow.Item.scripts.OnEnter(betterRow.Item)
+assert(tooltip.itemID == 11285 and betterRow.highlightLocked, "its icon shows the item's own tooltip")
+betterRow.Item.scripts.OnLeave(betterRow.Item)
+betterRow.scripts.OnClick(betterRow)
+assert(navigated and navigated.key == "arrows" and navigated.place == far, "a click goes to the farther vendor")
+navigated = nil
+search:SetText("bank")
+assert(not betterRow:IsShown(), "a search with no trip hides the row")
+search:SetText("")
 
 -- The tab module reports the panel hidden when another tab, Quests or the map takes it away.
 ns.registered.spec.shown(false)
