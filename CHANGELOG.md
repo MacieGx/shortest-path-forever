@@ -12,6 +12,9 @@ optional `### For addon authors` subsection after a version's player bullets.
 
 ## [Unreleased]
 
+- **Journeys start on the floor you are on.** The game does not say how high you stand, so a walk from where you were started on the cheapest surface around you: in the Undercity that was often the Ruins of Lordaeron overhead, or a walkway above the canal, and the route led you as if you were up there. Shortest Path now follows your floor as you move, keeping only the surfaces the walking map can reach from where you were, and starts the walk on it once one floor is left, usually within a few dozen yards of walking. Until then, standing still where floors overlap or just after a hearth or a lift, it walks from the cheapest surface as before. The floor is followed during a journey, and indoors whenever you move, so a journey planned in the Undercity after a short walk there starts in the city.
+- **A spot picked on the Undercity's map is in the city.** The map gives no height, so a journey there ended on the cheapest surface at that spot: under the throne hall that was the Ruins of Lordaeron overhead, and the route led you across the ruins instead of down into the city. A spot picked on the Undercity's map, by Shift-click, `/way` or a quest, now ends on the city's floor, and crossing the hall above it no longer counts as arriving. The Tirisfal Glades map still names the surface.
+
 ## [1.24.4] - 2026-11-09
 
 - **The switch that keeps a journey out of the objective tracker is easier to find.** It moved from Interface to Guidance and is now called *Show journey steps in the objective tracker*. Off, the journey still guides with its arrow, destination pin, map line and minimap route, and the tracker shows only the departures their own switch allows. Your choice carries over. Thanks to _spada on Discord for the question (#563).
