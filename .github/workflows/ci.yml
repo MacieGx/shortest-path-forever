@@ -10,9 +10,14 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   deadcode:
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -21,6 +26,7 @@ jobs:
 
   check:
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     env:
       FOREVER_CORE: forever-core
     steps:
@@ -49,7 +55,7 @@ jobs:
       - run: luacheck .
       - run: python3 -m tools.forever_tools.assets
       - run: python3 tools/check_api_docs.py
-      - run: for spec in tests/*_spec.lua; do luajit "$spec" || exit 1; done
+      - run: python3 -m tools.forever_tools.specs
       # The native client simulator: real Blizzard UI under LuaJIT with the full TOC, failing on errors and
       # gamepad-interface taint. Its UI source and client data are fetched at a pinned build and cached.
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -77,6 +83,7 @@ jobs:
 
   bake-provenance:
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -90,12 +97,22 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - run: sudo apt-get update && sudo apt-get install -y ninja-build libboost-all-dev libssl-dev zlib1g-dev libbz2-dev libreadline-dev
+      - run: sudo apt-get update && sudo apt-get install -y ninja-build ccache libboost-all-dev libssl-dev zlib1g-dev libbz2-dev libreadline-dev
+      # ccache hashes every compile's preprocessed input and flags, so a hit is the same object a full compile makes;
+      # every source still goes through the compiler step, which is what this job proves.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/ccache
+          key: bake-native-ccache-${{ hashFiles('tools/baker/bake.sh', 'tools/baker/*.patch') }}
+          restore-keys: bake-native-ccache-
       - name: Build pinned terrain tools without a game install
         env:
           BUILD_ONLY: 1
           OUT: ${{ runner.temp }}/terrain
-          JOBS: 2
+          JOBS: 4
+          CCACHE_DIR: ${{ runner.temp }}/ccache
+          CMAKE_C_COMPILER_LAUNCHER: ccache
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
         run: tools/baker/bake.sh
 
   generated:
@@ -122,6 +139,7 @@ jobs:
 
   typecheck:
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     env:
       FOREVER_CORE: forever-core
     steps:
@@ -162,6 +180,7 @@ jobs:
 
   secrets:
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -181,6 +200,7 @@ jobs:
 
   project-rules:
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -194,6 +214,7 @@ jobs:
 
   workflows:
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -219,6 +240,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          # Every commit and tag for the version, without old file contents.
+          filter: blob:none
           persist-credentials: false
       - name: Read the ForeverCore ref
         id: forever-core-ref
