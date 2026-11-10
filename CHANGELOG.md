@@ -12,6 +12,8 @@ optional `### For addon authors` subsection after a version's player bullets.
 
 ## [Unreleased]
 
+- **Journeys to mobs and NPCs in caves and mines end inside.** Questie knows only where a mob is on the map, not how high, so a journey to the miners of Azurelode Mine ended on the hill above them. Alt-clicking a Questie icon or choosing a Nearby services row now goes to the floor that NPC or quest object stands on, for the original world's spawns.
+
 ### For addon authors
 
 - **`ShortestPathForever.API` now has `minor = 3` and can read any journey, pause and resume it, skip a leg, and read the travel statistics.** `Journey()` returns the owner, goal, remaining legs and time left of whoever's journey guides; `Pause(owner)`, `Resume(owner)` and `SkipLeg(owner, index?)` act only for the journey's owner; and `Stats()` and `Leaderboard(limit)` publish the travel records in the shared statistics shape. `Subscribe` gains the `leg` change for a leg that moved on without the goal changing. Nothing changes for players.
