@@ -12,6 +12,8 @@ optional `### For addon authors` subsection after a version's player bullets.
 
 ## [Unreleased]
 
+- **A quest whose only map pin is its start still gets a journey.** Some quests start and end with one NPC and have no objective area, such as Dragonmaw Shinbones (1846), so the client reports only that start pin. Planning a journey from the quest log did nothing; it now goes to the pin the client names, and a quest with no pin or waypoint at all still says it has no location. Reported on GitHub by Aldericdevir (#629).
+
 ## [1.25.0] - 2026-11-10
 
 <!-- discord-image: docs/screenshots/arrival.png -->
