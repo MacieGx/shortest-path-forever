@@ -14,6 +14,13 @@ optional `### For addon authors` subsection after a version's player bullets.
 
 - **Journeys to mobs and NPCs in caves and mines end inside.** Questie knows only where a mob is on the map, not how high, so a journey to the miners of Azurelode Mine ended on the hill above them. Alt-clicking a Questie icon or choosing a Nearby services row now goes to the floor that NPC or quest object stands on, for the original world's spawns.
 
+## [1.29.0] - 2026-11-10
+
+<!-- discord-image: docs/screenshots/minimap.png -->
+
+- **Only your current quest's area on the minimap changes colour.** Standing in a stop's quest area used to turn every tracked quest's area on the minimap gold. The other areas now stay blue, and the stop keeps its ring and route line on the minimap so you can still see where you're going (#680).
+- **Less work at login after an update.** Nearby services now looks up map locations only for the vendors, trainers and services it lists, not for every creature in the game, which halves the time that first read takes (#582).
+
 ### For addon authors
 
 - **`ShortestPathForever.API` now has `minor = 3` and can read any journey, pause and resume it, skip a leg, and read the travel statistics.** `Journey()` returns the owner, goal, remaining legs and time left of whoever's journey guides; `Pause(owner)`, `Resume(owner)` and `SkipLeg(owner, index?)` act only for the journey's owner; and `Stats()` and `Leaderboard(limit)` publish the travel records in the shared statistics shape. `Subscribe` gains the `leg` change for a leg that moved on without the goal changing. Nothing changes for players.
