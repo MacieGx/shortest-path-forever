@@ -18,6 +18,9 @@ local CACHE_LIMIT, CACHE_MS = 256, 5000
 -- Teleports are cast from where you stand, now: only an estimate that starts within this many yards of you counts
 -- them. Anywhere else is a later leg of the caller's route, when their cooldowns are unknown.
 local HERE = 15
+-- Yards from a stop to the spawn it stands for: QuestieDB keeps a spawn's spot to a hundredth of a percent of its zone
+-- map, a yard or less, and the server's spawn sits within 2 yd of Questie's for five spawns in six.
+local SPAWN_REACH = 8
 local CONTEXT_KEYS = {
 	"walkSpeed",
 	"faction",
@@ -471,6 +474,11 @@ function API.NavigateRoute(owner, stops)
 		-- A caller's world height lets the stop pin compare its surface with the terrain under that spot.
 		if stop.z ~= nil then
 			point.z = stop.z
+		elseif point.z == nil then
+			-- A stop on an NPC's or quest object's spawn (Nearby services, a guide's quest step) comes from QuestieDB,
+			-- which has no height: the spawn's own, when it stands over or under another surface, keeps the walk on
+			-- its floor.
+			point.z = ns.SpawnHeight(point.map, point.x, point.y, SPAWN_REACH)
 		end
 		-- A caller such as Adventure Guide may need the route to remain visible while the
 		-- player completes an interaction at this location. It resubmits the route after

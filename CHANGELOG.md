@@ -12,6 +12,8 @@ optional `### For addon authors` subsection after a version's player bullets.
 
 ## [Unreleased]
 
+- **Journeys to mobs and NPCs in caves and mines end inside.** Questie knows only where a mob is on the map, not how high, so a journey to the miners of Azurelode Mine ended on the hill above them. Alt-clicking a Questie icon, a Nearby services row or another addon's stop now goes to the floor that NPC or quest object stands on, for the original world's spawns.
+
 ## [1.28.0] - 2026-11-10
 
 - **Needs Forever Core.** The shared tracker column, bug report and leaderboards now come from one Forever Core addon, which comes in the same download, so every Forever addon's tracker scale, lock and position stay in step. Your tracker settings carry over.
